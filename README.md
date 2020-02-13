@@ -1,4 +1,4 @@
-# ASTERICS - An Open Toolbox for Sophisticated FPGA-Based Image Processing
+# ASTERICS - An Open Toolbox for Sophisticated FPGA-Based Image Processing (coming soon)
 
 Image processing on embedded platforms is a challenging task, especially when implementing extensive computer vision applications. Field-programmable gate arrays (FPGAs) offer a suitable technology to accelerate image processing by customized hardware.
 

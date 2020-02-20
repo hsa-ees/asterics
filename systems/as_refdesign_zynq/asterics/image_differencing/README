@@ -1,0 +1,40 @@
+  ,===========================================,
+  |                                           |
+  |         ASTERICS Reference Design         |
+  |                                           |
+  '==========================================='
+
+Author: Michael Schaeferling <michael.schaeferling@hs-augsburg.de>
+Date of revision: 2019-06-25
+
+
+ASTERICS Design: "image_differencing"
+
+
+ASTERICS Modules:
+  * as_sensor_ov7670
+  * as_stream_splitter
+  * as_memreader
+  * as_stream_sync
+  * as_pixel_diff
+  * as_collect
+  * as_memwriter
+
+
+Description of the ASTERICS chain:
+  This ASTERICS reference design implements a set of ASTERICS modules to
+  perform image differencing on subsequent camera images.
+  Images are acquired by an OmniVision OV7670 image sensor. 
+  This imaga data stream is split to two streams: 
+  1) the original image is stored unmodified to main memory. 
+  2) the stream data and data from the previous image, fetched from main 
+     memory, are synchronized prior to calculating pixel differences. 
+     The resulting difference image is also stored to main memory.
+  The VEARS ipcore is used to display the images on a monitor.
+
+
+Demo operation:
+  The demo design is running in a loop, controlled by a dip-switch:
+    SW0: visualization select between 
+          - the original image (off) or 
+          - the difference image (on)

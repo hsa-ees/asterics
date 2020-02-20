@@ -1,0 +1,18 @@
+Module:  as_sim_image_reader/as_sim_image_writer
+Company: University of Applied Sciences, Augsburg, Germany
+Author:  Alexander Zoellner
+
+Description:    
+The as_sim_image_reader module reads data from a csv-file 
+and converts the data to a pixel stream.
+The as_sim_image_writer module receives a data stream and 
+writes it into a csv-file.
+
+Caution:
+When using the as_sim_image_writer module for ghdl 
+simulation, all files have to be analyzed with the --std=08 
+option for the IEEE.STD_LOGIC_TEXTIO.ALL!
+
+e.g.
+ghdl -a --std=08 my_file.vhd
+ghdl -e --std=08 my_testbench

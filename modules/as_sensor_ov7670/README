@@ -1,0 +1,8 @@
+Module:  as_sensor_ov7670
+Company: University of Applied Sciences, Augsburg, Germany
+Author:  Michael Schaeferling
+
+Description:    
+OmniVision OV7670 image sensor interface: Synchronize data into 
+internal system clock domain and generate appropriate VSYNC and HSYNC 
+signals from camera signals.

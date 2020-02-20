@@ -1,0 +1,9 @@
+Module:  as_pixel_diff
+Company: University of Applied Sciences, Augsburg, Germany
+Author:  Philip Manke
+
+Description:    
+This module takes two as_stream interfaces as inputs and outputs one as_stream interface.
+The outgoing as_stream pixels are the difference between the two input streams.
+This module does not handle any synchronization tasks and only operates when the "strobe" signals of both input streams are '1' simultaneously.
+

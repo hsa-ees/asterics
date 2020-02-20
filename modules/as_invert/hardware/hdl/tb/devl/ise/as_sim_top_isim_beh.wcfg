@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="as_sim_top_isim_beh.wdb" id="1" type="auto">
+         <top_modules>
+            <top_module name="as_sim_top" />
+            <top_module name="numeric_std" />
+            <top_module name="std_logic_1164" />
+            <top_module name="textio" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <WVObjectSize size="13" />
+   <wvobject fp_name="/as_sim_top/clk" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/as_sim_top/reset" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">reset</obj_property>
+      <obj_property name="ObjectShortName">reset</obj_property>
+   </wvobject>
+   <wvobject fp_name="divider29" type="divider">
+      <obj_property name="label">Image_Reader</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">128 128 255</obj_property>
+      <obj_property name="TextColor">230 230 230</obj_property>
+   </wvobject>
+   <wvobject fp_name="/as_sim_top/s_img_rd0_tb_enable" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">s_img_rd0_tb_enable</obj_property>
+      <obj_property name="ObjectShortName">s_img_rd0_tb_enable</obj_property>
+   </wvobject>
+   <wvobject fp_name="group40" type="group">
+      <obj_property name="label">AS_Stream_out</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/as_sim_top/s_img_rd0_vsync" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">s_img_rd0_vsync</obj_property>
+         <obj_property name="ObjectShortName">s_img_rd0_vsync</obj_property>
+      </wvobject>
+      <wvobject fp_name="/as_sim_top/s_img_rd0_hsync" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">s_img_rd0_hsync</obj_property>
+         <obj_property name="ObjectShortName">s_img_rd0_hsync</obj_property>
+      </wvobject>
+      <wvobject fp_name="/as_sim_top/s_img_rd0_strobe" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">s_img_rd0_strobe</obj_property>
+         <obj_property name="ObjectShortName">s_img_rd0_strobe</obj_property>
+      </wvobject>
+      <wvobject fp_name="/as_sim_top/s_img_rd0_data" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">s_img_rd0_data[7:0]</obj_property>
+         <obj_property name="ObjectShortName">s_img_rd0_data[7:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/as_sim_top/s_img_rd0_xres" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">s_img_rd0_xres[11:0]</obj_property>
+         <obj_property name="ObjectShortName">s_img_rd0_xres[11:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/as_sim_top/s_img_rd0_yres" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">s_img_rd0_yres[11:0]</obj_property>
+         <obj_property name="ObjectShortName">s_img_rd0_yres[11:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/as_sim_top/s_img_rd0_sync_error" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">s_img_rd0_sync_error</obj_property>
+         <obj_property name="ObjectShortName">s_img_rd0_sync_error</obj_property>
+      </wvobject>
+      <wvobject fp_name="/as_sim_top/s_img_rd0_pixel_error" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">s_img_rd0_pixel_error</obj_property>
+         <obj_property name="ObjectShortName">s_img_rd0_pixel_error</obj_property>
+      </wvobject>
+      <wvobject fp_name="/as_sim_top/s_img_rd0_stall" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">s_img_rd0_stall</obj_property>
+         <obj_property name="ObjectShortName">s_img_rd0_stall</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="divider28" type="divider">
+      <obj_property name="label">Image_Writer</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">128 128 255</obj_property>
+      <obj_property name="TextColor">230 230 230</obj_property>
+   </wvobject>
+   <wvobject fp_name="/as_sim_top/s_img_wr0_tb_done" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">s_img_wr0_tb_done</obj_property>
+      <obj_property name="ObjectShortName">s_img_wr0_tb_done</obj_property>
+   </wvobject>
+   <wvobject fp_name="/as_sim_top/s_img_wr0_tb_backpressure_en" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">s_img_wr0_tb_backpressure_en</obj_property>
+      <obj_property name="ObjectShortName">s_img_wr0_tb_backpressure_en</obj_property>
+   </wvobject>
+   <wvobject fp_name="/as_sim_top/s_img_wr0_tb_pixel_error" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">s_img_wr0_tb_pixel_error</obj_property>
+      <obj_property name="ObjectShortName">s_img_wr0_tb_pixel_error</obj_property>
+   </wvobject>
+   <wvobject fp_name="/as_sim_top/s_img_wr0_tb_sync_error" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">s_img_wr0_tb_sync_error</obj_property>
+      <obj_property name="ObjectShortName">s_img_wr0_tb_sync_error</obj_property>
+   </wvobject>
+   <wvobject fp_name="group41" type="group">
+      <obj_property name="label">AS_Stream_in</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/as_sim_top/s_img_wr0_vsync" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">s_img_wr0_vsync</obj_property>
+         <obj_property name="ObjectShortName">s_img_wr0_vsync</obj_property>
+      </wvobject>
+      <wvobject fp_name="/as_sim_top/s_img_wr0_hsync" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">s_img_wr0_hsync</obj_property>
+         <obj_property name="ObjectShortName">s_img_wr0_hsync</obj_property>
+      </wvobject>
+      <wvobject fp_name="/as_sim_top/s_img_wr0_strobe" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">s_img_wr0_strobe</obj_property>
+         <obj_property name="ObjectShortName">s_img_wr0_strobe</obj_property>
+      </wvobject>
+      <wvobject fp_name="/as_sim_top/s_img_wr0_data" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">s_img_wr0_data[7:0]</obj_property>
+         <obj_property name="ObjectShortName">s_img_wr0_data[7:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/as_sim_top/s_img_wr0_xres" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">s_img_wr0_xres[11:0]</obj_property>
+         <obj_property name="ObjectShortName">s_img_wr0_xres[11:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/as_sim_top/s_img_wr0_yres" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">s_img_wr0_yres[11:0]</obj_property>
+         <obj_property name="ObjectShortName">s_img_wr0_yres[11:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/as_sim_top/s_img_wr0_sync_error" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">s_img_wr0_sync_error</obj_property>
+         <obj_property name="ObjectShortName">s_img_wr0_sync_error</obj_property>
+      </wvobject>
+      <wvobject fp_name="/as_sim_top/s_img_wr0_pixel_error" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">s_img_wr0_pixel_error</obj_property>
+         <obj_property name="ObjectShortName">s_img_wr0_pixel_error</obj_property>
+      </wvobject>
+      <wvobject fp_name="/as_sim_top/s_img_wr0_stall" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">s_img_wr0_stall</obj_property>
+         <obj_property name="ObjectShortName">s_img_wr0_stall</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="divider30" type="divider">
+      <obj_property name="label">ASTERICS_Modules</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">128 128 255</obj_property>
+      <obj_property name="TextColor">230 230 230</obj_property>
+   </wvobject>
+   <wvobject fp_name="group38" type="group">
+      <obj_property name="label">Invert</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/as_sim_top/MOD_INST_0/INVERT_0/ready" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">ready</obj_property>
+         <obj_property name="ObjectShortName">ready</obj_property>
+      </wvobject>
+      <wvobject fp_name="/as_sim_top/as_invert_0_control" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">as_invert_0_control[15:0]</obj_property>
+         <obj_property name="ObjectShortName">as_invert_0_control[15:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/as_sim_top/as_invert_0_control_reset" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">as_invert_0_control_reset[15:0]</obj_property>
+         <obj_property name="ObjectShortName">as_invert_0_control_reset[15:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/as_sim_top/as_invert_0_state" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">as_invert_0_state[15:0]</obj_property>
+         <obj_property name="ObjectShortName">as_invert_0_state[15:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+   </wvobject>
+</wave_config>

@@ -1,0 +1,9 @@
+Module:  as_collect_2to1 / as_collect_4to1
+Company: University of Applied Sciences, Augsburg, Germany
+Author:  Michael Schaeferling
+
+Description:    
+This module collects a configurable number of data words to put 
+image data and corresponding VSYNC and HSYNC signals into one new data 
+word. 
+Thus, the new data words contain image data values of multiple input pixels.

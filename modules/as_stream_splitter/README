@@ -1,0 +1,7 @@
+Module:  as_stream_splitter 
+Company: University of Applied Sciences, Augsburg, Germany
+Author:  Philip Manke
+
+Description:    
+ASTERICS module that takes in one as_stream interface and outputs the same data 
+to two as_stream output interfaces.

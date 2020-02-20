@@ -1,0 +1,5 @@
+vhdl work "../../../vhdl/as_invert.vhd"
+vhdl work "../../../../../../as_misc/hardware/hdl/vhdl/simulation/file_ops/as_sim_image_reader.vhd"
+vhdl work "../../../../../../as_misc/hardware/hdl/vhdl/simulation/file_ops/as_sim_image_writer.vhd"
+vhdl work "../../vhdl/as_sim_mod_inst.vhd"
+vhdl work "../../vhdl/as_sim_top.vhd"

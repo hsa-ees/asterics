@@ -1,0 +1,14 @@
+__pycache__/*
+Makefile
+.vscode/*
+*.txt
+doxygen/
+*Testfiles/
+*.log
+astertest/
+*.jou
+*.svg
+*.pyc
+*.zip
+*.str
+.Xil/*

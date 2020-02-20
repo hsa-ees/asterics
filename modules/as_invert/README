@@ -1,0 +1,8 @@
+Module:  as_invert
+Company: University of Applied Sciences, Augsburg, Germany
+Author:  Michael Schaeferling
+
+Description:    
+This module inverts an image data stream. 
+Functionality can be enabled or disabled (by setting the configuration 
+register e.g. using the driver).

@@ -1,0 +1,22 @@
+##--------------------------------------------------------------------
+## This file is part of the ASTERICS Framework.
+## Copyright (C) Hochschule Augsburg, University of Applied Sciences
+##--------------------------------------------------------------------
+## Company:  Efficient Embedded Systems Group
+##           University of Applied Sciences, Augsburg, Germany
+##           http://ees.hs-augsburg.de
+##
+## Author:   Julian Sarcher
+## Date:     2017-01-29
+## Modified: 
+## Module:   as_mux
+##--------------------------------------------------------------------
+
+This directory contains files for hardware and software implementation of the 
+hardware module as_mux.
+
+The subdirectory hardware contains the necessary hardware description files 
+for implementing the module on programmable logic. 
+
+The subdirectory software contains the corresponding driver files for hardware 
+configuration conducted by software. 

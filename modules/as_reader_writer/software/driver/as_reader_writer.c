@@ -1,0 +1,167 @@
+/***********************************************************************
+ *  This file is part of the ASTERICS Framework.
+ *  Copyright (C) Hochschule Augsburg, University of Applied Sciences
+ *  All rights reserved
+ ***********************************************************************
+ * File:           as_reader_writer.c
+ *
+ * Company:        University of Applied Sciences, Augsburg, Germany
+ *                 Efficient Embedded Systems Group
+ *                 http://ees.hs-augsburg.de
+ *
+ * Author:         Alexander Zoellner
+ *
+ * Description:    Implements software drivers for using the
+ *                 as_reader_writer module.
+ *
+ * *********************************************************************
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ **********************************************************************/
+
+/**
+ * @file  as_reader_writer.c
+ * @brief Driver (source file) for as_reader_writer module.
+ */
+
+
+#include "as_reader_writer.h"
+
+
+/* Module Init Function */
+
+void as_reader_writer_init(uint32_t* base_addr, as_reader_writer_config_t * config)
+{
+    if(config != NULL) {
+        as_reader_writer_set_section_offset(base_addr, (*config).section_offset);
+        as_reader_writer_set_section_addr(base_addr, (*config).first_section_addr);
+        as_reader_writer_set_section_size(base_addr, (*config).section_size);
+        as_reader_writer_set_section_count(base_addr, (*config).section_count);
+        as_reader_writer_set_max_burst_length(base_addr, (*config).max_burst_length);
+    }
+    /* Write Default Values to Registers */
+    else {
+        as_reader_writer_set_section_offset(base_addr, (uint32_t)AS_READER_WRITER_DEFAULT_SECTION_OFFSET);
+        as_reader_writer_set_section_size(base_addr, (uint32_t)AS_READER_WRITER_DEFAULT_SECTION_SIZE);
+        as_reader_writer_set_section_count(base_addr, (uint32_t)AS_READER_WRITER_DEFAULT_SECTION_COUNT);
+        as_reader_writer_set_max_burst_length(base_addr, (uint32_t)AS_READER_WRITER_DEFAULT_MAX_BURST_LENGTH);
+    }
+    /* Reset */
+    as_reader_writer_reset(base_addr);
+}
+
+
+
+/* Register Read Functions */
+
+uint32_t* as_reader_writer_get_cur_hw_addr(uint32_t* base_addr) {
+    return (uint32_t*)as_reg_read( as_module_reg( base_addr,AS_READER_WRITER_REG_CUR_HW_ADDR_OFFSET) );
+}
+
+/* Memwriter only */
+uint32_t* as_writer_get_last_data_unit_complete_addr(uint32_t* base_addr) {
+    return (uint32_t*)as_reg_read( as_module_reg( base_addr,AS_WRITER_REG_LAST_DATA_UNIT_COMPLETE_ADDR_OFFSET) );
+}
+
+uint32_t* as_writer_get_cur_unit_count(uint32_t* base_addr) {
+    return (uint32_t*)as_reg_read( as_module_reg( base_addr,AS_WRITER_REG_CURRENT_UNIT_COUNT) );
+}
+
+
+
+/* Register Write Functions */
+
+void as_reader_writer_set_section_addr(uint32_t* base_addr, uint32_t* value) {
+    as_reg_write( as_module_reg( base_addr,AS_READER_WRITER_REG_SECTION_ADDR_OFFSET), (uint32_t)value);
+}
+
+void as_reader_writer_set_section_offset(uint32_t* base_addr, uint32_t value) {
+    as_reg_write( as_module_reg( base_addr,AS_READER_WRITER_REG_SECTION_OFFSET_OFFSET), value);
+}
+
+void as_reader_writer_set_section_size(uint32_t* base_addr, uint32_t value) {
+    as_reg_write( as_module_reg( base_addr,AS_READER_WRITER_REG_SECTION_SIZE_OFFSET), value);
+}
+void as_reader_writer_set_section_count(uint32_t* base_addr, uint32_t value) {
+    as_reg_write( as_module_reg( base_addr,AS_READER_WRITER_REG_SECTION_COUNT_OFFSET), value);
+}
+
+void as_reader_writer_set_max_burst_length(uint32_t* base_addr, uint32_t value) {
+    as_reg_write( as_module_reg( base_addr,AS_READER_WRITER_REG_MAX_BURST_LENGTH_OFFSET), value);
+}
+
+
+
+/* State Register Read Functions */
+
+AS_BOOL as_reader_writer_is_done(uint32_t* base_addr) {
+    return as_reg_read_masked( as_module_reg( base_addr, AS_READER_WRITER_STATE_CONTROL_REG_OFFSET), AS_READER_WRITER_DONE_MASK) ? AS_TRUE : AS_FALSE;
+}
+
+AS_BOOL as_reader_writer_is_busy(uint32_t* base_addr) {
+    return as_reg_read_masked( as_module_reg( base_addr, AS_READER_WRITER_STATE_CONTROL_REG_OFFSET), AS_READER_WRITER_BUSY_MASK) ? AS_TRUE : AS_FALSE;
+}
+
+AS_BOOL as_reader_writer_is_sync_error(uint32_t* base_addr) {
+    return as_reg_read_masked( as_module_reg( base_addr, AS_READER_WRITER_STATE_CONTROL_REG_OFFSET), AS_READER_WRITER_SYNC_ERROR_MASK) ? AS_TRUE : AS_FALSE;
+}
+
+AS_BOOL as_reader_writer_is_pending_go(uint32_t* base_addr) {
+    return as_reg_read_masked( as_module_reg( base_addr, AS_READER_WRITER_STATE_CONTROL_REG_OFFSET), AS_READER_WRITER_PENDING_GO_MASK) ? AS_TRUE : AS_FALSE;
+}
+
+/* Memwriter only */
+AS_BOOL as_writer_is_flushable_data(uint32_t* base_addr) {
+    return as_reg_read_masked( as_module_reg( base_addr, AS_READER_WRITER_STATE_CONTROL_REG_OFFSET), AS_WRITER_FLUSHABLE_DATA_MASK) ? AS_TRUE : AS_FALSE;
+}
+
+AS_BOOL as_writer_is_set_enable(uint32_t* base_addr) {
+    return as_reg_read_masked( as_module_reg( base_addr, AS_READER_WRITER_STATE_CONTROL_REG_OFFSET), AS_WRITER_SET_ENABLE_MASK) ? AS_TRUE : AS_FALSE;
+}
+
+
+
+/* Control Register Write Functions */
+
+void as_reader_writer_reset(uint32_t* base_addr) {
+    as_reg_write_masked( as_module_reg( base_addr, AS_READER_WRITER_STATE_CONTROL_REG_OFFSET), AS_READER_WRITER_RESET_MASK, 0xffffffff);
+}
+
+void as_reader_writer_set_go(uint32_t* base_addr) {
+    as_reg_write_masked( as_module_reg( base_addr, AS_READER_WRITER_STATE_CONTROL_REG_OFFSET), AS_READER_WRITER_GO_MASK, 0xffffffff);
+}
+
+/* Memwriter only */
+void as_writer_set_enable(uint32_t* base_addr) {
+    as_reg_write_masked( as_module_reg( base_addr, AS_READER_WRITER_STATE_CONTROL_REG_OFFSET), AS_WRITER_ENABLE_MASK, 0xffffffff);
+}
+
+void as_writer_set_disable(uint32_t* base_addr) {
+    as_reg_write_masked( as_module_reg( base_addr, AS_READER_WRITER_STATE_CONTROL_REG_OFFSET), AS_WRITER_DISABLE_MASK, 0xffffffff);
+}
+
+void as_writer_set_enable_on_data_unit_complete(uint32_t* base_addr) {
+    as_reg_write_masked( as_module_reg( base_addr, AS_READER_WRITER_STATE_CONTROL_REG_OFFSET), AS_WRITER_ENABLE_ON_DATA_UNIT_COMPLETE_MASK, 0xffffffff);
+}
+
+void as_writer_set_single_shot(uint32_t* base_addr) {
+    as_reg_write_masked( as_module_reg( base_addr, AS_READER_WRITER_STATE_CONTROL_REG_OFFSET), AS_WRITER_SINGLE_SHOT_MASK, 0xffffffff);
+}
+
+void as_writer_set_disable_on_no_go(uint32_t* base_addr) {
+    as_reg_write_masked( as_module_reg( base_addr, AS_READER_WRITER_STATE_CONTROL_REG_OFFSET), AS_WRITER_DISABLE_ON_NO_GO_MASK, 0xffffffff);
+}
+
+void as_writer_set_flush(uint32_t* base_addr) {
+    as_reg_write_masked( as_module_reg( base_addr, AS_READER_WRITER_STATE_CONTROL_REG_OFFSET), AS_WRITER_FLUSH_DATA_MASK, 0xffffffff);
+}

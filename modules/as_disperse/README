@@ -1,0 +1,20 @@
+##--------------------------------------------------------------------
+## This file is part of the ASTERICS Framework.
+## Copyright (C) Hochschule Augsburg, University of Applied Sciences
+##--------------------------------------------------------------------
+## Company:  Efficient Embedded Systems Group
+##           University of Applied Sciences, Augsburg, Germany
+##           http://ees.hs-augsburg.de
+##
+## Author:   Michael Schaeferling <michael.schaeferling@hs-augsburg.de>
+## Date:     2016-11-09
+## Modified: 
+## Module:   as_disperse
+##--------------------------------------------------------------------
+
+
+This directory contains files for the hardware implementation of the 
+hardware module as_disperse.
+
+The subdirectory hardware contains the necessary hardware description files 
+for implementing the module on programmable logic. 

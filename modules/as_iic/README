@@ -1,0 +1,18 @@
+Module:  as_iic
+Company: University of Applied Sciences, Augsburg, Germany
+Author:  Philip Manke
+Modified: 2017-08-30 Philip Manke
+
+Description:    
+This module adds an IIC master to Asterics.
+
+It is designed to be used to configure cameras to use with the Asterics framework, therefore many of the advanced features are missing from this module, to keep it as small as possible.
+
+The module is connected through three AXI Slave registers.
+It is capable to recognize clock stretching and can operate 
+using IIC bus frequencies around 10000kHz to 10kHz.
+This range is dependent on the FPGA System frequency and the generic "SCL_REGISTER_WIDTH" of the module.
+The module only supports standard and fast mode.
+Only 7 bit addressing is supported.
+The module has to be the only master on the IIC bus, as no arbitration method is implemented and the module does not check for activity on the bus by other IIC masters.
+

@@ -1,0 +1,42 @@
+##--------------------------------------------------------------------
+## This file is part of the ASTERICS Framework.
+## Copyright (C) Hochschule Augsburg, University of Applied Sciences
+##--------------------------------------------------------------------
+## Company:  Efficient Embedded Systems Group
+##           University of Applied Sciences, Augsburg, Germany
+##           http://ees.hs-augsburg.de
+##
+## Author:   Michael Schaeferling <michael.schaeferling@hs-augsburg.de>
+## Date:     2017-01-27
+##--------------------------------------------------------------------
+
+
+Directory content
+=================
+
+This directory primarily contains files of the 
+"ASTERICS software support package" (for further information see 
+the ASTERICS Manual [The ASTERICS Book]):
+
+* <asterics.h> (Layer 3)
+  Generated file for the specific ASTERICS chain and involved modules 
+  (header inclusion).
+
+* <as_support.h/c> (Layer 1)
+  A copy of the "ASTERICS Support Library".
+
+* <as_config.h/c> (Layer 0)
+  Configuration files to run the ASTERICS Framework on a Xilinx driven 
+  FPGA board without an OS (bare-metal) or using an OS.
+
+
+Note: The ASTERICS module driver files (Layer 2) are supplied from the 
+      ASTERICS "modules" directory.
+
+
+Additional files:
+
+* <Makefile>
+  Xilinx supplied Makefile to integrate the ASTERICS driver into an SDK 
+  project. This file can be omitted when building the system software 
+  without SDK support. 

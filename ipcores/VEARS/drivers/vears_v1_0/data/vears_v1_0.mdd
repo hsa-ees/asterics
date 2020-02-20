@@ -1,0 +1,17 @@
+##############################################################################
+## Filename:          ./drivers/vears_v1_0/data/vears_v1_0.mdd
+## Description:       Microprocessor Driver Definition for VEARS
+## Date:              27.08.2018
+##############################################################################
+
+OPTION psf_version = 2.1.0;
+
+BEGIN DRIVER vears
+
+  OPTION NAME = vears_v1_0;
+  OPTION VERSION = 1.00.a;
+  OPTION supported_peripherals = (vears);
+  OPTION depends = (common_v1_00_a);
+  OPTION copyfiles = all;
+
+END DRIVER

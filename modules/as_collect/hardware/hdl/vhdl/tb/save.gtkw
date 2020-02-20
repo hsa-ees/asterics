@@ -1,0 +1,38 @@
+[*]
+[*] GTKWave Analyzer v3.3.66 (w)1999-2015 BSI
+[*] Wed Feb  1 19:08:53 2017
+[*]
+[dumpfile] "/home/julian/git/chasa/asterics-chasa/external/asterics-nonfree/external/asterics/modules/as_collect/hardware/hdl/vhdl/tb/build/as_collect_tb.ghw"
+[dumpfile_mtime] "Wed Feb  1 18:07:33 2017"
+[dumpfile_size] 7786
+[savefile] "/home/julian/git/chasa/asterics-chasa/external/asterics-nonfree/external/asterics/modules/as_collect/hardware/hdl/vhdl/tb/save.gtkw"
+[timestart] 609710000
+[size] 1855 1056
+[pos] -1 -1
+*-23.363102 64700000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[treeopen] top.as_collect_tb.
+[treeopen] top.as_collect_tb.uut1.
+[sst_width] 225
+[signals_width] 345
+[sst_expanded] 1
+[sst_vpaned_height] 320
+@28
+top.as_collect_tb.uut1.reset
+top.as_collect_tb.uut1.clk
+@22
+#{top.as_collect_tb.uut1.data_in[7:0]} top.as_collect_tb.uut1.data_in[7] top.as_collect_tb.uut1.data_in[6] top.as_collect_tb.uut1.data_in[5] top.as_collect_tb.uut1.data_in[4] top.as_collect_tb.uut1.data_in[3] top.as_collect_tb.uut1.data_in[2] top.as_collect_tb.uut1.data_in[1] top.as_collect_tb.uut1.data_in[0]
+@28
+#{top.as_collect_tb.uut1.strobe_counter[2:0]} top.as_collect_tb.uut1.strobe_counter[2] top.as_collect_tb.uut1.strobe_counter[1] top.as_collect_tb.uut1.strobe_counter[0]
+@22
+#{top.as_collect_tb.uut1.shift_reg[47:0]} top.as_collect_tb.uut1.shift_reg[47] top.as_collect_tb.uut1.shift_reg[46] top.as_collect_tb.uut1.shift_reg[45] top.as_collect_tb.uut1.shift_reg[44] top.as_collect_tb.uut1.shift_reg[43] top.as_collect_tb.uut1.shift_reg[42] top.as_collect_tb.uut1.shift_reg[41] top.as_collect_tb.uut1.shift_reg[40] top.as_collect_tb.uut1.shift_reg[39] top.as_collect_tb.uut1.shift_reg[38] top.as_collect_tb.uut1.shift_reg[37] top.as_collect_tb.uut1.shift_reg[36] top.as_collect_tb.uut1.shift_reg[35] top.as_collect_tb.uut1.shift_reg[34] top.as_collect_tb.uut1.shift_reg[33] top.as_collect_tb.uut1.shift_reg[32] top.as_collect_tb.uut1.shift_reg[31] top.as_collect_tb.uut1.shift_reg[30] top.as_collect_tb.uut1.shift_reg[29] top.as_collect_tb.uut1.shift_reg[28] top.as_collect_tb.uut1.shift_reg[27] top.as_collect_tb.uut1.shift_reg[26] top.as_collect_tb.uut1.shift_reg[25] top.as_collect_tb.uut1.shift_reg[24] top.as_collect_tb.uut1.shift_reg[23] top.as_collect_tb.uut1.shift_reg[22] top.as_collect_tb.uut1.shift_reg[21] top.as_collect_tb.uut1.shift_reg[20] top.as_collect_tb.uut1.shift_reg[19] top.as_collect_tb.uut1.shift_reg[18] top.as_collect_tb.uut1.shift_reg[17] top.as_collect_tb.uut1.shift_reg[16] top.as_collect_tb.uut1.shift_reg[15] top.as_collect_tb.uut1.shift_reg[14] top.as_collect_tb.uut1.shift_reg[13] top.as_collect_tb.uut1.shift_reg[12] top.as_collect_tb.uut1.shift_reg[11] top.as_collect_tb.uut1.shift_reg[10] top.as_collect_tb.uut1.shift_reg[9] top.as_collect_tb.uut1.shift_reg[8] top.as_collect_tb.uut1.shift_reg[7] top.as_collect_tb.uut1.shift_reg[6] top.as_collect_tb.uut1.shift_reg[5] top.as_collect_tb.uut1.shift_reg[4] top.as_collect_tb.uut1.shift_reg[3] top.as_collect_tb.uut1.shift_reg[2] top.as_collect_tb.uut1.shift_reg[1] top.as_collect_tb.uut1.shift_reg[0]
+#{top.as_collect_tb.uut1.reg_in[11:0]} top.as_collect_tb.uut1.reg_in[11] top.as_collect_tb.uut1.reg_in[10] top.as_collect_tb.uut1.reg_in[9] top.as_collect_tb.uut1.reg_in[8] top.as_collect_tb.uut1.reg_in[7] top.as_collect_tb.uut1.reg_in[6] top.as_collect_tb.uut1.reg_in[5] top.as_collect_tb.uut1.reg_in[4] top.as_collect_tb.uut1.reg_in[3] top.as_collect_tb.uut1.reg_in[2] top.as_collect_tb.uut1.reg_in[1] top.as_collect_tb.uut1.reg_in[0]
+@28
+top.as_collect_tb.uut1.strobe_in
+top.as_collect_tb.uut1.strobe_out
+@22
+#{top.as_collect_tb.data_out[63:0]} top.as_collect_tb.data_out[63] top.as_collect_tb.data_out[62] top.as_collect_tb.data_out[61] top.as_collect_tb.data_out[60] top.as_collect_tb.data_out[59] top.as_collect_tb.data_out[58] top.as_collect_tb.data_out[57] top.as_collect_tb.data_out[56] top.as_collect_tb.data_out[55] top.as_collect_tb.data_out[54] top.as_collect_tb.data_out[53] top.as_collect_tb.data_out[52] top.as_collect_tb.data_out[51] top.as_collect_tb.data_out[50] top.as_collect_tb.data_out[49] top.as_collect_tb.data_out[48] top.as_collect_tb.data_out[47] top.as_collect_tb.data_out[46] top.as_collect_tb.data_out[45] top.as_collect_tb.data_out[44] top.as_collect_tb.data_out[43] top.as_collect_tb.data_out[42] top.as_collect_tb.data_out[41] top.as_collect_tb.data_out[40] top.as_collect_tb.data_out[39] top.as_collect_tb.data_out[38] top.as_collect_tb.data_out[37] top.as_collect_tb.data_out[36] top.as_collect_tb.data_out[35] top.as_collect_tb.data_out[34] top.as_collect_tb.data_out[33] top.as_collect_tb.data_out[32] top.as_collect_tb.data_out[31] top.as_collect_tb.data_out[30] top.as_collect_tb.data_out[29] top.as_collect_tb.data_out[28] top.as_collect_tb.data_out[27] top.as_collect_tb.data_out[26] top.as_collect_tb.data_out[25] top.as_collect_tb.data_out[24] top.as_collect_tb.data_out[23] top.as_collect_tb.data_out[22] top.as_collect_tb.data_out[21] top.as_collect_tb.data_out[20] top.as_collect_tb.data_out[19] top.as_collect_tb.data_out[18] top.as_collect_tb.data_out[17] top.as_collect_tb.data_out[16] top.as_collect_tb.data_out[15] top.as_collect_tb.data_out[14] top.as_collect_tb.data_out[13] top.as_collect_tb.data_out[12] top.as_collect_tb.data_out[11] top.as_collect_tb.data_out[10] top.as_collect_tb.data_out[9] top.as_collect_tb.data_out[8] top.as_collect_tb.data_out[7] top.as_collect_tb.data_out[6] top.as_collect_tb.data_out[5] top.as_collect_tb.data_out[4] top.as_collect_tb.data_out[3] top.as_collect_tb.data_out[2] top.as_collect_tb.data_out[1] top.as_collect_tb.data_out[0]
+@28
+top.as_collect_tb.uut1.stall_in
+[pattern_trace] 1
+[pattern_trace] 0

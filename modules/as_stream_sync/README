@@ -1,0 +1,11 @@
+Module:  as_stream_sync 
+Company: University of Applied Sciences, Augsburg, Germany
+Author:  Philip Manke
+
+Description:    
+ASTERICS module that takes in two as_stream interfaces and outputs both synchronously.
+Timing signals like HSYNC and VSYNC are not taken into account.
+Synchronization is solely done using the strobe signal.
+This module is meant to snychronize two as_streams that may start sending data 
+!of the same length! at different times and implements a FIFO buffer of
+configurable size.

@@ -1,0 +1,22 @@
+##--------------------------------------------------------------------
+## This file is part of the ASTERICS Framework.
+## Copyright (C) Hochschule Augsburg, University of Applied Sciences
+##--------------------------------------------------------------------
+## Company:  Efficient Embedded Systems Group
+##           University of Applied Sciences, Augsburg, Germany
+##           http://ees.hs-augsburg.de
+##
+## Author:   Philip Manke <philip.manke@hs-augsburg.de>
+## Date:     2019-09-11
+## Modified: 
+## Module:   as_memreader, as_memwriter
+##--------------------------------------------------------------------
+
+This directory contains hardware and software files for the modules
+as_memreader and as_memwriter, collectively called as_reader_writer.
+
+The subdirectory 'hardware' contains the hardware description files
+along with a specification file for the Automatics generator.
+
+The subdirectory 'software' contains bare metal driver files
+for the modules.

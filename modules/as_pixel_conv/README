@@ -1,0 +1,7 @@
+Module:  as_pixel_conv
+Company: University of Applied Sciences, Augsburg, Germany
+Author:  Philip Manke
+
+Description:    
+This module modifies an as_stream pixel stream by performing simple conversions on the pixel data.
+Currently it only supports expanding the pixel width by duplicating the pixel data.

@@ -1,0 +1,22 @@
+##--------------------------------------------------------------------
+## This file is part of the ASTERICS Framework.
+## Copyright (C) Hochschule Augsburg, University of Applied Sciences
+##--------------------------------------------------------------------
+## Company:  Efficient Embedded Systems Group
+##           University of Applied Sciences, Augsburg, Germany
+##           http://ees.hs-augsburg.de
+##
+## Author:   Michael Schaeferling <michael.schaeferling@hs-augsburg.de>
+## Date:     2016-11-09
+## Modified: 
+## Module:   as_misc
+##--------------------------------------------------------------------
+
+This directory contains files for miscellaneous hardware implementation 
+supporting the asterics modules.
+
+The subdirectory hardware contains the necessary hardware description files 
+for implementing the module on programmable logic. 
+
+The subdirectory software contains the corresponding driver files for hardware 
+configuration conducted by software. 

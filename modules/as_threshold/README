@@ -1,0 +1,10 @@
+Module:  as_threshold
+Company: University of Applied Sciences, Augsburg, Germany
+Author:  Michael Schaeferling
+
+Description:    
+This module thresholds an image data stream using two threshold values. 
+Threshold regions can be individually configured to output fixed values 
+or the original image data (by setting the configuration registers e.g. 
+using the driver). 
+For detailed information see the modules documentation.

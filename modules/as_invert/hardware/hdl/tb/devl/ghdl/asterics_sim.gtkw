@@ -1,0 +1,56 @@
+[*]
+[*] GTKWave Analyzer v3.3.62 (w)1999-2014 BSI
+[*] Mon Feb 27 13:57:18 2017
+[*]
+[dumpfile] "/home/michael/git/asterics/modules/as_invert/hardware/hdl/tb/devl/ghdl/waveout.ghw"
+[dumpfile_mtime] "Mon Feb 27 13:56:39 2017"
+[dumpfile_size] 10409123
+[savefile] "/home/michael/git/asterics/modules/as_invert/hardware/hdl/tb/devl/ghdl/asterics_sim.gtkw"
+[timestart] 0
+[size] 1920 1004
+[pos] -1 -1
+*-37.000000 228454000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 288
+[signals_width] 278
+[sst_expanded] 1
+[sst_vpaned_height] 360
+@28
+top.as_sim_top.clk
+top.as_sim_top.reset
+@200
+-Image_Reader
+@28
+top.as_sim_top.s_img_rd0_tb_enable
+top.as_sim_top.s_img_rd0_strobe
+top.as_sim_top.s_img_rd0_hsync
+top.as_sim_top.s_img_rd0_vsync
+@22
+#{top.as_sim_top.s_img_rd0_data[7:0]} top.as_sim_top.s_img_rd0_data[7] top.as_sim_top.s_img_rd0_data[6] top.as_sim_top.s_img_rd0_data[5] top.as_sim_top.s_img_rd0_data[4] top.as_sim_top.s_img_rd0_data[3] top.as_sim_top.s_img_rd0_data[2] top.as_sim_top.s_img_rd0_data[1] top.as_sim_top.s_img_rd0_data[0]
+@28
+top.as_sim_top.s_img_rd0_sync_error
+top.as_sim_top.s_img_rd0_pixel_error
+top.as_sim_top.s_img_rd0_stall
+@200
+-Image_Writer
+@28
+top.as_sim_top.s_img_wr0_tb_done
+top.as_sim_top.s_img_wr0_tb_sync_error
+top.as_sim_top.s_img_wr0_tb_pixel_error
+top.as_sim_top.s_img_wr0_tb_backpressure_en
+top.as_sim_top.s_img_wr0_strobe
+top.as_sim_top.s_img_wr0_hsync
+top.as_sim_top.s_img_wr0_vsync
+@22
+#{top.as_sim_top.s_img_wr0_data[7:0]} top.as_sim_top.s_img_wr0_data[7] top.as_sim_top.s_img_wr0_data[6] top.as_sim_top.s_img_wr0_data[5] top.as_sim_top.s_img_wr0_data[4] top.as_sim_top.s_img_wr0_data[3] top.as_sim_top.s_img_wr0_data[2] top.as_sim_top.s_img_wr0_data[1] top.as_sim_top.s_img_wr0_data[0]
+@28
+top.as_sim_top.s_img_wr0_sync_error
+top.as_sim_top.s_img_wr0_pixel_error
+top.as_sim_top.s_img_wr0_stall
+@200
+-Module_Parameters
+@22
+#{top.as_sim_top.as_invert_0_control[15:0]} top.as_sim_top.as_invert_0_control[15] top.as_sim_top.as_invert_0_control[14] top.as_sim_top.as_invert_0_control[13] top.as_sim_top.as_invert_0_control[12] top.as_sim_top.as_invert_0_control[11] top.as_sim_top.as_invert_0_control[10] top.as_sim_top.as_invert_0_control[9] top.as_sim_top.as_invert_0_control[8] top.as_sim_top.as_invert_0_control[7] top.as_sim_top.as_invert_0_control[6] top.as_sim_top.as_invert_0_control[5] top.as_sim_top.as_invert_0_control[4] top.as_sim_top.as_invert_0_control[3] top.as_sim_top.as_invert_0_control[2] top.as_sim_top.as_invert_0_control[1] top.as_sim_top.as_invert_0_control[0]
+#{top.as_sim_top.as_invert_0_control_reset[15:0]} top.as_sim_top.as_invert_0_control_reset[15] top.as_sim_top.as_invert_0_control_reset[14] top.as_sim_top.as_invert_0_control_reset[13] top.as_sim_top.as_invert_0_control_reset[12] top.as_sim_top.as_invert_0_control_reset[11] top.as_sim_top.as_invert_0_control_reset[10] top.as_sim_top.as_invert_0_control_reset[9] top.as_sim_top.as_invert_0_control_reset[8] top.as_sim_top.as_invert_0_control_reset[7] top.as_sim_top.as_invert_0_control_reset[6] top.as_sim_top.as_invert_0_control_reset[5] top.as_sim_top.as_invert_0_control_reset[4] top.as_sim_top.as_invert_0_control_reset[3] top.as_sim_top.as_invert_0_control_reset[2] top.as_sim_top.as_invert_0_control_reset[1] top.as_sim_top.as_invert_0_control_reset[0]
+#{top.as_sim_top.as_invert_0_state[15:0]} top.as_sim_top.as_invert_0_state[15] top.as_sim_top.as_invert_0_state[14] top.as_sim_top.as_invert_0_state[13] top.as_sim_top.as_invert_0_state[12] top.as_sim_top.as_invert_0_state[11] top.as_sim_top.as_invert_0_state[10] top.as_sim_top.as_invert_0_state[9] top.as_sim_top.as_invert_0_state[8] top.as_sim_top.as_invert_0_state[7] top.as_sim_top.as_invert_0_state[6] top.as_sim_top.as_invert_0_state[5] top.as_sim_top.as_invert_0_state[4] top.as_sim_top.as_invert_0_state[3] top.as_sim_top.as_invert_0_state[2] top.as_sim_top.as_invert_0_state[1] top.as_sim_top.as_invert_0_state[0]
+[pattern_trace] 1
+[pattern_trace] 0

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 #
 # --------------------- LICENSE -----------------------------------------------
 # This program is free software; you can redistribute it and/or
@@ -41,16 +41,17 @@ chain = asterics.new_chain()
 # CAM -> as_sensor -+-----------------------> collect0 -> writer0 -> RAM
 #                   \-------> sync => diff -> collect1 -> writer1 -> RAM
 # RAM -> reader -> disperse ->/ 
+#        as_iic ---------------------------------------------------> CAM
 
 # Camera
 camera = chain.add_module("as_sensor_ov7670")
+camera.add_iic_master("XILINX_PL_IIC")
 
 # Splitter
 splitter = chain.add_module("as_stream_splitter")
 
 # Reader
 reader = chain.add_module("as_memreader")
-reader.set_port_fixed_value("interrupt_out", "open")
 
 # Disperse
 disperse = chain.add_module("as_disperse")
@@ -68,13 +69,13 @@ collect1 = chain.add_module("as_collect", "collect1")
 
 # Writer 0
 writer0 = chain.add_module("as_memwriter", "writer0")
-writer0.set_generic("MEMORY_DATA_WIDTH", 32)
-writer0.set_generic("DIN_WIDTH", 32)
+writer0.set_generic_value("MEMORY_DATA_WIDTH", 32)
+writer0.set_generic_value("DIN_WIDTH", 32)
 
 # Writer 1
 writer1 = chain.add_module("as_memwriter", "writer1")
-writer1.set_generic("MEMORY_DATA_WIDTH", 32)
-writer1.set_generic("DIN_WIDTH", 32)
+writer1.set_generic_value("MEMORY_DATA_WIDTH", 32)
+writer1.set_generic_value("DIN_WIDTH", 32)
 
 # -------- Module connections ---------------------------
 
@@ -82,7 +83,7 @@ chain.connect(camera,
                 splitter)
                 
 # original image path:
-chain.connect(splitter.get_interface("as_stream_0"),
+chain.connect(splitter.get("0"),
                 collect1)
 chain.connect(collect1,
                 writer1)
@@ -93,13 +94,13 @@ chain.connect(reader,
                 
 # sync image pixels, diff and write back the result:
 chain.connect(disperse,
-                sync.get_interface("as_stream_0", "in"))
-chain.connect(splitter.get_interface("as_stream_1"),
-                sync.get_interface("as_stream_1", "in"))
-chain.connect(sync.get_interface("as_stream_0", "out"),
-                diff.get_interface("as_stream_0", "in"))
-chain.connect(sync.get_interface("as_stream_1", "out"),
-                diff.get_interface("as_stream_1", "in"))
+                  sync.get("0", "in"))
+chain.connect(splitter.get("1"),
+                  sync.get("1", "in"))
+chain.connect(sync.get("0", "out"),
+              diff.get("0", "in"))
+chain.connect(sync.get("1", "out"),
+              diff.get("1", "in"))
 chain.connect(diff, 
                 collect0)
 chain.connect(collect0, 
@@ -119,14 +120,27 @@ if len(sys.argv) < 3:
 # Build chain: Generate output products
 # Write the outputs for the ASTERICS core
 
+# Stores wether Automatics completed without errors or not
+success = False
+
 if sys.argv[1] == "vivado":
-    chain.write_ip_core_xilinx(sys.argv[2] + "/ASTERICS", use_symlinks=True, force=True)
-    # Create link to the VEARS IP-Core
-    asterics.vears(sys.argv[2], use_symlinks=True)
+    success = chain.write_ip_core_xilinx(sys.argv[2] + "/ASTERICS",
+                                         use_symlinks=True, force=True)
+    if success:
+        # Create link to the VEARS IP-Core
+        success = asterics.vears(sys.argv[2], use_symlinks=True, force=True)
 elif sys.argv[1] == "core":
-    chain.write_asterics_core(sys.argv[2], use_symlinks=True)
+    success = chain.write_asterics_core(sys.argv[2], use_symlinks=True)
 else:
     sys.exit("Not a valid build target!")
+# On success, generate a system graph using dot
+if success:
+    asterics.write_system_graph(chain, "asterics_system_graph")
 
-# Done!
-print("Process complete!")
+# Report
+if success:
+    print("Automatics completed successfully!")
+else:
+    print("Automatics encountered errors:")
+    asterics.list_errors()
+

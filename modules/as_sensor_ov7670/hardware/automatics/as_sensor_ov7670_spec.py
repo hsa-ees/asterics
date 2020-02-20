@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 """
 as_sensor_ov7670_spec.py
@@ -43,10 +43,14 @@ of the ASTERICS hardware module as_sensor_ov7670.
 
 from as_automatics_module import AsModule
 
+# Import and retrieve an instance of the Automatics Python logging module
+import as_automatics_logging as as_log
+LOG = as_log.get_log()
 
-def get_module_instance(module_dir):
+
+def get_module_instance(module_dir: str) -> AsModule:
     
-    module = AsModule("as_sensor_ov7670")
+    module = AsModule()
     toplevel_file = "hardware/hdl/vhdl/as_sensor_ov7670.vhd"
     
     module.files = []
@@ -56,5 +60,38 @@ def get_module_instance(module_dir):
     # ports, generics, existing interfaces and register interfaces
     module.discover_module("{mdir}/{toplevel}"
                            .format(mdir=module_dir, toplevel=toplevel_file))
+
+    module.iic_masters = []
+    module.iic_masters_available = ("XILINX_PL_IIC", "XILINX_PS_IIC", "AS_IIC")
+
+    # Special function definitions for as_sensor_ov7670 module:
+    def add_iic_master(self, iic_type: str):
+        self.iic_masters.append(iic_type)
+        LOG.info("Added IIC master '%s' to '%s'", iic_type, self.name)
+    
+    def set_iic_masters(self, iic_types: list):
+        self.iic_masters = iic_types
+
+    def list_iic_masters(self):
+        print("IIC masters available for '{}':".format(self.name))
+        for iic in self.iic_masters_available:
+            print(" - '{}'".format(iic))
+        print("")
+
+    def overwrite_sw_additions(self) -> list:
+        additions = []
+        for master in self.iic_masters:
+            additions.append("#define AS_USING_{}".format(master.upper()))
+        return additions
+    
+    # Assign functions to module instance
+    # The call to "__get__(module)" is necessary and "binds" the method
+    # the instance AsModule instance "module" that was created here!
+    # Syntax:
+    # module.<function_name (user script)> = <function to add>.__get__(module)
+    module.set_iic_masters = set_iic_masters.__get__(module)
+    module.add_iic_master = add_iic_master.__get__(module)
+    module.list_iic_masters = list_iic_masters.__get__(module)
+    module.get_software_additions = overwrite_sw_additions.__get__(module)
 
     return module

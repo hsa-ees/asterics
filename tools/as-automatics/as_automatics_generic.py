@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 """
 as_automatics_generic.py
@@ -87,6 +87,9 @@ class Generic():
             "{}('{}'): {} with default value: {}".format(
                 self.name, self.code_name, self.data_type, str(
                     self.default_value)))
+    
+    def __repr__(self) -> str:
+        return self.code_name
 
     def check_value(self):
         """Check if the currently set value is valid. Can only be invalid
@@ -117,6 +120,10 @@ class Generic():
         is returned.
         Will recursively resolve 'value' if it is set to another generic object.
         """
+        if getattr(self.parent, "window_interfaces", False):
+            if self.value:
+                return self.value
+            return self.default_value
         # If this generic is on toplevel
         if not self.parent.parent:
             if not self.value and top_default:

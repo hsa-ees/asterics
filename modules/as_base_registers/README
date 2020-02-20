@@ -1,0 +1,7 @@
+Module:  as_base_registers
+Company: University of Applied Sciences, Augsburg, Germany
+Author:  Philip Manke
+
+Description:    
+This module implements a set of base registers present in every ASTERICS system.
+The registers provide basic information about the ASTERICS hardware system.

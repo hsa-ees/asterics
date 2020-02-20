@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 """
 as_vhdl_reader.py
@@ -49,10 +49,12 @@ from as_automatics_port import Port
 from as_automatics_generic import Generic
 from as_automatics_constant import Constant
 from as_automatics_helpers import eval_vhdl_expr
+from as_automatics_vhdl_static import PIPE_WINDOW_TYPE
+from as_automatics_exceptions import AsAnalysisError, AsFileError
 
 LOG = as_log.get_log()
 
-AUTO_TAG = "[auto]:"
+AUTO_TAG = "[as]:"
 
 class VHDLReader():
     """This class implements methods used to read and partially parse
@@ -71,6 +73,7 @@ class VHDLReader():
         self.found_ports = []
         self.found_generics = []
         self.found_constants = []
+        self.errors = []
         self.entity_name = ""
         self.arch_name = ""
         self.component_name = ""
@@ -101,28 +104,26 @@ class VHDLReader():
             self.__analyze__()
         return self.found_constants
 
-    def __analyze__(self) -> str:
+    def __analyze__(self):
         LOG.info("Start analysis of VHDL file '%s' ...", self.vhdl_file)
         try:
             self.file_analyzed = False
-            ret = ""
             # Open the source file
             with open(self.vhdl_file) as file:
                 LOG.debug("File opened, reading...")
-                ret = self.__analyze_readfile__(file)
-            if ret != "":
-                # If the analyse function failed, re-initialize self!
-                self.__init__(self.vhdl_file)
-                LOG.error(("VHDL analysis function returned with "
-                           "error '%s'"), ret)
-                return ret
+                self.__analyze_readfile__(file)
         except IOError as err:
             LOG.error("File '%s' couldn't be opened: '%s'", self.vhdl_file,
                       str(err))
-            return "IO error"
-        return ""
+            raise AsFileError(self.vhdl_file, "File could not be opened!")
+        if self.errors:
+            LOG.error("VHDL analysis function returned with %s error(s).",
+                        str(len(self.errors)))
+            raise AsAnalysisError(self.vhdl_file, "{} error(s) encountered!"
+                                    .format(len(self.errors)))
+        
 
-    def __analyze_readfile__(self, file_obj) -> str:
+    def __analyze_readfile__(self, file_obj):
         # Marker variables, where in the VHDL file are we currently?
         in_entity = False
         in_arch = False
@@ -132,7 +133,7 @@ class VHDLReader():
             # Move to the next 'interesting' line (with a keyword)
             ret = self.__find_next_keyword__(file_obj)
             if ret == "":  # find_next_keyword() returns "" in case of EOF
-                return ""
+                return True
             # On keyword 'entity'
             if ret == "entity":
                 # Get the entity name (used to identify the AsModule)
@@ -140,7 +141,8 @@ class VHDLReader():
                 if self.entity_name == "":
                     LOG.error(("Entity declaration of '%s' is "
                                "malformed!"), file_obj.name)
-                    return "entity malformed"
+                    self.errors.append(AsAnalysisError(self.vhdl_file, 
+                            "Entity declaration is malformed!", ret))
                 in_entity = True
                 LOG.debug("Found entity '%s' of '%s'",
                           self.entity_name, file_obj.name)
@@ -150,7 +152,8 @@ class VHDLReader():
                 if self.arch_name == "":
                     LOG.error(("Architecture declaration of '%s' is "
                                "malformed!"), file_obj.name)
-                    return "architecture malformed"
+                    self.errors.append(AsAnalysisError(self.vhdl_file, 
+                            "Architecture declaration malformed!"))
                 in_arch = True
                 LOG.debug("Found architecture '%s' of '%s'",
                           self.arch_name, file_obj.name)
@@ -160,7 +163,8 @@ class VHDLReader():
                 if self.component_name == "":
                     LOG.error(("Component declaration in '%s' is "
                                "malformed!"), file_obj.name)
-                    return "component malformed"
+                    self.errors.append(AsAnalysisError(self.vhdl_file,
+                            "Component declaration malformed!"))
                 in_component = True
                 LOG.debug("Found component '%s' in '%s'",
                           self.component_name, file_obj.name)
@@ -192,9 +196,8 @@ class VHDLReader():
                         LOG.warning(("Malformed constant found, '%s', "
                                      "line: '%s'"), result, self.line)
                 else:
-                    LOG.error(("'constant' keyword outside of "
-                               "'architecture' in '%s'"), file_obj.name)
-                    return "constant outside of architecture"
+                    LOG.warning(("Found 'constant' keyword outside of "
+                                 "'architecture' in '%s'"), file_obj.name)
             # On keyword 'end': Determine what 'ended' and adjust state
             elif ret == "end":
                 if "entity" in self.line or self.entity_name in self.line:
@@ -284,7 +287,10 @@ class VHDLReader():
                 params[0] = params[0].strip()
                 # If its only digits
                 if params[0] in ("integer", "natural"):
-                    default_value = int(params[1])
+                    try:
+                        default_value = int(params[1])
+                    except ValueError:
+                        default_value = params[1]
                 elif params[0] == "boolean":
                     default_value = params[1].title()
                 elif params[0] == "string":
@@ -325,10 +331,12 @@ class VHDLReader():
                 if tag:
                     tag = tag.strip(" :")
                     try:
-                        tag = tag[tag.find("(") : tag.find(")") + 1]
+                        tag = tag[tag.find("("): tag.find(")") + 1]
                     except IndexError as err:
                         LOG.error(("VHDLReader: Not a valid tag '%s' in '%s'"
-                                  " - '%s'"), tag, self.entity_name, str(err))
+                                   " - '%s'"), tag, self.entity_name, str(err))
+                        self.errors.append(self.vhdl_file, 
+                                "Not a valid 2D Window Tag '{}'!".format(tag))
             else:
                 line = self.__next_clean_line__(file_obj)
             # Clean and split the input
@@ -349,7 +357,10 @@ class VHDLReader():
                 # Extract data type and pass the data width definition
                 data_type = params[1][:parens_pos]
                 parens = params[1][parens_pos:]
-                data_width = self.__get_data_width__(parens)
+                if PIPE_WINDOW_TYPE in data_type:
+                    data_width = parens[1:-1]
+                else:
+                    data_width = self.__get_data_width__(parens)
                 LOG.debug("Data width translated as '%s'", data_width)
             else:
                 # If no data width definition is present, assume width 1
@@ -357,12 +368,12 @@ class VHDLReader():
                 data_width = Port.DataWidth(1, None, None)
             # Instantiate and add a new Port to the found ports list
             port = Port(name=name, code_name=name, direction=direction,
-                     data_type=data_type, data_width=data_width)
+                        data_type=data_type, data_width=data_width)
             if self.window_module and tag:
-                LOG.debug("Found AUTOTAG in '%s' for '%s': '%s'", 
+                LOG.debug("Found AUTOTAG in '%s' for '%s': '%s'",
                           self.entity_name, name, tag)
                 port.set_window_reference(
-                        map(str.strip, tag.strip("() ").split(",")))
+                    map(str.strip, tag.strip("() ").split(",")))
             self.found_ports.append(port)
 
     def __get_constant__(self, file_obj) -> str:
@@ -427,12 +438,8 @@ class VHDLReader():
         return Port.DataWidth(a=value0, sep=spliton, b=value1)
 
     @classmethod
-    def __next_clean_line__(
-            cls,
-            file_obj,
-            *,
-            ret_on_semi: bool = False,
-            get_window_tag: bool = False) -> str:
+    def __next_clean_line__(cls, file_obj, *, ret_on_semi: bool = False,
+                            get_window_tag: bool = False) -> str:
         while True:
             line = file_obj.readline().lower().strip(' \t')
             if line == "\n":
@@ -487,7 +494,7 @@ class VHDLReader():
     def __extract_automatics_tag__(line: str) -> str:
         tag = line.find(AUTO_TAG)
         if tag > -1:
-            tag = line[tag : ]
+            tag = line[tag:]
         else:
             tag = ""
         return tag

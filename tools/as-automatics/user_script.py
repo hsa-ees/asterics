@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 #
 # Author: Philip Manke <philip.manke@hs-augsburg.de> 2019-07-09
 #
@@ -50,6 +50,8 @@ chain = asterics.new_chain()
 #  CAMERA
 #########################################################
 camera = chain.add_module("as_sensor_ov7670", "camera0")
+# Add IIC Master:
+camera.add_iic_master("XILINX_PL_IIC")
 
 #########################################################
 #  INVERTER
@@ -57,7 +59,7 @@ camera = chain.add_module("as_sensor_ov7670", "camera0")
 inverter = chain.add_module("as_invert")
 
 # Connect: camera -> inverter
-chain.connect(camera, inverter)
+camera.connect(inverter)
 
 #########################################################
 #  COLLECT module
@@ -65,7 +67,7 @@ chain.connect(camera, inverter)
 collect = chain.add_module("as_collect")
 
 # Connect: inverter -> collect
-chain.connect(inverter, collect)
+inverter.connect(collect)
 
 #########################################################
 #  MEMWRITER
@@ -77,14 +79,14 @@ writer.set_generic_value("MEMORY_DATA_WIDTH", 32)
 writer.set_generic_value("DIN_WIDTH", 32)
 
 # Connect: collect -> writer
-chain.connect(collect, writer)
+collect.connect(writer)
 
 # --------- Chain description end ---------
 
 
 # Generate output products
 # !! Set output directory here !!
-chain.write_ip_core_xilinx("output/directory/")
+success = chain.write_ip_core_xilinx("output/directory/")
 # Optional parameters: 
 #   use_symlinks : link to source files instead of copying them (default: True)
 #   force : delete contents of output directory if not empty (False)
@@ -97,12 +99,24 @@ chain.write_ip_core_xilinx("output/directory/")
 #    output only HW sources
 # write_sw(path, use_symlinks, force, module_driver_dirs)
 #    output only SW sources
+# write_ip_core_xilinx(path, use_symlinks, force, module_driver_dirs)
+#    output all sources and package the system as an IP-Core for use with the
+#    Xilinx FPGA toolchain - requires Xilinx Vivado to be installed
 # write_system(path, use_symlinks, force, module_driver_dirs, add_vears)
 #    output all sources into a system template folder structure.
-#    package IP core and link/copy the VEARS core into the system
+#    package IP core (requires Vivado!) and add the VEARS core to the system
 #    Additional parameter: add_vears : Copy/Link the VEARS core (default: True)
 #                             VEARS enables video output via VGA, DVI or HDMI
 
+if success:
+    # If Automatics finished successfully:
 
-# Done!
-print("Process complete!")
+    # Optional: Generate and write a system graph
+    asterics.write_system_graph(chain)
+    # Optional: List address space used by ASTERICS
+    chain.list_address_space()
+    
+    print("Process completed successfully!")
+else:
+    # If Automatics failed:
+    print("Automatics encountered errors!")

@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
 --  This file is part of the ASTERICS Framework. 
---  Copyright (C) Hochschule Augsburg, University of Applied Sciences
+--  (C) 2019 Hochschule Augsburg, University of Applied Sciences
 ----------------------------------------------------------------------------------
 -- Entity:         as_filter_mask_pkg
 --
@@ -39,7 +39,7 @@ package as_filter_mask is
         --constant c_YRES : natural := 480;
         
         constant c_bitsPerPixel : natural := 8;
-        --subtype   t_pixel                 is std_logic_vector(natural range <>);--(c_bitsPerPixel-1 downto 0);
+        --subtype   t_pixel                 is std_logic_vector(natural range <>);--(c_bitsPerPixel-1 downto 0); 
     
     type        t_pixelVector8Bit is array (natural range <>) of std_logic_vector(7 downto 0);
     type        t_pixelVector9Bit is array (natural range <>) of std_logic_vector(8 downto 0);
@@ -129,6 +129,5 @@ package body as_filter_mask is
         end loop;
       end loop;
       return sum;
-    end f_filterGetSum;
- 
+    end f_filterGetSum; 
 end as_filter_mask;

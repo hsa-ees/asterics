@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 """
 demo_script.py
@@ -111,7 +111,7 @@ def define_myfilter(chain):
     collect0 = chain.add_module("as_collect", "collect0")
 
     # Connect: myfilter (original image) -> collect0
-    chain.connect(myfilter.get_interface("as_stream_0"), collect0)
+    chain.connect(myfilter.get_interface("0"), collect0)
     #########################################################
     #  MEMWRITER 0 (original image)
     #########################################################
@@ -136,7 +136,7 @@ def define_myfilter(chain):
     collect1 = chain.add_module("as_collect", "collect1")
 
     # Connect: myfilter (filtered image) -> collect1
-    chain.connect(myfilter.get_interface("as_stream_1"), collect1)
+    chain.connect(myfilter.get_interface("1"), collect1)
 
     #########################################################
     #  MEMWRITER 1 (filtered image)
@@ -211,7 +211,7 @@ def define_diff_image(chain):
     chain.connect(camera, splitter0)
 
     # splitter0 (0) -> collect1 -> writer1 (delay image)
-    chain.connect(splitter0.get_interface("as_stream_1"), collect1)
+    chain.connect(splitter0.get_interface("1"), collect1)
     chain.connect(collect1, writer1)
 
     # reader -> disperse -> splitter1 (read from delay image, previous frame)
@@ -219,20 +219,20 @@ def define_diff_image(chain):
     chain.connect(disperse, splitter1)
 
     # splitter1 (0) -> inverter -> collect0 -> writer0 (test for delay image)
-    chain.connect(splitter1.get_interface("as_stream_1"), inverter)
+    chain.connect(splitter1.get_interface("1"), inverter)
     chain.connect(inverter, collect0)
     chain.connect(collect0, writer0)
 
     # splitter0 (1) -> sync => diff -> collect2 -> writer2 (diff image)
     # splitter1 (1) --->/
-    chain.connect(splitter0.get_interface("as_stream_0"),
-                  sync.get_interface("as_stream_1", "in"))
-    chain.connect(splitter1.get_interface("as_stream_0"),
-                  sync.get_interface("as_stream_0", "in"))
-    chain.connect(sync.get_interface("as_stream_0", "out"),
-                  diff.get_interface("as_stream_0", "in"))
-    chain.connect(sync.get_interface("as_stream_1", "out"),
-                  diff.get_interface("as_stream_1", "in"))
+    chain.connect(splitter0.get_interface("0"),
+                  sync.get_interface("1", "in"))
+    chain.connect(splitter1.get_interface("0"),
+                  sync.get_interface("0", "in"))
+    chain.connect(sync.get_interface("0", "out"),
+                  diff.get_interface("0", "in"))
+    chain.connect(sync.get_interface("1", "out"),
+                  diff.get_interface("1", "in"))
     chain.connect(diff, collect2)
     chain.connect(collect2, writer2)
 
@@ -261,9 +261,11 @@ def build(demo_system):
 
     # Define system
     demo_system(chain)
-
+    
     # Build system
     chain.write_system("astertest/", use_symlinks=False, force=True)
+
+    asterics.write_system_graph(chain)
 
 
 if __name__ == "__main__":
@@ -276,4 +278,3 @@ if __name__ == "__main__":
     # build(define_diff_image)
 
     print("Automatics finished in {:.2f}s!".format(time.time() - runtime))
-    print("Note: To rebuild, you first need to delete the previous output!")

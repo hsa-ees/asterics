@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
 --  This file is part of the ASTERICS Framework. 
---  Copyright (C) Hochschule Augsburg, University of Applied Sciences
+--  (C) 2019 Hochschule Augsburg, University of Applied Sciences
 ----------------------------------------------------------------------------------
 -- Entity:         ram
 --
@@ -56,17 +56,17 @@ begin
   process (CLK)
     constant ram_size  : natural := 2**ADDR_WIDTH;
     type ramType is array (0 to (ram_size)-1) of std_logic_vector(DATA_WIDTH-1 downto 0);
-    variable ram : ramType := (others => (others => '0'));
+    variable ram_array : ramType := (others => (others => '0'));
   begin
     if rising_edge(CLK) then
       
       -- write:
       if WR_EN = '1' then
-        ram(to_integer(unsigned(WR_ADDR))) := DIN;
+        ram_array(to_integer(unsigned(WR_ADDR))) := DIN;
       end if;
       
       -- read:
-      DOUT <= ram(to_integer(unsigned(RD_ADDR)));
+      DOUT <= ram_array(to_integer(unsigned(RD_ADDR)));
       
     end if;
   end process;

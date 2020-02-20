@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 """
 as_automatics_interface.py
@@ -53,10 +53,12 @@ LOG = as_log.get_log()
 class Interface():
     """Describes a hardware interface consisting of VHDL ports and generics."""
 
-    def __init__(self, name: str, template: object = None):
+    def __init__(self, type_name: str, template: object = None,
+                 default_name: str = ""):
         self.ports = []  # List of this interface's Ports
         self.generics = []  # List of this interface's Generics
-        self.name = name  # The interface "type" (as_stream, AXI_Master, ...)
+        self.name = default_name  # This name 
+        self.type = type_name  # The interface "type" (as_stream, AXI_Master, ...)
         self.parent = None
         self.template = None
         self.direction = "in"  # Data direction (flips all Port's direction)
@@ -68,6 +70,7 @@ class Interface():
         # AsModule to instantiate in toplevel.
         # Used to automatically instantiate management components
         # (ie AXI Master for memory access)
+        # Format: ("module_to_instantiate", "where_to_instantiate")
         self.instantiate_in_top = None
         self.in_entity = True  # Include in VHDL entity?
         self.incoming = []  # Incoming connections (data -> self)
@@ -79,11 +82,22 @@ class Interface():
                 self.template = template
             else:
                 LOG.error("Template passed to %s is not an Interface object!",
-                          name)
+                          self.type)
 
     def __str__(self) -> str:
-        """Return the 'full name' of this interface (not the unique name)"""
-        return self.name_prefix + self.name + self.name_suffix
+        """Return the 'user name' of this interface (not the unique name)"""
+        return self.name
+
+    def __repr__(self) -> str:
+        if self.unique_name:
+            return self.unique_name
+        return self.int_name()
+    
+    def connect(self, other):
+        self.parent.chain.connect(self, other)
+
+    def int_name(self) -> str:
+        return self.name_prefix + self.type + self.name_suffix
 
     def duplicate(self):
         """Generate a copy of this interface object and reset a few parameters
@@ -119,7 +133,6 @@ class Interface():
             port.incoming = None
             port.outgoing = []
             port.assign_to(out)
-
         return out
 
     def add_port(self, port_obj: Port) -> bool:
@@ -165,6 +178,7 @@ class Interface():
                 return False
             port_obj.optional = tport.optional
             port_obj.set_ruleset(list(tport.ruleset))
+            port_obj.in_entity = tport.in_entity
 
         # If the checks passed, add this port
         LOG.debug("Add port '%s' to interface '%s'.",
@@ -174,16 +188,29 @@ class Interface():
         self.ports.append(port_obj)
         return True
 
-    def make_external(self):
-        """For use in the user script / interactive mode: Make this interface
+    def make_external(self, value: bool=True):
+        """For use in the user script: Make this interface
         external, exposing it to the outside of the IP-Core."""
-        self.to_external = True
+        self.to_external = value
 
-    def instantiate_module(self, entity_name: str):
-        """For use in the user script / interactive mode: Automatically add the
-        module 'entity_name' to toplevel and connect this interface to it."""
-        self.instantiate_in_top = entity_name
-        self.to_external = True
+    def instantiate_module(self, entity_name: str, in_group: str = ""):
+        """For use in the user script: Automatically add the
+        module 'entity_name' to a module group (module parent by default)
+        and connect this interface to it.
+        Calling this method with an empty 'entity_name' or passing None
+        will call 'instantiate_no_module'."""
+        if entity_name == "" or entity_name is None:
+            self.instantiate_no_module()
+        else:
+            self.instantiate_in_top = (entity_name, in_group)
+            self.to_external = True
+
+    def instantiate_no_module(self):
+        """For use in the user script: Reset the instantiation behaviour.
+        Sets 'instantiate_in_top' to the default value [None].
+        Also sets 'to_external' to 'False'."""
+        self.instantiate_in_top = None
+        self.to_external = False
 
     def get_ports(self, port_name: str, *,
                   suppress_error: bool = False) -> Sequence[Port]:
@@ -196,11 +223,8 @@ class Interface():
             raise NameError("No port {} found in {}!".format(port_name, self))
         return found
 
-    def get_port(
-            self,
-            port_name: str,
-            *,
-            suppress_error: bool = False) -> Port:
+    def get_port(self, port_name: str, *,
+                 suppress_error: bool = False) -> Port:
         """Search for and return the first Port matching 'port_name'
         using the port.name attribute"""
         found = next((port for port in self.ports if port.name == port_name),
@@ -240,6 +264,12 @@ class Interface():
         in their generic.name attribute"""
         return [gen for gen in self.generics if gen.name == generic_name]
 
+    def get_generic(self, generic_name: str) -> Generic:
+        """Returns the first generic matching 'generic_name' that's associated
+            with this object. If none are found, returns None."""
+        return next((gen for gen in self.generics if gen.name == generic_name),
+                    None)
+
     def has_generic(self, generic_name: str) -> bool:
         """Return 'True' if this interface has a Generic matching
         'generic_name' in its generic.name attribute"""
@@ -273,7 +303,7 @@ class Interface():
         for port in self.ports:
             port.connected = value
 
-    def set_prefix_suffix(self, new_prefix, new_suffix, update : bool = True):
+    def set_prefix_suffix(self, new_prefix, new_suffix, update: bool = True):
         """Modify the prefix and suffix for all Ports.
         Does NOT store the new prefix and suffix in the respective attributes"""
         for port in self.ports:
@@ -335,7 +365,6 @@ class Interface():
         # Try adding the port
         if not self.add_port(port_obj):
             return False
-
         return True
 
     def remove_port(self, port_name: str) -> bool:
@@ -409,16 +438,24 @@ class Interface():
     def print_interface(self, verbose: bool = False):
         """Print the interface configuration, listing all ports and generics.
            Prints only the mandatory ports if 'verbose' is set to 'False'."""
-        print(self.name_prefix + self.name + self.name_suffix +
-              ": Interface with direction '{}'".format(self.direction))
+        print("{}: {} with direction '{}'".format(str(self), self.type,
+                                                  self.direction))
         if verbose:
             print("Source module: {}"
                   .format(str(as_help.get_source_module(self))))
             if self.generics:
-                print("Generics:")
+                print("\nGenerics:")
                 self.list_generics()
-            print("Ports:")
+            print("\nPorts:")
             self.list_ports()
+            if self.instantiate_in_top:
+                print("\n -- Auto-Instantiate -- ")
+                instmod, togroup = self.instantiate_in_top
+                if togroup == "":
+                    togroup = "asterics"
+                print(("This interface will automatically instantiate "
+                       "module '{}' in module group '{}'!")
+                      .format(instmod, togroup))
         else:
             print("Mandatory ports:")
             for port in self.ports:

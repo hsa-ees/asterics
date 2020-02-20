@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 # packaging.tcl
 #
@@ -209,6 +209,8 @@ foreach { file } $file_list {
 
 source -notrace ${projdir}package_interface_config.tcl
 
+set_property display_name        $display_name [ipx::current_core]
+set_property description         $description [ipx::current_core]
 set_property vendor              $vendor_name    [ipx::current_core]
 set_property library             {user}                  [ipx::current_core]
 set_property taxonomy            {{/Image_Processing}} [ipx::current_core]

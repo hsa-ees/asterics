@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 """
 as_autotest_module.py
@@ -265,12 +265,12 @@ class TestAsModule(ut.TestCase):
         # the direction "out". Since no other ports match that AsStream
         # direction, the interface should be removed during "assign_interfaces"
         # The port should be added to the module itself, as a single/lone port
-        self.mut.entity_ports = \
-            [Port("data", data_type="std_logic_vector"),
-             Port("data_error", direction="out"),
-             Port("data", data_type="std_logic_vector",
-                  data_width=Port.DataWidth(a="DWIDTH - 1", sep="downto", b=0)),
-             Port("strobe")]
+        self.mut.entity_ports = [
+            Port(
+                "data", data_type="std_logic_vector"), Port(
+                "data_error", direction="out"), Port(
+                "data", data_type="std_logic_vector", data_width=Port.DataWidth(
+                    a="DWIDTH - 1", sep="downto", b=0)), Port("strobe")]
         self.mut.entity_generics = [Generic("DWIDTH"), Generic("NOMATCH"),
                                     Generic("MAX_REGS_PER_MODULE")]
 

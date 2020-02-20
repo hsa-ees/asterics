@@ -12,3 +12,4 @@ astertest/
 *.zip
 *.str
 .Xil/*
+*.code-workspace

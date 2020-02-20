@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 """
 as_automatics_port.py
@@ -55,18 +55,19 @@ class Port():
 
     DataWidth = namedtuple("DataWidth", "a sep b")
     Rule = namedtuple("Rule", "condition action")
-    WindowReference = namedtuple("WindowReference", "x y layer")
-    
+    WindowReference = namedtuple("WindowReference", "x y intername")
+
     directions = ("in", "out", "inout")
-    port_types = ("external", "single", "interface", "register")
+    port_types = ("external", "single", "interface", "register",
+                  "signal", "glue_signal")
     necessity_types = ("mandatory", "optional")
     rule_conditions = ("any_missing", "any_present", "both_missing",
                        "both_present", "sink_present", "sink_missing",
                        "source_present", "source_missing", "single_port",
-                       "external_port")
+                       "external_port", "type_signal")
     rule_actions = ("connect", "make_external", "error", "warning", "note",
                     "set_value(<value>)", "bundle_and", "bundle_or",
-                    "fallback_port(<port name>)", "none")
+                    "fallback_port(<port name>)", "none", "forceconnect")
 
     rule_condition_eval = \
         {"any_missing": lambda src, sink: src is None or sink is None,
@@ -78,11 +79,11 @@ class Port():
          "source_present": lambda src, sink: src is not None,
          "source_missing": lambda src, sink: src is None,
          "single_port": lambda src, sink: src.port_type == "single",
-         "external_port": lambda src, sink: src.port_type == "external"}
+         "external_port": lambda src, sink: src.port_type == "external",
+         "type_signal": lambda src, sink: src.port_type == "signal"}
     # The ruleset describes how this port is going to be connected
     default_rules = [Rule("both_present", "connect"),
-                     Rule("sink_missing", "warning"),
-                     Rule("source_missing", "warning")]
+                     Rule("sink_missing", "note")]
 
     def __init__(
             self,
@@ -122,6 +123,12 @@ class Port():
             self.code_name = self.name
         if not self.name:
             self.name = self.code_name
+
+    def connect(self, other):
+        if self.port_type == "interface":
+            self.parent.parent.chain.connect(self, other)
+        else:
+            self.parent.chain.connect(self, other)
 
     def add_generic(self, gen) -> bool:
         """Associate a Generic with this Port.
@@ -197,6 +204,8 @@ class Port():
                         data_width=self.data_width_to_string(self.data_width),
                         port_type=self.port_type,
                         code=self.code_name))
+    def __repr__(self) -> str:
+        return self.code_name 
 
     def set_window_reference(self, tags: iter):
         """Set the reference data required for ports of the 2D Window Pipeline
@@ -308,19 +317,26 @@ class Port():
 
     def remove_rule(self, condition: str, action: str) -> bool:
         """Remove a specific port rule, defined by both condition and action."""
-        try:
-            self.ruleset.remove(self.Rule(condition, action))
-        except ValueError:
+        rule = [rule for rule in self.ruleset 
+                if (action in rule.action) and rule.condition == condition]
+        if len(rule) > 1:
+            LOG.warning(("Found multiple rules to remove for port '%s'! "
+                         "Removing only rule ('%s' -> '%s')."), self.code_name,
+                        rule.condition, rule.action)
+        if not rule:
             LOG.warning(("Could not remove rule ('%s' -> '%s') for port '%s'."
                          " Rule does not exist."), condition, action,
                         self.code_name)
             return False
+        else:
+            rule = rule[0]
+            self.ruleset.remove(rule)
         return True
 
-    def remove_condition(self, rule_condition: str) -> Sequence[str]:
+    def remove_condition(self, rule_condition: str) -> list:
         """Remove 'rule_condition' from the ruleset
         along with all rule actions that were defined.
-        Returns all removed rules"""
+        Returns all removed rules."""
         new_ruleset = deque()
         out = []
         for rule in self.ruleset:
@@ -328,6 +344,18 @@ class Port():
                 new_ruleset.append(rule)
             else:
                 out.append(rule)
+        return out
+
+    def remove_rule_action(self, rule_action: str) -> list:
+        """Remove all rules with the action 'rule_action'.
+        Returns all removed rules."""
+        out = []
+        for rule in self.ruleset:
+            if rule_action in rule.action:
+                out.append(copy.copy(rule))
+        for rule in out:
+            self.remove_rule(rule.condition, rule.action)
+        return out
 
     def update_ruleset(self, rules: list):
         """Merge a list of rules into the current ruleset.
@@ -423,13 +451,19 @@ class Port():
             pass
         return False
 
-    def make_external(self) -> bool:
+    def make_external(self, value: bool=True) -> bool:
         """Set the required port rule and port type to have Automatics
         make this port external."""
         if self.port_type == "interface":
             self.direction = self.get_direction_normalized()
-        self.port_type = "external"
-        return self.set_ruleset([self.Rule("external_port", "make_external")])
+        if value:
+            self.port_type = "external"
+            return self.set_ruleset([self.Rule("external_port", "make_external")])
+        else:
+            if self.port_type == "external":
+                self.port_type = "single"
+            self.remove_condition("external_port")            
+            return True
 
     def duplicate(self):
         """Get a copy of this port.
@@ -470,16 +504,17 @@ class StandardPort(Port):
             self.update_ruleset(extra_rules)
 
 
-class GlueSignal(Port):
+class GenericSignal(Port):
     """Variation of the regular Port class.
     Has additional attributes and may have multiple incoming data sources.
-    The 'direction' and 'connected' attribute are ignored for this class."""
+    The 'direction' and 'connected' attribute are ignored for this class.
+    Models a generic VHDL signal in an architecture."""
 
     def __init__(
             self,
             name: str = "",
             code_name: str = "",
-            port_type: str = "single",
+            port_type: str = "signal",
             data_type: str = "std_logic",
             optional: bool = False,
             data_width=Port.DataWidth(1, None, None)):
@@ -495,3 +530,21 @@ class GlueSignal(Port):
     def set_connected(self, value: bool = True):
         """Set the 'connected' attribute"""
         self.connected = False
+
+
+class GlueSignal(GenericSignal):
+    """Variation of the regular Port class.
+    Has additional attributes and may have multiple incoming data sources.
+    The 'direction' and 'connected' attribute are ignored for this class.
+    Used only to connect a port to a VHDL component in a port map."""
+
+    def __init__(
+            self,
+            name: str = "",
+            code_name: str = "",
+            port_type: str = "glue_signal",
+            data_type: str = "std_logic",
+            optional: bool = False,
+            data_width=Port.DataWidth(1, None, None)):
+        super().__init__(name, code_name, port_type,
+                         data_type, optional, data_width)

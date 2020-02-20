@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
 --  This file is part of the ASTERICS Framework. 
---  Copyright (C) Hochschule Augsburg, University of Applied Sciences
+--  (C) 2019 Hochschule Augsburg, University of Applied Sciences
 ----------------------------------------------------------------------------------
 -- Entity:         DUAL_BRAM_READ_WRITE
 --

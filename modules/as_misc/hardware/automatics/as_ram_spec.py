@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 """
 as_ram_spec.py
@@ -75,7 +75,7 @@ class SimpleRAMInterface(Interface):
 
 
 def get_module_instance(module_dir: str) -> AsModule:
-    module = AsModule("ram")
+    module = AsModule()
     
     toplevel_file = "hardware/hdl/vhdl/ram/ram.vhd"
     

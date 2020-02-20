@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
 --  This file is part of the ASTERICS Framework. 
---  Copyright (C) Hochschule Augsburg, University of Applied Sciences
+--  (C) 2019 Hochschule Augsburg, University of Applied Sciences
 ----------------------------------------------------------------------------------
 -- Entity:         as_iic_tb
 --
@@ -39,6 +39,9 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
+library asterics;
+use asterics.helpers.all;
+
 entity as_iic_tb is
 end entity;
 
@@ -55,7 +58,7 @@ architecture testbench_quick of as_iic_tb is
 
 constant SCL_DIV_WIDTH : integer := 12; -- serial bus clock accuracy
 constant SYS_CLK : integer := 500;      -- in MHz; maximum of 500 MHz 
-constant SCL_CLK : integer := 25000;    -- in kHz. This value is used to calculate the value of scl_div
+constant SCL_CLK : integer := 5000;    -- in kHz. This value is used to calculate the value of scl_div
 
 constant TC_MASTER_ACK : unsigned := "101";
 constant TC_CLOCK_STRETCHING : unsigned := "100";
@@ -68,18 +71,26 @@ component as_iic is
     Clk   : in std_logic;
     Reset : in std_logic;
   
-    SDA : inout std_logic;
-    SCL : inout std_logic;
+    sda_in : in std_logic;
+    sda_out : out std_logic;
+    sda_out_enable : out std_logic;
+
+    scl_in : in std_logic;
+    scl_out : out std_logic;
+    scl_out_enable : out std_logic;
   
-    control : in std_logic_vector(15 downto 0);
-    control_reset : out std_logic_vector(15 downto 0);
-    status : out std_logic_vector(15 downto 0);
-    scl_div_data_tx : in std_logic_vector(31 downto 0));
+    slv_ctrl_reg : in slv_reg_data(0 to 1);
+    slv_status_reg : out slv_reg_data(0 to 1);
+    slv_reg_modify : out std_logic_vector(0 to 1);
+    slv_reg_config : out slv_reg_config_table(0 to 1));
 end component;
 
 type TB_DATASET is array(7 downto 0) of std_logic_vector(7 downto 0);
 
 signal clk, reset, sda, scl : std_logic;
+signal sda_in_iic, sda_out_iic, sda_out_enable : std_logic;
+
+signal scl_in_iic, scl_out_iic, scl_out_enable : std_logic;
 
 signal data_rx, data_tx, tb_data : std_logic_vector(7 downto 0);
 signal control : std_logic_vector(5 downto 0);
@@ -98,6 +109,14 @@ signal iic_ready, io_ready, bus_active, ackrec, stalled, waiting_sw : std_logic;
 signal scycle_counter : integer;
 
 begin
+
+  -- model tristate:
+  sda <= sda_out_iic when sda_out_enable = '1';
+  sda_in_iic <= sda_out;
+  sda_in_iic <= sda_out_iic when sda_out_enable = '1';
+
+  scl_in_iic <= scl;
+  scl <= scl_out_iic when scl_out_enable = '1' else 'H';
   -- Data Register logic
   
   data_rx <= (others => 'L');
@@ -115,16 +134,19 @@ begin
     port map(
       Clk => clk,
       Reset => reset,
-      SDA => sda,
-      SCL => scl,
-      control(15 downto 6) => (others => '0'),
-      control(5 downto 0) => control,
-      status(15 downto 8) => data_rx,
-      status(7 downto 6) => status_zero,
-      status(5 downto 0) => status,
-      scl_div_data_tx(31 downto 24) => data_tx,
-      scl_div_data_tx(23 downto SCL_DIV_WIDTH) => scl_div_zero,
-      scl_div_data_tx(SCL_DIV_WIDTH - 1 downto 0) => div);
+      sda_in => sda_in_iic,
+      sda_out => sda_out_iic,
+      sda_out_enable => sda_out_enable,
+      scl_in => scl_in_iic,
+      scl_out => scl_out_iic,
+      scl_out_enable => scl_out_enable,
+      slv_ctrl_reg(0)(5 downto 0) => control,
+      slv_ctrl_reg(0)(31 downto 6) => (others => '0'),
+      slv_ctrl_reg(1) => (others => '0'),
+      slv_status_reg(0)(21 downto 16) => status,
+      slv_status_reg(0)(31 downto 24) => data_rx,
+      slv_status_reg(1)(SCL_DIV_WIDTH - 1 downto 0) => div,
+      slv_status_reg(1)(31 downto 24) => data_tx);
   
   iic_ready <= status(0);
   io_ready <= status(1);
@@ -177,7 +199,7 @@ begin
     scl_div := ((SYS_CLK * 1000) / (4 * (SCL_CLK))) - 2;
     div <= std_logic_vector(to_unsigned(scl_div, div'length));
     sda_out <= 'H';
-    scl <= 'H';
+    --scl <= 'H';
     thalf := scl_div * 2;
     scycle_counter <= 0;
     report "Done. SCL_DIV set to " & integer'image(scl_div) & ".";
@@ -186,6 +208,7 @@ begin
     report "Using a SCL of " & integer'image(SCL_CLK) & " kHz.";
     
     for COUNT in 0 to 31 loop
+      wait for scl_div * 1 ns;
       
       -- check if the hardware is ready:
       if iic_ready = '0' then

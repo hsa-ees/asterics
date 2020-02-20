@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------
 --  This file is part of the ASTERICS Framework. 
---  Copyright (C) Hochschule Augsburg, University of Applied Sciences
+--  (C) 2019 Hochschule Augsburg, University of Applied Sciences
 ----------------------------------------------------------------------------------
 --
 -- Company:        University of Applied Sciences, Augsburg, Germany
@@ -24,11 +24,7 @@
 --  along with this program; if not, see <http://www.gnu.org/licenses/>
 --  or write to the Free Software Foundation, Inc.,
 --  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-----------------------------------------------------------------------------------
---! @file  asterics-demo.c
---! @brief Demo application for the ASTERICS Framework.
 --------------------------------------------------------------------------------*/
-
 
 /*
  * This application configures UART 16550 to baud rate 9600.
@@ -108,7 +104,8 @@ int main() {
 
   //   1) Sensor_OV7670...
   printf ("   - as_sensor_ov7670\n");
-  as_sensor_ov7670_init (AS_MODULE_BASEADDR_AS_SENSOR_OV7670_0);
+  as_sensor_ov7670_init (AS_MODULE_BASEADDR_AS_SENSOR_OV7670_0, OV7670_XILINX_PL_IIC,
+                         XPAR_AS_SENSOR_OV7670_0_IIC_0_BASEADDR);
 
   //   2) MemWriter #0 ...
   printf ("   - as_reader_writer #0 (writer0)\n");

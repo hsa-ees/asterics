@@ -1,5 +1,14 @@
+# asterics gitignore
 .vscode
+
+# Xilinx Toolchain
 *.log
 *.jou
 .Xil
+
+# OS generated files
+.DS_Store
+
+# sphinx build folder
+_build
 

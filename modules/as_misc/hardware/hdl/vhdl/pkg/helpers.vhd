@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
 --  This file is part of the ASTERICS Framework.
---  Copyright (C) Hochschule Augsburg, University of Applied Sciences
+--  (C) 2019 Hochschule Augsburg, University of Applied Sciences
 ----------------------------------------------------------------------------------
 --
 -- Package:       HELPERS
@@ -46,12 +46,18 @@ package helpers is
 
 function log2_ceil ( n : in positive) return integer;
 function log2_ceil_zero ( n : in positive) return integer;
+function log2_floor ( n : in positive) return integer;
 function maximum(a, b : in natural) return natural;
 function minimum(a, b : in natural) return natural;
 function f_1d_to_2d_index (index : in natural; width : in natural) return natural;
 
 type slv_reg_data is array(natural range<>) of std_logic_vector(31 downto 0); 
 type slv_reg_config_table is array(natural range<>) of std_logic_vector(1 downto 0);
+
+constant AS_REG_NONE    : std_logic_vector := "00";
+constant AS_REG_STATUS  : std_logic_vector := "01";
+constant AS_REG_CONTROL : std_logic_vector := "10";
+constant AS_REG_BOTH    : std_logic_vector := "11";
 
 end helpers;
 
@@ -79,6 +85,15 @@ begin
   end loop;
   return i;
 end log2_ceil_zero;
+
+function log2_floor ( n : in positive) return integer is
+  variable i : integer := 1;
+begin
+  while (2**i <= n) loop
+    i := i + 1;
+  end loop;
+  return i - 1;
+end log2_floor;
 
 function maximum(a, b : in natural) return natural is
 begin

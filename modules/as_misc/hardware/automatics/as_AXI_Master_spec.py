@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 """
 as_AXI_Master_spec.py
@@ -117,14 +117,16 @@ class AXIMasterExternal(Interface):
         self.add_port(Port("m_axi_bvalid"))
         self.add_port(Port("m_axi_bresp", data_type="std_logic_vector",
                            data_width=Port.DataWidth(a=1, sep="downto", b=0)))
-        self.add_port(Port("md_error", direction="out"))
+        md_err = Port("md_error", direction="out", optional=True)
+        md_err.overwrite_rule("sink_missing", "set_value(open)")
+        self.add_port(md_err)
 
         self.to_external = True
 
 
 def get_module_instance(module_dir: str) -> AsModule:
     
-    module = AsModule("AXI_Master")
+    module = AsModule()
 
     module.add_local_interface_template(AXIMasterExternal())
     
@@ -138,7 +140,7 @@ def get_module_instance(module_dir: str) -> AsModule:
     module.discover_module("{mdir}/{toplevel}"
                            .format(mdir=module_dir, toplevel=toplevel_file))
 
-    internal_memory = module.get_interface("axi_master_memory_int")
+    internal_memory = module.get_interface("out")
     internal_memory.to_external = False
     internal_memory.instantiate_in_top = None
     

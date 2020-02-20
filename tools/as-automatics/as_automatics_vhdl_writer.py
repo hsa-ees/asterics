@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 """
 as_automatics_vhdl_writer.py
@@ -42,10 +42,11 @@ infrastructure required by any ASTERICS processing chain.
 # -----------------------------------------------------------------------------
 import copy
 from typing import Sequence
+from math import ceil, log2
 
 from as_automatics_generic import Generic
-from as_automatics_port import Port, GlueSignal
-from as_automatics_module import AsModule
+from as_automatics_port import Port, GlueSignal, GenericSignal
+from as_automatics_module import AsModule, AsModuleGroup
 from as_automatics_register import SlaveRegisterInterface
 from as_automatics_exceptions import AsFileError
 
@@ -118,7 +119,7 @@ class VHDLWriter():
             # Generate and write the entity descritpion
             self.__write_entity__(self.chain.top, ofile)
             # Generate and write the toplevel architecture
-            self.__write_architecture_as_top__(self.chain.top, ofile)
+            self.__write_module_group_architecture__(self.chain.top, ofile)
             # Done writing to file
         # Reset to init state
         self.clear_lists()
@@ -161,12 +162,12 @@ class VHDLWriter():
             # Generate and write the entity descritpion
             self.__write_entity__(self.chain.as_main, ofile)
             # Generate and write the toplevel architecture
-            self.__write_architecture_as_main__(self.chain.as_main,
-                                                self.chain.address_space,
-                                                ofile)
+            self.__write_module_group_architecture__(self.chain.as_main, ofile)
             # Done writing to file
         # Reset to init state
         self.clear_lists()
+    
+    
 
     def __write_entity__(self, module: AsModule, file):
         """Generate and write the entity description of a given module
@@ -188,97 +189,62 @@ class VHDLWriter():
         # "End" the entity description
         file.write("end entity {};\n".format(module.entity_name))
 
-    def __write_architecture_as_top__(self, top: AsModule, file):
-        """Generate and write the architecture portion
-        of the ASTERICS toplevel VHDL file"""
-        # Add the static part of the toplevel file
-        self.arch_body.extend(as_static.AS_TOP_ARCH_BODY_STATIC)
-        # Instantiate all modules included in toplevel
-        for mod in top.modules:
-            # Generate the module instantiation VHDL code
-            ret = self.__instantiate_module__(mod)
-            if not ret:
-                raise Exception("Problem instantiating module {}!"
-                                .format(mod.name))
-            # Add it to the architecture body
-            self.arch_body.extend(ret)
-        # "Start" the architecture portion of the file
-        file.write("\narchitecture RTL of {} is\n"
-                   .format(as_static.AS_TOP_ENTITY))
-        # Write the list of glue signals
-        self.__write_list_to_file__(self.signal_list, file,
-                                    "  -- Glue signals:\n")
-        # Begin the functional part of the architecture
-        file.write("\nbegin\n")
-        # Write the architecture body to the file
-        self.__write_list_to_file__(self.arch_body, file, "\n")
-        # "End" the architecture description
-        file.write("end architecture RTL;\n")
 
-    def __write_architecture_as_main__(self, as_main: AsModule,
-                                       address_space: dict, file):
-        """Generate and write the architecture portion
-        of the intermediate as_main VHDL file"""
-        # Get the register manager module template for reference
-        reg_mgr = self.chain.library.get_module_template("as_regmgr")
-        # Generate some required signals and constants for register management:
-        self.signal_list.extend(
-            ["\n  -- Register interface constants and signals:\n",
-             "  constant c_slave_reg_addr_width : integer := {};\n"
-             .format(self.chain.mod_addr_width + self.chain.reg_addr_width),
-             "  constant c_module_addr_width : integer := {};\n"
-             .format(self.chain.mod_addr_width),
-             "  constant c_reg_addr_width : integer := {};\n"
-             .format(self.chain.reg_addr_width),
-             "  constant c_reg_if_count : integer := {};\n"
-             .format(sum([len(mod.register_ifs)
-                          for mod in self.chain.modules])),
-             ("  signal read_module_addr : integer;\n"),
-             ("  signal sw_address : std_logic_vector"
-              "(c_slave_reg_addr_width - 1 downto 0);\n"),
-             ("  signal mod_read_data_arr : slv_reg_data"
-              "(0 to c_reg_if_count - 1);\n")])
-        # And add some static functional VHDL code for register management
-        self.arch_body = [as_static.AS_MAIN_ARCH_BODY_STATIC, "\n"]
+    def __write_module_group_architecture__(self, group_module: AsModuleGroup, file):
 
-        # Generate the signal bundle logic:
-        for btype in self.chain.bundles:
-            # For each bundling type, call the bundle method
-            # and add the results to the architecture body
-            ret = self.__bundle_signals__(self.chain.bundles[btype], btype)
-            if ret:
-                self.arch_body.extend(ret)
-                self.arch_body.append("\n")
+        self.signal_list.extend(group_module.static_code["signals"])
+        self.arch_body.extend(group_module.static_code["body"])
+        code_dict = {"signals": [],
+                     "body": []}
+        if group_module.dynamic_code_generator:
+            group_module.dynamic_code_generator(self.chain, code_dict)
+            self.signal_list.extend(code_dict["signals"])
+            self.arch_body.extend(code_dict["body"])
 
-        regif_num = 0
-        # Generate the register manager instantiations:
-        for addr in address_space:  # For each address space
-            # Grab the register manager reference
-            regif = address_space[addr]
-            self.signal_list.extend(
-                self.__get_register_glue_signals__(regif))
-            self.signal_list.append(
-                '  constant c_{}_base_addr{} : integer := 16#{:8X}#;\n'
-                .format(regif.parent.name, regif.name_suffix,
-                        regif.base_address))
-            self.signal_list.append(
-                "  constant c_{}_regif_num{} : integer := {};\n"
-                .format(regif.parent.name, regif.name_suffix, regif_num))
-            # Generate the instantiation code for the register manager
-            ret = self.__instantiate_reg_mgr__(regif, reg_mgr)
-            if not ret:
-                # On error (empty list)
-                raise Exception(("Problem instantiating register manager for "
-                                 "module {}").format(regif.parent.name))
-            self.arch_body.extend(ret)  # Add to architecture body
-            regif_num += 1  # Count the register interfaces
+        self.arch_body.extend(["  \n", "  -- Port assignments:\n"])
+        for port in group_module.ports:
+            if (port.port_type == "external"
+                    and port.glue_signal is not None):
+                try:
+                    target = port.glue_signal.code_name
+                except AttributeError:
+                    target = port.glue_signal
+                if str(target) == port.code_name:
+                    continue
+                self.arch_body.append(as_static.ASSIGNMENT_TEMPL
+                                      .format(port.code_name, target))
 
-        self.signal_list.append("\n")
+        # Add signal assignments to the architecture body
+        self.arch_body.extend(["  \n", "  -- Signal assignments:\n"])        
+        for signal in group_module.signals:
+            if signal.port_type == "signal":
+                self.signal_list.append("  signal {} : {};\n".format(signal.code_name, as_help.get_printable_datatype(signal)))
+                if signal.glue_signal:
+                    try:
+                        target_str = signal.glue_signal.code_name
+                    except AttributeError:
+                        target_str = str(signal.glue_signal)
+                    self.arch_body.append(as_static.ASSIGNMENT_TEMPL
+                                          .format(signal.code_name, target_str))
+                    continue
+                for target in signal.outgoing:
+                    try:
+                        target_str = target.code_name
+                    except AttributeError:
+                        target_str = str(target)
+                    self.arch_body.append(as_static.ASSIGNMENT_TEMPL
+                                          .format(target_str, signal.code_name))
+                for source in signal.incoming:
+                    try:
+                        source_str = source.code_name
+                    except AttributeError:
+                        source_str = str(source)
+                    self.arch_body.append(as_static.ASSIGNMENT_TEMPL
+                                          .format(signal.code_name, source_str))
+        
+        self.arch_body.extend(["  \n", "  -- Components:\n"])
 
-        # Generate the module instantiation code for each module in as_main
-        for mod in as_main.modules:
-            if mod is self.chain.as_main:
-                continue  # Skip as_main itself
+        for mod in group_module.modules:
             # Generate VHDL instantiation
             ret = self.__instantiate_module__(mod)
             if not ret:
@@ -287,12 +253,14 @@ class VHDLWriter():
             self.arch_body.extend(ret)  # And add to the architecture body
 
         # Write to the output file
-        file.write("\narchitecture RTL of {} is\n".format(as_main.entity_name))
+        file.write("\narchitecture RTL of {} is\n"
+                   .format(group_module.entity_name))
         self.__write_list_to_file__(self.signal_list, file,
                                     "  -- Glue signals:\n")
         file.write("\nbegin\n")
         self.__write_list_to_file__(self.arch_body, file, "\n")
         file.write("end architecture RTL;\n")
+        
 
     @staticmethod
     def __convert_generic_entity_list__(generics: Sequence[Generic]):
@@ -327,9 +295,8 @@ class VHDLWriter():
             if not port.in_entity:
                 continue
             # Skip ports of excluded interfaces
-            if (port.port_type == "interface" and
-                    ((port.parent.to_external or port.parent.instantiate_in_top) and
-                     port.parent.in_entity)):
+            if (port.port_type == "interface" and ((port.parent.to_external or
+                port.parent.instantiate_in_top) and port.parent.in_entity)):
                 pass
             # inlcude only external type single ports
             elif port.port_type == "external":
@@ -351,81 +318,6 @@ class VHDLWriter():
                            .format(port.get_print_name(), port_dir, port_data))
         return out
 
-    @staticmethod
-    def __get_register_glue_signals__(
-            regif: SlaveRegisterInterface) -> Sequence[str]:
-        """Generate a list of glue signal declarations
-        for the passed register interface."""
-        out = ["\n  -- Register interface signals for {}:\n"
-               .format(regif.parent.name)]
-        for port in regif.ports:
-            out.append("  signal {}_{} : {};\n"
-                       .format(regif.parent.name, port.get_print_name(),
-                               as_help.get_printable_datatype(port)))
-        return out
-
-    def __instantiate_reg_mgr__(self, regif: SlaveRegisterInterface,
-                                regmgr: AsModule) -> Sequence[str]:
-        """Generate and write the VHDL instantiation for
-        a register manager object and associated register interface and
-        return the generated architecture body section."""
-        # Add lead in comment
-        out = ["\n  -- Register manager for {}:\n".format(regif.parent.name)]
-        # Start instantiation
-        out.append("  {}_reg_mgr_{} : entity {}\n"
-                   .format(regif.parent.name,
-                           regif.parent.register_ifs.index(regif),
-                           regmgr.entity_name))
-        # Generic section:
-        out.append("  generic map(\n")
-        for tgen in regmgr.generics:
-            # For each generic: match with static code
-            if tgen.name == "MODULE_ADDR_WIDTH":
-                ret = str(self.chain.mod_addr_width)
-            elif tgen.name == "REG_ADDR_WIDTH":
-                ret = "c_slave_reg_addr_width"
-            elif tgen.name == "REG_DATA_WIDTH":
-                ret = "C_S_AXI_DATA_WIDTH"
-            elif tgen.name == "MODULE_BASEADDR":
-                ret = "c_{}_regif_num".format(regif.parent.name)
-            elif tgen.name == "REG_COUNT":
-                ret = str(regif.reg_count)
-            else:
-                LOG.error(
-                    "Unknown generic found in as_regmgr: '%s'",
-                    tgen.name)
-                return []
-            # Get format string and add to output list
-            if regmgr.generics.index(tgen) < len(regmgr.generics) - 1:
-                out.append("    {} => {},\n".format(tgen.name, ret))
-            else:
-                out.append("    {} => {})\n".format(tgen.name, ret))
-
-        # Port mapping section
-        out.append("  port map(\n")
-        full_port_list = regmgr.get_full_port_list()
-        for port in full_port_list:
-            try:  # Try to match each port
-                target = as_static.REGMGR_MATCH_LIST_PORTS[port.name]
-            except KeyError:  # Report errors
-                LOG.error("Could not match port '%s' of '%s' in '%s'!",
-                          port.name, str(regif), regif.parent.name)
-                return []
-            if "{}" in target:  # If there's a placeholder in the result
-                if target.strip("()").endswith("{}"):
-                    # Insert the parent module name
-                    # and register interface suffix
-                    target = target.format(
-                        regif.parent.name, regif.name_suffix)
-                target = target.format(regif.parent.name)
-            # Get format string, insert mapping and add to return list
-            if (full_port_list.index(port) <
-                    len(full_port_list) - 1):
-                out.append("    {} => {},\n".format(port.name, target))
-            else:
-                out.append("    {} => {});\n".format(port.name, target))
-        return out
-
     def __instantiate_module__(self, module: AsModule) -> Sequence[str]:
         """Generate VHDL code as a list of strings to instantiate 'module'.
         Handles generic assignment and port mapping."""
@@ -435,8 +327,9 @@ class VHDLWriter():
             "  {} : entity {}\n".format(
                 "as_main_impl" if module.name == "as_main" else module.name,
                 module.entity_name)]
+        gen_str = []
         if module.generics:
-            out.append("  generic map(\n")
+            gen_str.append("  generic map(\n")
             for tgen in module.generics:
                 # If the generic was set by the user in the generator,
                 # use that value
@@ -444,32 +337,28 @@ class VHDLWriter():
                     ret = tgen.value.code_name
                 else:
                     ret = self.__get_printable_generic_value__(tgen)
-
-                if module.generics.index(tgen) < len(module.generics) - 1:
-                    out.append("    {} => {},\n".format(tgen.code_name, ret))
-                else:
-                    out.append("    {} => {})\n".format(tgen.code_name, ret))
+                    # Skip generics that use the default value
+                    if ret == tgen.default_value:
+                        continue
+                gen_str.append("    {} => {},\n".format(tgen.code_name, ret))
+        if len(gen_str) > 1:
+            # Replace the comma in the last generic mapping with a brace ')'
+            gen_str[-1] = ")".join(gen_str[-1].rsplit(",", maxsplit=1))
+            out.extend(gen_str)
         out.append("  port map(\n")
 
-        full_port_list = module.get_full_port_list()
+        full_port_list = module.get_full_port_list(include_signals=False)
         # For every port of this module:
         for port in full_port_list:
             # Target of the port map
             target = None
-
+            
             # Determine the format for this ports port map line
             if (full_port_list.index(port) <
                     len(full_port_list) - 1):
                 templ_str = "    {} => {},\n"
             else:
                 templ_str = "    {} => {});\n"
-            # If this port is part of a register interface
-            if isinstance(port.parent, SlaveRegisterInterface):
-                # Generate the target glue signal name
-                target = "{}_{}{}".format(port.parent.parent.name, port.name,
-                                          port.parent.name_suffix)
-                out.append(templ_str.format(port.code_name, target))
-                continue  # Done for this port
 
             # Port mapping target is the port's glue signal
             if port.glue_signal and isinstance(port.glue_signal, GlueSignal):
@@ -508,14 +397,14 @@ class VHDLWriter():
                         target = "open"
                     # And warn the user of an unconnected port
                     if port.optional:
-                        LOG.info(
+                        LOG.debug(
                             ("Optional port '%s' of module '%s' was "
                              "left unconnected, automatically set to [%s]!"),
                             port.code_name,
                             AsModule.get_parent_module(port).name,
                             target)
                     else:
-                        LOG.warning(
+                        LOG.info(
                             ("Port '%s' of module '%s' was left "
                              "unconnected, automatically set to [%s]!"),
                             port.code_name,
@@ -525,42 +414,14 @@ class VHDLWriter():
             out.append(templ_str.format(port.code_name, target))
         return out
 
-    @staticmethod
-    def __bundle_signals__(bundle_list: Sequence[Port],
-                           bundle_type: str) -> Sequence[str]:
-        """Generate VHDL code to bundle the signals in the bundle list.
-        The type of bundling (and / or) is determined by 'bundle_type'.
-        Returns a list of VHDL statements."""
-        if not bundle_list:
-            return None  # No action on empty list
-        out = []
-        crt_name = ""
-        crt_stmt = ""
-        local_list = copy.copy(bundle_list)
 
-        # While there are unprocessed ports in the bundle list
-        while local_list:
-            # Filter by the name of the first port item
-            crt_name = local_list[0].code_name
-            # Initialize the statement
-            crt_stmt = "{} <= ".format(crt_name)
-            # Add all ports with the same name to the statement
-            for nport in (port for port in bundle_list
-                          if port.code_name == crt_name):
-                # Find the connection of the current port:
-                target = nport.glue_signal
-                # Use the connections sink and the bundle type to append
-                crt_stmt += "{} {} ".format(target.code_name, bundle_type)
-                local_list.remove(nport)  # And remove them from the local list
-            # Append the statement to the return list
-            # The '[:-4]' removes the last superfluous bundle operand.
-            out.append("  {};\n".format(crt_stmt[:-4].strip()))
-        return out
-
-    def generate_glue_signal_strings(self, signals: Sequence[GlueSignal]):
+    def generate_glue_signal_strings(self, signals: Sequence[GenericSignal]):
         """Convert a list of glue signal objects to a string representation
         in the format for VHDL signals in an architecture section."""
         for glue in signals:
+            # We only process GlueSignals here...
+            if not isinstance(glue, GlueSignal):
+                continue
             # Insert values to format string
             glue_signal_str = "  signal {} : {};\n".format(
                 glue.code_name, as_help.get_printable_datatype(glue))
@@ -570,10 +431,7 @@ class VHDLWriter():
 
     @classmethod
     def __get_printable_generic_value__(cls, gen: Generic):
-        val = gen.get_value()
-        if isinstance(val, Generic):
-            return cls.__get_printable_generic_value__(val)
-        return val
+        return gen.get_value()
 
     @staticmethod
     def __write_list_to_file__(wlist: Sequence[str], file,

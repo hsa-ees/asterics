@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------------
 --  This file is part of the ASTERICS Framework.
---  Copyright (C) Hochschule Augsburg, University of Applied Sciences
+--  (C) 2019 Hochschule Augsburg, University of Applied Sciences
 ----------------------------------------------------------------------------------
 -- Module:         as_sensor_ov7670
 --
@@ -61,17 +61,16 @@
 #ifndef AS_SENSOR_OV7670_H
 #define AS_SENSOR_OV7670_H
 
-
-#include "as_support.h"
-
+#include "asterics.h"
 
 
-/* Define when using as_iic module */
-//#define USING_AS_IIC 1
-
-#ifdef USING_AS_IIC
- #include "asterics.h"
-#endif
+// This driver supports configuring the OV7670 Camera via multiple different
+// IIC master modules. Multiple cameras may be connected and configured using
+// this driver. Set the any of the following defines to select IIC types for
+// the pool of available hardware modules before compiling the ASTERICS library:
+// #define AS_USING_AS_IIC
+// #define AS_USING_XILINX_PL_IIC
+// #define AS_USING_XILINX_PS_IIC // TO BE IMPLEMENTED
 
 /* uncomment for debug output */
 //#define DEBUG_PRINT
@@ -101,6 +100,8 @@
 #define AS_SENSOR_OV7670_ENABLEONCE_MASK        (1<<AS_SENSOR_OV7670_ENABLEONCE_BIT_OFFSET)
 #define AS_SENSOR_OV7670_EXT_RESET_MASK         (1<<AS_SENSOR_OV7670_EXT_RESET_BIT_OFFSET)
 
+// Constant definitions for different IIC types:
+enum ov7670_iic_types{OV7670_AS_IIC, OV7670_XILINX_PL_IIC, OV7670_XILINX_PS_IIC};
 
 /** \addtogroup as_sensor_ov7670
  *  @{
@@ -115,7 +116,8 @@
  * @param base_addr             Address of the corresponding hardware
  *                              module (see also as_hardware.h)
  */
-uint8_t as_sensor_ov7670_init(uint32_t* base_addr);
+uint8_t as_sensor_ov7670_init(uint32_t* base_addr, uint8_t iic_type,
+                              uint32_t* iic_base_addr);
 
 
 /**
@@ -178,7 +180,7 @@ AS_BOOL as_sensor_ov7670_frame_is_transmitted(uint32_t* base_addr);
  *                              appropriate gain value must be set using
  *                              the corresponding function.
  */
-void as_sensor_ov7670_gain_auto(AS_BOOL enable);
+void as_sensor_ov7670_gain_auto(uint32_t* base_addr, AS_BOOL enable);
 
 
 /**
@@ -187,7 +189,7 @@ void as_sensor_ov7670_gain_auto(AS_BOOL enable);
  * @return                      The return value is the gain value
  *                              of the module.
  */
-void as_sensor_ov7670_gain_set(uint8_t gain);
+void as_sensor_ov7670_gain_set(uint32_t* base_addr, uint8_t gain);
 
 
 /**
@@ -196,7 +198,7 @@ void as_sensor_ov7670_gain_set(uint8_t gain);
  * @return                      The return value is the gain value set
  *                              in the module.
  */
-uint8_t as_sensor_ov7670_gain_get();
+uint8_t as_sensor_ov7670_gain_get(uint32_t* base_addr);
 
 
 /**
@@ -209,7 +211,7 @@ uint8_t as_sensor_ov7670_gain_get();
  *                              appropriate exposure value must be
  *                              set using the corresponding function.
  */
-void as_sensor_ov7670_exposure_auto(AS_BOOL enable);
+void as_sensor_ov7670_exposure_auto(uint32_t* base_addr, AS_BOOL enable);
 
 
 /**
@@ -218,7 +220,7 @@ void as_sensor_ov7670_exposure_auto(AS_BOOL enable);
  * @return                      The return value is the exposure value
  *                              of the module.
  */
-void as_sensor_ov7670_exposure_set(uint32_t exposure);
+void as_sensor_ov7670_exposure_set(uint32_t* base_addr, uint32_t exposure);
 
 
 /**
@@ -227,7 +229,7 @@ void as_sensor_ov7670_exposure_set(uint32_t exposure);
  * @return                      The return value is the exposure value
  *                              of the module.
  */
-uint32_t as_sensor_ov7670_exposure_get();
+uint32_t as_sensor_ov7670_exposure_get(uint32_t* base_addr);
 
 
 /** @}*/

@@ -1,9 +1,10 @@
 #! /bin/bash
 ############################################################################
-#
 # This file is part of the ASTERICS Framework.
+# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+############################################################################
 #
-# Author: Michael Schäferling <michael.schaeferling@hs-augsburg.de>
+# Author: Michael Schaeferling <michael.schaeferling@hs-augsburg.de>
 # 
 # Modified: 2019-07-05 Philip Manke <philip.manke@hs-augsburg.de> 
 #
@@ -35,24 +36,41 @@
 #
 ############################################################################
 
+# Detect bash or zsh
+if [ -n $BASH ]; then
+  ASTERICS_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+elif [ -n  $ZSH_NAME ]; then
+  ASTERICS_HOME=`dirname ${(%):-%N}`
+fi
+
 # Get ASTERICS_HOME
-ASTERICS_HOME=`dirname $BASH_SOURCE`
 if [[ "${ASTERICS_HOME:0:1}" != "/" ]]; then
   ASTERICS_HOME=$PWD/$ASTERICS_HOME
 fi
 export ASTERICS_HOME
 
-# Add EES tools to PATH
-PATH=$PATH:${ASTERICS_HOME}/tools/ees/:${ASTERICS_HOME}/tools/as-automatics/
+
+# Add ASTERICS Automatics tools to PATH
+PATH=$PATH:${ASTERICS_HOME}/tools/as-automatics/
 
 # Append to PYTHONPATH, so Automatics is found by Python3
 export PYTHONPATH=$PYTHONPATH:${ASTERICS_HOME}/tools/as-automatics/
 
-if [ -z $XILINX_VIVADO ]; then
-  echo "Vivado is not sourced! Assuming it is located in /opt/Xilinx/Vivado/2017.2/ .";
-  echo "If this is not correct, either modify this file (<asterics>/settings.sh)";
-  echo "or source Vivado by setting XILINX_VIVADO.";
-  export EES_VIVADO_SETTINGS=/opt/Xilinx/Vivado/2017.2/settings64.sh
-else
-  export EES_VIVADO_SETTINGS=$XILINX_VIVADO/settings64.sh
+
+# The general UAS EES-Lab environment already includes following setup steps, 
+# thus they are omitted in that case:
+if [ -z $EES_HOME ]; then
+
+  # Add EES tools to PATH
+  PATH=$PATH:${ASTERICS_HOME}/tools/ees/
+
+  if [ -z $XILINX_VIVADO ]; then
+    echo "Vivado is not sourced! Assuming it is located in /opt/Xilinx/Vivado/2017.2/ .";
+    echo "If this is not correct, either modify this file (<asterics>/settings.sh)";
+    echo "or source Vivado by setting XILINX_VIVADO.";
+    export EES_VIVADO_SETTINGS=/opt/Xilinx/Vivado/2017.2/settings64.sh
+  else
+    export EES_VIVADO_SETTINGS=$XILINX_VIVADO/settings64.sh
+  fi
+
 fi

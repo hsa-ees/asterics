@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 """
 as_reorder_spec.py
@@ -46,7 +46,7 @@ from as_automatics_module import AsModule
 
 def get_module_instance(module_dir: str) -> AsModule:
     
-    module = AsModule("as_reorder")
+    module = AsModule()
     toplevel_file = "hdl/vhdl/as_reorder.vhd"
     module.files = []
     module.dependencies = []

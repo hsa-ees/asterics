@@ -1,0 +1,6 @@
+# GIT IGNORE
+## OS Generated Files
+.DS_Store
+
+## LaTeX
+*.aux

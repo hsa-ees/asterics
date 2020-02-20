@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 """
 as_automatics_env_init.py
@@ -43,22 +43,6 @@ explore the module library and other features of Automatics.
 
 import sys
 
-
-def as_append_to_path(path: str, to_append: str):
-    """Take two path fragments and merge them.
-    This function makes sure that each directory is separated by a '/'
-    and always returnes the path with a '/' at the end."""
-    # Merge to one string
-    string = path + "/" + to_append + "/"
-    # Split it and filter out empty strings resulting from subsequent "/"es
-    strsplit = [s for s in string.split("/") if s != ""]
-    # Join the path separating each string by a single "/"
-    out = "/".join(strsplit) + "/"
-    if string[0] == "/":  # Add a leading "/" if the initial string had one
-        return "/" + out
-    return out
-
-
 if __name__ == "__main__":
 
     print("ASTERICS Automatics: Automatic Processing Chain generator tool")
@@ -70,7 +54,7 @@ if __name__ == "__main__":
     print("Importing Automatics from '{}'...".format(source_dir))
     sys.path.append(source_dir)
     import as_automatics_logging as as_log
-    as_log.init_log(loglevel_console="INFO", loglevel_file="INFO")
+    as_log.init_log(loglevel_console="WARNING", loglevel_file="INFO")
 
     # Even though not all imports are used here,
     # they are included for easy access from the interactive environment.
@@ -83,10 +67,14 @@ if __name__ == "__main__":
     from as_automatics_module_lib import AsModuleLibrary
     from as_automatics_generic import Generic
     from as_automatics_templates import AsMain, AsTop
+    from as_automatics_helpers import append_to_path
+    
     print("Success!")
     # Init Automatics and load standard modules...
     print("Getting default modules from '{}'...".format(asterics_dir))
     auto = AsAutomatics(asterics_dir)
+    auto.add_module_repository(
+            append_to_path(asterics_dir, "modules"), "default")
 
     # User prompt:
     print("Done.")
@@ -132,6 +120,14 @@ if __name__ == "__main__":
             print("Got module '{}' from repo '{}'!"
                   .format(name, module.repository_name))
             return module
+
+        module = auto.library.get_module_template(name, repo_name=repo,
+                                                  window_module=True)
+        if module:
+            print("Got window module '{}' from repo '{}'!"
+                  .format(name, module.repository_name))
+            return module
+
         # Else ->
         if repo == "":
             print("No module '{}' found in any repository!".format(name))

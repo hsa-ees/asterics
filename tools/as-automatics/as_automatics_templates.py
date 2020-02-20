@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 """
 as_automatics_templates.py
@@ -40,10 +40,15 @@ Module containing all interface template classes for use in as_automatics.
 # @brief Template definitions for interfaces used in as_automatics.
 # -----------------------------------------------------------------------------
 
+from math import ceil, log2
+import copy
+
 from as_automatics_interface import Interface
 from as_automatics_port import Port, StandardPort, GlueSignal
 from as_automatics_generic import Generic
 from as_automatics_module import AsModule, AsModuleGroup
+
+import as_automatics_vhdl_static as as_vhdl_static
 
 
 def add_templates():
@@ -57,6 +62,8 @@ def add_templates():
     AsModule.add_global_interface_template(AXIMasterMemoryInternal())
     AsModule.add_global_interface_template(CameraInputOV7670())
     AsModule.add_global_interface_template(AXISlaveRegisterInterface())
+    AsModule.add_global_interface_template(SlaveRegisterInterfaceTemplate())
+    
 
 
 # as-stream interface definition
@@ -74,6 +81,8 @@ class AsStream(Interface):
         self.add_port(Port("vsync", optional=True))
         vcomplete = Port("vcomplete", optional=True)
         vcomplete.add_rule("sink_missing", "fallback_port(vsync)", False)
+        vcomplete.add_rule("sink_missing", "fallback_port(data_unit_complete)",
+                           False)
         self.add_port(vcomplete)
         hcomplete = Port("hcomplete", optional=True)
         self.add_port(Port("hsync", optional=True))
@@ -89,6 +98,23 @@ class AsStream(Interface):
                 "yres",
                 data_type="std_logic_vector",
                 optional=True))
+        self.add_port(Port("data_unit_complete", optional=True))
+
+# Slave register interface (module <-> as_regmgr)
+class SlaveRegisterInterfaceTemplate(Interface):
+    """Template definition for the slave register interface used for 
+    communication between ASTERICS Modules and the register management hardware.
+    """
+
+    def __init__(self):
+        super().__init__("slv_reg_interface")
+        self.add_port(Port("slv_ctrl_reg", data_type="slv_reg_data"))
+        self.add_port(Port("slv_status_reg", direction="out", 
+                           data_type="slv_reg_data"))
+        self.add_port(Port("slv_reg_modify", direction="out", 
+                           data_type="std_logic_vector"))
+        self.add_port(Port("slv_reg_config", direction="out", 
+                           data_type="slv_reg_config_table"))
 
 
 # Camera interface definition
@@ -119,10 +145,13 @@ class AXIMasterMemoryInternal(Interface):
         super().__init__("axi_master_memory_int")
 
         # Ports for arbitration mode
-        self.add_port(Port("mem_req", direction="out", optional=True))
+        mem_req = Port("mem_req", direction="out", optional=True)
+        mem_req.in_entity = False
+        self.add_port(mem_req)
         # This port needs to be set to '1' if not connected!
         mem_req_ack = Port("mem_req_ack", optional=True)
         mem_req_ack.overwrite_rule("sink_missing", "set_value('1')")
+        mem_req_ack.in_entity = False
         self.add_port(mem_req_ack)
 
         # Ports towards AXI interface
@@ -159,8 +188,7 @@ class AXIMasterMemoryInternal(Interface):
                                                      "downto", 0)))
         # This interface usually always connects directly to an AXI Master
         # Unless an Arbiter module manages access to the AXI interface
-        self.to_external = True
-        self.instantiate_in_top = "AXI_Master"
+        self.instantiate_module("AXI_Master")
 
 
 class AXISlaveRegisterInterface(Interface):
@@ -239,42 +267,121 @@ class AXISlaveInterface(Interface):
 
 class AsMain(AsModuleGroup):
 
-    def __init__(self, top):
+    def __init__(self, top, chain):
         super().__init__("as_main", top, [])
         self.entity_name = "as_main"
-
+        self.chain = chain
         # Setup default reset signal and port and default AXI Slave Interface
-        self.add_standard_port(StandardPort("reset_n", port_type="external"))
-
-        clk = StandardPort("clk", port_type="single")
-        self.add_standard_port(clk)
+        #self.add_standard_port(StandardPort("reset_n", port_type="external"))
+        self.define_port("reset_n")
+        self.define_signal("reset", fixed_value="not reset_n")
+        self.define_port("clk")
+        #clk = StandardPort("clk", port_type="single")
+        #self.add_standard_port(clk)
+        
         axi_slave_reg_inter = AXISlaveRegisterInterface()
-        axi_slave_reg_inter.instantiate_in_top = "AXI_Slave"
+        axi_slave_reg_inter.instantiate_module("AXI_Slave")
         self.add_interface(axi_slave_reg_inter)
-        reset = GlueSignal("reset")
-        reset.assign_to(self)
-        self.signals = [reset]
+        
+        #reset = GlueSignal("reset")
+        #reset.assign_to(self)
+        #self.signals = [reset]
         self.add_generic(Generic(name="C_S_AXI_ADDR_WIDTH",
                                  default_value=32))
         self.add_generic(Generic(name="C_S_AXI_DATA_WIDTH",
                                  default_value=32))
         self.dependencies = ["as_regmgr"]
+        self.static_code["body"].append(as_vhdl_static.AS_MAIN_ARCH_BODY_STATIC)
+
+        def as_main_dynamic_code(chain, code_dict: dict):
+            # code_dict format: lists "signals" and "body"
+            def bundle_signals(bundle_list: list,
+                               bundle_type: str) -> list:
+                """Generate VHDL code to bundle the signals in the bundle list.
+                The type of bundling (and / or) is determined by 'bundle_type'.
+                Returns a list of VHDL statements."""
+                if not bundle_list:
+                    return None  # No action on empty list
+                out = []
+                crt_name = ""
+                crt_stmt = ""
+                local_list = copy.copy(bundle_list)
+
+                # While there are unprocessed ports in the bundle list
+                while local_list:
+                    # Filter by the name of the first port item
+                    crt_name = local_list[0].code_name
+                    # Initialize the statement
+                    crt_stmt = "{} <= ".format(crt_name)
+                    # Add all ports with the same name to the statement
+                    for nport in (port for port in bundle_list
+                                if port.code_name == crt_name):
+                        # Find the connection of the current port:
+                        target = nport.glue_signal
+                        # Use the connections sink and the bundle type to append
+                        crt_stmt += "{} {} ".format(target.code_name, bundle_type)
+                        local_list.remove(nport)  # And remove them from the local list
+                    # Append the statement to the return list
+                    # The '[:-4]' removes the last superfluous bundle operand.
+                    out.append("  {};\n".format(crt_stmt[:-4].strip()))
+                return out
+
+            # Generate a hexadecimal string storing the ASTERICS base address:
+            # Calculate the width in hexadecimal characters of the base address
+            length = int(2**ceil(log2( \
+                        chain.asterics_base_addr.bit_length())) / 4)
+            base_addr_str = 'X"{addr:0{length}X}"'.format(length=length,
+                    addr=chain.asterics_base_addr)
+            # Generate some required signals and constants for register management:
+            code_dict["signals"].extend(
+                ["\n  -- Register interface constants and signals:\n",
+                "  constant c_asterics_base_addr : unsigned({} downto 0) := {};\n"
+                .format(length * 4 - 1, base_addr_str),
+                "  constant c_slave_reg_addr_width : integer := {};\n"
+                .format(chain.mod_addr_width + chain.reg_addr_width),
+                "  constant c_module_addr_width : integer := {};\n"
+                .format(chain.mod_addr_width),
+                "  constant c_reg_addr_width : integer := {};\n"
+                .format(chain.reg_addr_width),
+                "  constant c_reg_if_count : integer := {};\n"
+                .format(sum([len(mod.register_ifs)
+                            for mod in chain.modules])),
+                ("  signal read_module_addr : integer;\n"),
+                ("  signal sw_address : std_logic_vector"
+                "(c_slave_reg_addr_width - 1 downto 0);\n"),
+                ("  signal mod_read_data_arr : slv_reg_data"
+                "(0 to c_reg_if_count - 1);\n")])
+            code_dict["body"].extend(["  \n", "  -- Bundled signals:\n"])
+            # Generate the signal bundle logic:
+            for btype in chain.bundles:
+                # For each bundling type, call the bundle method
+                # and add the results to the architecture body
+                ret = bundle_signals(chain.bundles[btype], btype)
+                if ret:
+                    code_dict["body"].extend(ret)
+                    code_dict["body"].append("\n")
+
+            # Generate the register manager instantiations:
+            for addr in chain.address_space:  # For each address space
+                # Grab the register manager reference
+                regif = chain.address_space[addr]
+                code_dict["signals"].append(
+                    '  -- Module register base address: 16#{:8X}#\n'
+                    .format(regif.base_address))
+                code_dict["signals"].append(
+                    "  constant c_{}_regif_num{} : integer := {};\n"
+                    .format(regif.parent.name, regif.name_suffix, regif.regif_num))
+        
+        self.dynamic_code_generator = as_main_dynamic_code
 
 
 class AsTop(AsModuleGroup):
 
-    def __init__(self):
+    def __init__(self, chain):
         super().__init__("asterics", None, [])
         self.entity_name = "asterics"
-        clk_p = StandardPort("clk")
-        clk_p.in_entity = False
-        rst_p = StandardPort("reset_n")
-        rst_p.in_entity = False
-        self.add_standard_port(clk_p)
-        self.add_standard_port(rst_p)
-        clk = GlueSignal("clk")
-        rst = GlueSignal("reset_n")
-        clk.assign_to(self)
-        rst.assign_to(self)
-        self.signals = [clk, rst]
+        self.chain = chain
+        self.define_signal("clk", fixed_value="slave_s_axi_aclk")
+        self.define_signal("reset_n", fixed_value="slave_s_axi_aresetn")
         self.dependencies = ["as_main"]
+        self.static_code["body"].append(as_vhdl_static.AS_TOP_ARCH_BODY_STATIC)

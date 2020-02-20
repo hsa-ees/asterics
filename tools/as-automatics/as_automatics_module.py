@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 """
 as_automatics_module.py
@@ -47,10 +47,12 @@ import as_automatics_logging as as_log
 import as_automatics_helpers as as_help
 
 from as_automatics_vhdl_reader import VHDLReader
-from as_automatics_port import Port, StandardPort, GlueSignal
+from as_automatics_port import Port, StandardPort, GlueSignal, GenericSignal
 from as_automatics_generic import Generic
 from as_automatics_interface import Interface
-from as_automatics_register import SlaveRegisterInterface, REGIF_PORTS
+from as_automatics_register import SlaveRegisterInterface
+from as_automatics_constant import Constant
+from as_automatics_exceptions import AsNameError
 
 LOG = as_log.get_log()
 
@@ -98,10 +100,20 @@ class AsModule():
         self.parent = None
         self.modlevel = 0
         self.module_connections = []
+        self.chain = None
 
     def __str__(self) -> str:
-        return "ASTERICS Module '{}' ({})" \
-            .format(self.name, self.entity_name)
+        if self.name:
+            return "ASTERICS Module '{}' ({})" \
+                .format(self.name, self.entity_name)
+        else:
+            return "ASTERICS Module '{}'".format(self.entity_name)
+
+    def __repr__(self) -> str:
+        return self.name
+
+    def connect(self, connect_to, *, top=None):
+        self.chain.connect(source=self, sink=connect_to, top=top)
 
     def register_connection(self, module):
         """Add 'module' to this module's list of module connections."""
@@ -120,8 +132,8 @@ class AsModule():
             LOG.error(("Attempted to add '%s' as an interface template! "
                        "Not an Interface object!"), str(inter_template))
             return False
-        compare = [inter.name for inter in cls.interface_templates_cls]
-        if inter_template.name in compare:
+        compare = [repr(inter) for inter in cls.interface_templates_cls]
+        if repr(inter_template) in compare:
             LOG.debug(("Couldn't add template '%s' to AsModule class, "
                        "already present."), str(inter_template))
             return False
@@ -134,8 +146,8 @@ class AsModule():
             LOG.error(("Attempted to add '%s' as an interface template! "
                        "Not an Interface object!"), str(inter_template))
             return False
-        compare = [inter.name for inter in self.__get_interface_templates__()]
-        if inter_template.name in compare:
+        compare = [repr(inter) for inter in self.__get_interface_templates__()]
+        if repr(inter_template) in compare:
             LOG.debug(("Couldn't add template '%s' to AsModule class, "
                        "already present."), str(inter_template))
             return False
@@ -144,8 +156,12 @@ class AsModule():
 
     def add_interface(self, interface: Interface) -> bool:
         """Add an interface instance to this AsModule."""
-
+        inter_temp = copy.copy(interface)
+        ports = [port.code_name for port in self.get_full_port_list()]
         if isinstance(interface, Interface):
+            for port in inter_temp.ports:
+                if (port.code_name in ports):
+                    interface.remove_port(port.code_name)
             interface.assign_to(self)
             self.interfaces.append(interface)
         else:
@@ -180,21 +196,24 @@ class AsModule():
         """Set the 'connected' parameter"""
         self.connected = value
 
-    def get_full_port_list(self) -> Sequence[Port]:
+    def get_full_port_list(self, include_signals: bool = True) -> Sequence[Port]:
         """Return a list containing a reference to every port in this module"""
         out = []
         out.extend(self.ports)
         out.extend(self.standard_ports)
         for inter in self.interfaces:
             out.extend(inter.ports)
-        for regif in self.register_ifs:
-            out.extend(regif.ports)
+        if include_signals:
+            try:
+                out.extend(self.signals)
+            except AttributeError:
+                pass
         return out
 
     def get_interface_type_count(self, inter_name: str) -> int:
         """Return the number of different interface types
         (two as_stream interfaces count as one)"""
-        return sum([1 for itf in self.interfaces if inter_name == itf.name])
+        return sum([1 for itf in self.interfaces if inter_name == itf.type])
 
     def __get_port_by_code_name__(self, port_name: str) -> Port:
         return next((port for port in self.get_full_port_list()
@@ -203,6 +222,33 @@ class AsModule():
     def __get_port_by_name__(self, port_name: str) -> Port:
         return next((port for port in self.get_full_port_list()
                      if port.name == port_name), None)
+
+    def get(self, name: str, direction: str = "", if_type: str = ""):
+        """Generic interface and port search method.
+        Return an interface or port of this AsModule searching by the object
+        name and, for interfaces, also the direction.
+        Parameters:
+          name:      The interface or port name to search for.
+          direction: The interface's direction. ! Does not apply for ports !
+        NOTE: This method searches the interface list first. Consider using
+              the method 'get_port()' when searching for ports.
+        NOTE: Check the ASTERICS manual for Automatics interface naming rules.
+        """
+        out = None
+        try:
+            out = self.get_interface(name, direction, if_type)
+        except NameError:
+            pass
+        if out is not None:
+            return out
+        try:
+            out = self.__get_port__(name)
+        except NameError:
+            LOG.error("Could not find port or interface '%s' in '%s'!", name,
+                      str(self))
+            raise NameError("No port or interface '{}' found in '{}'!"
+                            .format(name, self.name))
+        return out
 
     def get_port(self, port_name: str, *, suppress_error: bool = False,
                  by_code_name: bool = True) -> Port:
@@ -230,15 +276,33 @@ class AsModule():
             return self.__get_port_by_name__(pname)
         return port
 
-    def make_port_external(self, port_name: str) -> bool:
+    def make_port_external(self, port_name: str, value: bool=True) -> bool:
         """Method for use in user script: Make a port of this module external
         by modifying the port's rules. The port will be connected through to
-        ASTERICS IP-Core toplevel."""
+        ASTERICS IP-Core toplevel.
+        Parameters:
+            port_name: The name of the port to make external
+            value: Wether to make the port external (default), or make an external port
+                   no longer external."""
         port = self.__get_port__(port_name)
         if not port:
             raise NameError(("Could not find a port with name '{}' "
                              "in AsModule '{}'!").format(port_name, self.name))
-        return port.make_external()
+        return port.make_external(value)
+
+    def make_interface_external(self, inter_name: str, direction: str="",
+                                if_type: str="", value: bool=True):
+        """Method for use in user script: Make an interface of this module 
+        external. All ports of the interface will be made available as ports
+        of the ASTERICS IP-Core.
+        Parameters:
+            inter_name: Name of the interface to modify.
+            direction: Interface direction to differentiate, if necessary.
+            if_type: Interface type to differentiate, if necessary.
+            value: Wether to make the interface external (default), or 
+                   make external interfaces no longer external."""
+        inter = self.get_interface(inter_name, direction, if_type)
+        inter.make_external(value)
 
     def make_generic_external(self, generic_name: str):
         """Method for use in user script: Propagate the Generic 'generic_name'
@@ -401,19 +465,51 @@ class AsModule():
             self.generics.remove(rem_gen)
         return True
 
-    def get_interface(self, interface_name: str, direction: str = "", *,
+    def get_interfaces_filtered(self, direction: str = "", if_type: str = ""):
+        """This function returns a list of interfaces of this module matching
+        the specified criteria - either interface direction,
+        interface type or both.
+        If no criteria are passed, an empty list is returned."""
+
+        if direction and if_type:
+            return [inter for inter in self.interfaces
+                    if inter.type == if_type and inter.direction == direction]
+        elif direction:
+            return [inter for inter in self.interfaces
+                    if inter.direction == direction]
+        elif if_type:
+            return [inter for inter in self.interfaces
+                    if inter.type == if_type]
+        # Else ->
+        return []
+
+    def get_interface(self, interface_name: str, direction: str = "",
+                      if_type: str = "", *, 
                       suppress_error: bool = False) -> Interface:
         """Return an interface instance of name 'interface_name'.
            Returns 'None' if no interface with the specified name exists."""
-        if direction == "":
+        # If both direction and type are unspedified
+        if direction == "" and if_type == "":
             found = next((inter for inter in self.interfaces
                           if str(inter) == interface_name), None)
-        else:
+        else:  # Filtered search
+            # Filter by name
             found = [inter for inter in self.interfaces
                      if str(inter) == interface_name]
-            if found:
+            # Filter by direction, if type unspecified
+            if found and if_type == "":
                 found = next((inter for inter in found
                               if inter.direction == direction), None)
+            # Filter by type, if direction unspecified
+            elif found and direction == "":
+                found = next((inter for inter in found
+                              if inter.type == if_type), None)
+            # Filter by both type and direction
+            elif found:
+                found = next((inter for inter in found
+                              if inter.type == if_type and
+                              inter.direction == direction), None)
+        # "Interface not found" error report
         if not found and not suppress_error:
             LOG.error("Could not find interface '%s' in module '%s'!",
                       interface_name, self.name)
@@ -421,10 +517,24 @@ class AsModule():
                             .format(interface_name, self.name))
         return found
 
-    def __get_interface_by_un_fuzzy__(self, if_unique_name : str):
+    def __get_interface_by_un_fuzzy__(self, if_unique_name: str):
         """Return first matching interface object for provided unique name."""
         return next((inter for inter in self.interfaces if
                      if_unique_name in inter.unique_name), None)
+
+    def get_slave_register_interface(self,
+                if_name: str = "") -> SlaveRegisterInterface:
+        """Returns the reference to a slave register interface object of this
+        module.
+        If none exist, returns None.
+        Returns the first interface if 'if_name' is omitted."""
+        if self.register_ifs:
+            if len(self.register_ifs) == 1:
+                return self.register_ifs[0]
+            else:
+                return next((reg for reg in self.register_ifs
+                             if reg.name == if_name), None)
+        return None
 
     def get_generic(self, generic_name: str, *,
                     suppress_error: bool = False) -> Generic:
@@ -484,6 +594,9 @@ class AsModule():
                     gen.value,
                     gen.default_value))
 
+    def get_software_additions(self) -> list:
+        return []
+
     def list_module(self, verbosity: int = 0):
         """List the configuration of this module."""
         print("\n{}:".format(self))
@@ -508,6 +621,9 @@ class AsModule():
         if self.interfaces:
             print("\n~~~\nInterfaces:")
             for inter in self.interfaces:
+                # Skip register interfaces, listed separately
+                if isinstance(inter, SlaveRegisterInterface):
+                    continue
                 if verbosity > 0:
                     inter.print_interface(verbosity > 1)
                 else:
@@ -533,7 +649,8 @@ class AsModule():
             else:
                 print("\n~~~\nRegister interface(s):")
                 for reg_if in self.register_ifs:
-                    reg_if.list_regif(verbosity > 1)
+                    reg_if.print_interface(verbosity > 1)
+                    print("")
 
     def is_connect_complete(self) -> bool:
         """Returns True if this module does not have any unconnected
@@ -563,7 +680,7 @@ class AsModule():
         return out
 
     def discover_module(self, file: str, window_module: bool = False,
-                        extra_function = None):
+                        extra_function=None):
         """Read and parse VHDL-file 'file'.
            Extracts the generic, port and register interface definitions
            to configure this AsModule object."""
@@ -581,80 +698,92 @@ class AsModule():
         if extra_function is not None:
             extra_function()
 
-        LOG.debug("Now discovering and assigning register interfaces...")
-        self.__assign_register_interfaces__()
         LOG.debug("Now assigning interfaces...")
         self.__assign_interfaces__()
+        self.__name_interfaces__()
 
-    def __assign_register_interfaces__(self):
-        to_remove = []  # List for ports that are added to register interfaces
-        LOG.debug("Starting register interface assignment...")
-        for port in self.entity_ports:
-            # LOG.debug("Now checking port '%s' for regif.", port.code_name)
-            reg_names = [templ.name for templ in REGIF_PORTS]
-            matchlist = [slv_port_name for slv_port_name in reg_names
-                         if slv_port_name in port.code_name]
-            # If matchlist is not empty
-            if matchlist:
-                LOG.debug("Could fit for '%s'", str(matchlist))
-                # We found a port that looks like a potential register port
-                # Build a new port object
-                port_obj = port
-                port_obj.name = matchlist[0]
+    def __name_interfaces__(self):
+        """Interface naming function: Names interfaces of this module.
+        Names are chosen according to the following rules:
+        If the interface has a unique prefix and/or suffix,
+        only the prefix and/or suffix are used as the name.
+        If multiple interfaces with no prefix and or suffix
+        but different types are present, the type is added as a prefix.
+        Interfaces of the same type and direction cannot exist witht he same 
+        prefix and suffix, as their VHDL names would be identical.
+        If no prefix and suffix and only one interface maximum per direction
+        is present, only the data direction is used as a name ("in", "out").
+        Slave register interfaces always use the type in their name and are
+        handled by a different function.
+        """
 
-                matched = False
-                # Check to see if it fits with any existing register interface
-                for reg_if in self.register_ifs:
-                    LOG.debug("Trying to assign to '%s'", str(reg_if))
-                    if reg_if.add_port(port_obj):
-                        matched = True
-                        break
-                # If the port didn't match with an existing register interface
-                if not matched:
-                    # Create a new one
-                    new_reg_if = SlaveRegisterInterface(parent=self)
-                    new_reg_if.name_prefix, new_reg_if.name_suffix = \
-                        as_help.get_prefix_suffix(port_obj.name,
-                                                  port_obj.code_name,
-                                                  Port.directions)
-                    # And try to add the port
-                    if new_reg_if.add_port(port_obj):
-                        self.register_ifs.append(new_reg_if)
+        # Helper function to left-rotate a list by a fixed number of items
+        def rotate(l : list, n : int) -> list:
+            return l[n:] + l[:n]
 
-        # Similar procedure for the constants:
-        for const in self.entity_constants:
-            LOG.debug("Now checking constant '%s' for regif.", const.code_name)
-            # Check if the constant could match with a register interface
-            if SlaveRegisterInterface.CONST_NAME in const.code_name:
-                const.name = SlaveRegisterInterface.CONST_NAME
-                # Check existing interfaces
-                for reg_if in self.register_ifs:
-                    if reg_if.set_config_constant(const):
-                        break
-                # No new interfaces will be created, that should have happened
-                # during the port checking stage earlier
+        # "Worker" function for the naming function. Names a single interface
+        # Uses a list of all remaining interfaces to make the decision
+        # If the choice for the current interface is ambiguos, the interface is 
+        # not named, instead 'None' is returned and the interface list rotated
+        # left by one, leaving the interface as the last to handle
+        # All interfaces *should* always be able to be named deterministically.
+        def handler(interfaces: list) -> list:
+            crt_if = interfaces[0]  # First interface in list will be named
+            # Unique names through suffix and/or prefix
+            # Both suffix and prefix
+            if crt_if.name_prefix != "" and crt_if.name_suffix != "":
+                crt_if.name = (crt_if.name_prefix.rsplit("_", maxsplit=1)[0] +
+                               "_" + 
+                               crt_if.name_suffix.split("_", maxsplit=1)[-1])
+                return [crt_if]
+            # Only prefix
+            if crt_if.name_prefix != "":
+                crt_if.name = crt_if.name_prefix.rsplit("_", maxsplit=1)[0]
+                return [crt_if]
+            # Only suffix
+            if crt_if.name_suffix != "":
+                crt_if.name = crt_if.name_suffix.split("_", maxsplit=1)[-1]
+                return [crt_if]
 
-        # Determine which register interfaces are complete/valid
-        to_remove = []
-        for reg_if in self.register_ifs:
-            if not reg_if.is_complete():
-                to_remove.append(reg_if)
-        LOG.debug("regifs to remove, since incomplete: %s",
-                  str([str(regif) for regif in to_remove]))
-        # Remove invalid register interfaces, moving their ports and constants
-        # back into the pool of entity-ports/-constants
-        for reg_if in to_remove:
-            self.register_ifs.remove(reg_if)
-        # Remove now assigned ports from the entity port list
-        for regif in self.register_ifs:
-            for port in regif.ports:
-                for e_port in self.entity_ports:
-                    if e_port.code_name == port.code_name:
-                        LOG.debug("Removing port '%s' from entity port list.",
-                                  port.code_name)
-                        self.entity_ports.remove(e_port)
-                        break
+            # Neither prefix nor suffix are present
+            # Determine number of interfaces with the same type
+            others = [inter for inter in interfaces \
+                      if inter.type == crt_if.type]
+            if len(others) > 2:  # More than two: Filter by direction
+                others = [inter for inter in others \
+                          if inter.direction == crt_if.direction]
+            if len(others) == 1:  # Exactly one: name using direction
+                crt_if.name = crt_if.direction
+                return [crt_if]
+            if len(others) == 2:  # Exactly two: 
+                other_if = interfaces[1] # Use the next interface for comparison
+                # If direction differs: name both by their direction
+                if crt_if.direction != other_if.direction:
+                    crt_if.name = crt_if.direction
+                    other_if.name = other_if.direction
+                elif other_if.name_prefix != "" or other_if.name_suffix != "":
+                    crt_if.name = crt_if.direction
+                    other_if.name = other_if.name_prefix + other_if.name_suffix
+                    other_if.name = other_if.name.replace("__", "_").strip("_")
+                    other_if.name += "_" + other_if.direction
+                else: # Add the type
+                    crt_if.name = crt_if.type + "_" + crt_if.direction
+                    other_if.name = other_if.type + "_" + other_if.direction
+                return [crt_if, other_if]
+            return None
+        # Working copy of interface list
+        interfaces = copy.copy(self.interfaces)  
+        while interfaces:  # Run until all interfaces have been named
+            to_remove = handler(interfaces)  # Name zero to two interfaces
+            if to_remove is None:  # No interface named
+                # Move current (first) interface to back of list 
+                interfaces = rotate(interfaces, 1)
+                continue
+            # Otherwise, remove the named interfaces from the list
+            for inter in to_remove:
+                interfaces.remove(inter)
 
+    
     def __assign_interfaces__(self):
         """For all ports discovered in the VHDL files entity
            Either add a new interface that the port might be a part of,
@@ -686,21 +815,39 @@ class AsModule():
             LOG.debug(("Assigning all ports of interface '%s'"
                        " to module '%s'."), str(inter), self.name)
             # If the interface is missing mandatory ports,
-            # add all ports assigned to that interface as lone ports
-            for port in inter.ports:
+            # fit all ports of that interface again, not allowing new interfaces
+            # as they would re-create this incomplete interface
+            to_refit = copy.copy(inter.ports)
+            self.interfaces.remove(inter)
+            for port in to_refit:
                 port.name = port.code_name
                 port.direction = inter.get_port_direction_normalized(port.name)
                 port.optional = False
                 port.port_type = "single"
-                self.add_port(port)
-            self.interfaces.remove(inter)
+                self.__fit_port__(port, new_ifs_allowed=False)
+        for inter in self.interfaces:
+            if isinstance(inter, SlaveRegisterInterface):
+                self.register_ifs.append(inter)
 
         LOG.debug("Now fitting generics...")
         # Assign matching generics to interfaces
         for gen in self.entity_generics:
             self.__assign_generic__(gen)
+        
+        # Assign matching constants to register interfaces:
+        for const in self.entity_constants:
+            LOG.debug("Now checking constant '%s' for regif.", const.code_name)
+            # Check if the constant could match with a register interface
+            if SlaveRegisterInterface.CONST_NAME in const.code_name:
+                const.name = SlaveRegisterInterface.CONST_NAME
+                # Check existing interfaces
+                for reg_if in self.register_ifs:
+                    if reg_if.set_config_constant(const):
+                        break
+        
 
-    def __fit_port__(self, port_obj: Port) -> bool:
+
+    def __fit_port__(self, port_obj: Port, new_ifs_allowed: bool=True) -> bool:
         """Assign 'port_obj' either to an existing interface
            of, if not possible, create a new interface for this port.
            If no matching port exists in the interface templates,
@@ -710,11 +857,12 @@ class AsModule():
         if self.__fit_port_to_existing_interface__(port_obj):
             return True
 
-        # Try to match the port to an interface template (new interface)
-        LOG.debug(("Port didn't fit with existing interfaces. "
-                   "Checking against interface templates..."))
-        if self.__fit_port_to_new_interface__(port_obj):
-            return True
+        if new_ifs_allowed:
+            # Try to match the port to an interface template (new interface)
+            LOG.debug(("Port didn't fit with existing interfaces. "
+                    "Checking against interface templates..."))
+            if self.__fit_port_to_new_interface__(port_obj):
+                return True
 
         # If the port is not part of a known interface:
         # Check if it's a standard port (ie. clk, reset, ...)
@@ -739,8 +887,7 @@ class AsModule():
            module. Returns 'True' if the port was assigned, else 'False'."""
 
         for inter in self.interfaces:
-            LOG.debug("Looking at existing interface '%s'", inter.name)
-
+            LOG.debug("Looking at existing interface '%s'", inter.int_name())
             if inter.fit_and_add_port(port_obj):
                 return True
 
@@ -752,7 +899,8 @@ class AsModule():
            matching interface to this module."""
         matchlist = []
         for template in self.__get_interface_templates__():
-            LOG.debug("Checking interface template for '%s'", template.name)
+            LOG.debug("Checking interface template for '%s'",
+                      template.int_name())
             for tport in template.ports:
                 if (tport.name in port_obj.code_name and
                         tport.data_type == port_obj.data_type):
@@ -777,7 +925,7 @@ class AsModule():
         inter_list = copy.copy(self.interfaces)
         inter_list.extend(self.register_ifs)
         for inter in inter_list:
-            LOG.debug("Checking interface '%s'.", inter.name)
+            LOG.debug("Checking interface '%s'.", inter.int_name())
             # For all ports of the interface:
             for port in inter.ports:
                 try:
@@ -787,7 +935,7 @@ class AsModule():
                         LOG.debug(("Found generic '%s' in data width of port "
                                    "'%s' of interface '%s'. Assigning..."),
                                   generic_obj.code_name, port.code_name,
-                                  str(inter))
+                                  inter.int_name())
                         # If yes, assign it to the interface
                         inter.add_generic(generic_obj)
                 except TypeError:
@@ -805,10 +953,13 @@ class AsModule():
         """Copies 'template' interface, configures 'port_obj',
            assigns it to the new interface and
            adds the interface to this module."""
-
-        new_interface = copy.copy(template)
-        # Blank interface (only keeping name, direction, ...)
-        new_interface.clear()
+        if ((template.type == SlaveRegisterInterface.DEFAULT_NAME) and 
+                (self.entity_name != "as_regmgr")):
+            new_interface = SlaveRegisterInterface()
+        else:
+            new_interface = copy.copy(template)
+            # Blank interface (only keeping name, direction, ...)
+            new_interface.clear()
         new_interface.template = template
         new_interface.direction = "in"
 
@@ -826,7 +977,7 @@ class AsModule():
         if not new_interface.fit_and_add_port(port_obj):
             LOG.error(("Port '%s' didn't fit in interface '%s' in function "
                        "new_interface_from_template, which shouldn't happen!"),
-                      port_obj.code_name, str(new_interface))
+                      port_obj.code_name, new_interface.int_name())
             return None
         new_interface.assign_to(self)
         return new_interface
@@ -854,7 +1005,11 @@ class AsModuleGroup(AsModule):
         super().__init__(name)
         self.assign_to(parent)
         self.signals = []
+        self.constants = []
         self.modules = sub_modules
+        self.static_code = {"signals": [],
+                            "body": []}
+        self.dynamic_code_generator = None
 
     def update_modlevel(self):
         """Update the modlevel off all submodules.
@@ -865,25 +1020,165 @@ class AsModuleGroup(AsModule):
             if group:
                 mod.update_modlevel()
 
-    def get_signal(self, signal_name: str) -> GlueSignal:
+    def get_signal(self, signal_name: str) -> GenericSignal:
         """Search for and return a glue signal matching 'signal_name'"""
         return next((sig for sig in self.signals
                      if sig.code_name == signal_name), None)
 
-    def add_signal(self, signal: GlueSignal) -> bool:
+    def add_signal(self, signal: GenericSignal) -> bool:
         """Add a new GlueSignal to this AsModuleGroup.
         If a signal with the same code_name is already present, do nothing.
         Returns True on success, False if the signal has a duplicate name."""
-        # Build a list of all signal names
-        names = [sig.code_name for sig in self.signals]
         # Check if the new signal has a duplicate name
-        if signal.code_name in names:
+        if any((signal.code_name == sig.code_name for sig in self.signals)):
             return False
         # Otherwise, associate the signal with this group and add it
-        signal.assign_to(self)
+        if not isinstance(signal, GlueSignal):
+            # Don't assign GlueSignals as they "belong" to their source module
+            signal.assign_to(self)
         self.signals.append(signal)
+        return True
+
+    def add_constant(self, const: Constant) -> bool:
+        """Add a new Constant to this AsModuleGroup.
+        If a constant with the same code_name is already present, do nothing.
+        Returns True on success, False if the Constant has a duplicate name."""
+        # Check if the new constant has a duplicate name
+        if any((const.code_name == c.code_name for c in self.constants)):
+            return False
+        # Otherwise, associate the constant with this group and add it
+        const.assign_to(self)
+        self.constants.append(const)
+
+    def get_constant(self, constant_name : str) -> Constant:
+        """Return the Constant with the code_name 'constant_name'.
+        If no Constant exists with this name, returns None."""
+        return next((const for const in self.constants
+                     if const.code_name == constant_name), None)
+
 
     def get_module(self, module_name: str) -> AsModule:
         """Search for and return a submodule matching 'module_name'"""
         return next((mod for mod in self.modules
                      if mod.name == module_name), None)
+
+    def __minimize_port_names__(self, exclude: list = None):
+        """Remove sections of the port names so they are still unique but as
+        short as possible.
+        This function only removes redundant strings delimited by underscores.
+        The resulting names will be all lowercase!
+        """
+        ports = self.get_full_port_list()
+        for port in ports:
+            port.code_name = as_help.minimize_name(port.code_name, exclude)
+
+    def define_port(self, name: str, code_name: str = "",
+                    direction: str = "in", data_type: str = "std_logic",
+                    data_width : tuple = None, fixed_value: str = ""):
+        """Add a port to this ASTERICS module group.
+        Parameters (square brackets indicate defaults):
+            name: The ports base name (without pre- or suffixes)
+            code_name: The ports name as it appears in VHDL code. [name]
+            direction: Direction or data ['in'], 'out' or 'inout'.
+            data_type: The ports VHDL data type. [std_logic]
+            data_width: The width of vector data types. Use a tuple to define.
+                        Example: (7, 'downto', 0); [None]
+            fixed_value: Optionally set a fixed value for the port. The value of
+                         this parameter is directly copied into code!
+        """
+        if not code_name:
+            code_name = name
+        if data_width:
+            data_width = Port.DataWidth(*data_width)
+        else:
+            data_width = Port.DataWidth(1, None, None)
+        port = Port(name, code_name, direction, port_type="external",
+                    data_type=data_type, optional=False, data_width=data_width)
+        if fixed_value:
+            self.__port_set_value__(port, fixed_value)
+        self.add_port(port)
+    
+    def port_set_value(self, portname: str, value: str):
+        """Set the fixed "value" for the port "portname" of this module group.
+        """
+        port = self.get_port(portname)
+        self.__port_set_value__(port, value)
+
+    def __port_set_value__(self, port: Port, value: str):
+        if (port.port_type + "_port") in Port.rule_conditions:
+            port.add_rule((port.port_type + "_port"), 
+                            "set_value({})".format(value))
+        else:
+            port.add_rule("source_present",
+                            "set_value({})".format(value))
+        port.remove_condition("both_present")
+        if port.direction == "in":
+            port.in_entity = False
+
+
+    def port_connect(self, portname: str, target):
+        port = self.get_port(portname)
+        port.connect(target)
+        port.overwrite_rule("both_present", "connect")
+        port.remove_rule_action("set_value")
+    
+    def define_signal(self, name: str, data_type: str = "std_logic",
+                      data_width : tuple = None, fixed_value: str = "") -> bool:
+        """Define, create and """
+        if data_width:
+            data_width = Port.DataWidth(*data_width)
+        else:
+            data_width = Port.DataWidth(1, None, None)
+        signal = GenericSignal(name, data_type=data_type,
+                            data_width=data_width)
+        if fixed_value:
+            glue = GlueSignal(name=fixed_value, code_name=fixed_value,
+                                port_type=signal.port_type,
+                                data_width=signal.data_width,
+                                optional=False)
+            glue.is_signal = False
+            glue.set_connected()
+            signal.glue_signal = glue
+        return self.add_signal(signal)
+
+    def signal_set_value(self, signalname: str, value: str):
+        signal = self.get_signal(signalname)
+        if signal is None:
+            raise AsNameError(signalname, self, 
+                    "Could not find signal with given name!",
+                    "Signal and searched module:")
+        signal.add_rule("type_signal", "set_value({})".format(value))
+
+    def signal_connect(self, signalname: str, target):
+        if target is None:
+            raise ValueError(("'signal_connect' got an empty target parameter"
+                              " for signal '{}'!").format(signalname))
+        signal = self.get_signal(signalname)
+
+        if signal is None:
+            raise AsNameError(signalname, self, 
+                    "Could not find signal with given name!",
+                    "Signal and searched module:")
+        if isinstance(target, Port):
+            port = target
+        elif isinstance(target, Interface):
+            port = target.get_port(signalname, suppress_error=True)
+            if not port:
+                port = target.get_port_by_code_name(signalname,
+                                                    suppress_error=True)
+        elif isinstance(target, AsModule):
+            port = target.get_port(signalname)
+        if not target:
+            raise AsNameError(signalname, str(target),
+                    ("Could not find matching port in '{}' to connect "
+                     "signal to!").format(str(target)), 
+                    ("To connect to a port with a different name, "
+                     "specify the port object in the connect method!"))
+        port.glue_signal = signal
+        if port.direction == "in":
+            port.incoming = signal
+            signal.outgoing.append(port)
+        else:
+            port.outgoing.append(signal)
+            signal.incoming.append(port)
+        

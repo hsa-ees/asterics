@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 """
-as_disperse_spec.py
+as_gensync_spec.py
 
 Company:
 Efficient Embedded Systems Group
@@ -16,7 +16,7 @@ Philip Manke
 
 Description:
 Python module used by as_automatics used to build the generators internal model
-of the ASTERICS hardware module as_disperse.
+of the ASTERICS hardware module as_gensync.
 """
 # --------------------- LICENSE -----------------------------------------------
 # This program is free software; you can redistribute it and/or
@@ -36,9 +36,9 @@ of the ASTERICS hardware module as_disperse.
 #
 # --------------------- DOXYGEN -----------------------------------------------
 ##
-# @file as_disperse_spec.py
+# @file as_gensync_spec.py
 # @author Philip Manke
-# @brief Specifics for as_disperse used by as_automatics
+# @brief Specifics for as_gensync used by as_automatics
 # -----------------------------------------------------------------------------
 
 
@@ -47,7 +47,7 @@ from as_automatics_module import AsModule
 
 def get_module_instance(module_dir: str) -> AsModule:
     
-    module = AsModule("as_gensync")
+    module = AsModule()
     toplevel_file = "hdl/vhdl/as_gensync.vhd"
     module.files = []
     module.dependencies = []

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 """
 as_automatics_helpers.py
@@ -245,11 +245,19 @@ def is_data_width_resolved(data_width) -> bool:
 
 
 def extract_generics(data_width) -> Sequence[str]:
-    """Extract generic names from the data width tuple."""
-    if not data_width.sep:
-        return ""
-    dwstr = "{}{}".format(data_width.a, data_width.b)
-    to_replace = " -+*/^()<>"
+    """Extract generic names from the data width tuple or a string."""
+    if isinstance(data_width, str):
+        temp = data_width.split("downto")
+        dwstr = []
+        for tstr in temp:
+            dwstr.extend(tstr.split("to"))
+        dwstr = "".join(dwstr)
+    else:
+        if not data_width.sep:
+            return ""
+        dwstr = "{}.{}".format(data_width.a, data_width.b)
+    
+    to_replace = " -+*/^()<>,"
     for repl in to_replace:
         dwstr = dwstr.replace(repl, ".")
     return list(filter(lambda x: bool(x) and not x.isnumeric(),
@@ -279,6 +287,18 @@ def append_to_path(path: str, to_append: str, add_trailing_slash: bool = True):
     if string[0] == "/":  # Add a leading "/" if the initial string had one
         return "/" + out
     return out
+
+def minimize_name(name: str, exclude: list=None):
+    if not exclude:
+        exclude = []
+    split = name.lower().split("_")
+    split.reverse()
+    result = []
+    for fragment in split:
+        if fragment not in result and not fragment in exclude:
+            result.append(fragment)
+    result.reverse()
+    return "_".join(result)
 
 
 # From

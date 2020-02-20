@@ -1,0 +1,6 @@
+# GIT IGNORE
+## OS files
+.DS_Store
+
+## Xilinx files
+.Xil

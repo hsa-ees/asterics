@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 """
 as_automatics_proc_chain.py
@@ -47,12 +47,13 @@ from typing import Sequence
 from collections import namedtuple
 
 from as_automatics_module import AsModule, AsModuleGroup
-from as_automatics_port import Port, GlueSignal
+from as_automatics_port import Port, GlueSignal, StandardPort
 from as_automatics_interface import Interface
 from as_automatics_module_lib import AsModuleLibrary
 from as_automatics_generic import Generic
 from as_automatics_templates import AsMain, AsTop
-from as_automatics_exceptions import AsConnectionError, AsModuleError
+from as_automatics_exceptions import (AsConnectionError, AsModuleError,
+                                      AsErrorManager, AsTextError, AsError)
 import as_automatics_helpers as as_help
 import as_automatics_logging as as_log
 import as_automatics_connection_helper as as_conh
@@ -69,21 +70,26 @@ class AsProcessingChain():
     # namedtuple template for port-to-port connections
     Connection = namedtuple("Connection", "source sink")
 
+    # Error manager:
+    err_mgr = None
+
     # Addresses per register, determined by register size and addressing scheme
     addr_per_reg = 4
     asterics_base_addr = 0x43C10000
 
+    NAME_FRAGMENTS_REMOVED_ON_TOPLEVEL = ("as", "main")
+
     def __init__(self, module_lib: AsModuleLibrary, parent):
         self.parent = parent
         self.library = module_lib
-        self.top = AsTop()
-        self.as_main = AsMain(self.top)
+        self.top = AsTop(self)
+        self.as_main = AsMain(self.top, self)
         self.as_main.assign_to(self.top)
         self.top.modules.append(self.as_main)
         self.module_groups = [self.as_main]
         self.modules = []
         self.user_cons = []
-        self.bundles = {"and": [], "or": []}
+        self.bundles = {"and": [], "or": [], "xor": [], "xnor": []}
         self.address_space = {}
         self.max_regs_per_module = 0
         self.cur_addr = 0
@@ -92,11 +98,20 @@ class AsProcessingChain():
         self.asterics_top_addr = self.asterics_base_addr + 0x0000FFFF
         self.auto_inst_done = False
         self.auto_connect_run = False
+        self.auto_instantiated = None
         for module in [self.as_main, self.top]:
             for inter in module.interfaces:
                 # Assign a unique name to all interfaces, so that two as_streams
                 # for example, don't have the same name, append the module name
                 as_conh.set_unique_name(inter, module)
+
+    def set_asterics_base_address(self, base_address : int,
+                                  address_space_size : int = 0xFFFF):
+        """Allows setting of the base address and the address space size of 
+        ASTERICS in the user script."""
+        self.asterics_base_addr = base_address
+        self.asterics_top_addr = base_address + address_space_size
+
 
     def write_hw(self, path: str, use_symlinks: bool = True,
                  force: bool = False):
@@ -110,10 +125,13 @@ class AsProcessingChain():
             force: If 'True', deletes anything in the output directory.
         """
         if not self.auto_connect_run:
-            self.auto_connect()
+            try:
+                self.auto_connect()
+            except AsError:
+                return False
+        return self.parent.__write_hw__(path, use_symlinks,
+                                        allow_deletion=force)
 
-        self.parent.__write_hw__(path, use_symlinks, allow_deletion=force)
-    
     def write_sw(self, path: str, use_symlinks: bool = True,
                  force: bool = False, module_driver_dirs: bool = False):
         """Wrapper function for AsAutomatics.__write_sw__.
@@ -127,15 +145,22 @@ class AsProcessingChain():
             module_driver_dirs: Sort drivers into subfolders per module.
         """
         if not self.auto_connect_run:
-            self.auto_connect()
-        self.parent.__write_sw__(path, use_symlinks, allow_deletion=force,
-                                 module_driver_dirs=module_driver_dirs)
-    
-    def write_asterics_core(self, path: str, use_symlinks: bool = True,
-                 force: bool = False, module_driver_dirs: bool = False):
+            try:
+                self.auto_connect()
+            except AsError:
+                return False
+        return self.parent.__write_sw__(path, use_symlinks,
+                allow_deletion=force, module_driver_dirs=module_driver_dirs)
+
+    def write_asterics_core(
+            self,
+            path: str,
+            use_symlinks: bool = True,
+            force: bool = False,
+            module_driver_dirs: bool = False):
         """Wrapper function for AsAutomatics.__write_asterics_core__.
         If necessary, auto_connect() is called before exporting the output.
-        Generate and collect all source files that are necessary to build 
+        Generate and collect all source files that are necessary to build
         this ASTERICS IP core.
         Parameters:
             path: String - Where to put the output. Relative or static path.
@@ -144,17 +169,24 @@ class AsProcessingChain():
             module_driver_dirs: Sort drivers into subfolders per module.
         """
         if not self.auto_connect_run:
-            self.auto_connect()
-        self.parent.__write_asterics_core__(path, use_symlinks,
+            try:
+                self.auto_connect()
+            except AsError:
+                return False
+        return self.parent.__write_asterics_core__(path, use_symlinks,
                 allow_deletion=force, module_driver_dirs=module_driver_dirs)
 
-    def write_ip_core_xilinx(self, path: str, use_symlinks: bool = True,
-                 force: bool = False, module_driver_dirs: bool = False):
+    def write_ip_core_xilinx(
+            self,
+            path: str,
+            use_symlinks: bool = True,
+            force: bool = False,
+            module_driver_dirs: bool = False):
         """Wrapper function for AsAutomatics.__write_ip_core_xilinx__.
         If necessary, auto_connect() is called before exporting the output.
-        Generate and collect all source files that are necessary to build 
+        Generate and collect all source files that are necessary to build
         this ASTERICS IP core.
-        Uses a directory structure compatible with Vivado IP-Cores and 
+        Uses a directory structure compatible with Vivado IP-Cores and
         runs Vivado to generate the meta-files, making it an IP-Core.
         Parameters:
             path: String - Where to put the output. Relative or static path.
@@ -163,13 +195,16 @@ class AsProcessingChain():
             module_driver_dirs: Sort drivers into subfolders per module.
         """
         if not self.auto_connect_run:
-            self.auto_connect()
-        self.parent.__write_ip_core_xilinx__(path, use_symlinks,
+            try:
+                self.auto_connect()
+            except AsError:
+                return False
+        return self.parent.__write_ip_core_xilinx__(path, use_symlinks,
                 allow_deletion=force, module_driver_dirs=module_driver_dirs)
 
     def write_system(self, path: str, use_symlinks: bool = True,
-                 force: bool = False, module_driver_dirs: bool = False,
-                 add_vears: bool = False):
+                     force: bool = False, module_driver_dirs: bool = False,
+                     add_vears: bool = False):
         """Wrapper function for AsAutomatics.__write_system__.
         If necessary, auto_connect() is called before exporting the output.
         Generate and package the ASTERICS IP-Core into an FPGA system
@@ -182,11 +217,13 @@ class AsProcessingChain():
             add_vears: Link or copy VEARS (video output) into the system.
         """
         if not self.auto_connect_run:
-            self.auto_connect()
-        self.parent.__write_system__(path, use_symlinks,
+            try:
+                self.auto_connect()
+            except AsError:
+                return False
+        return self.parent.__write_system__(path, use_symlinks,
                 allow_deletion=force, module_driver_dirs=module_driver_dirs,
                 add_vears=add_vears)
-    
 
     def add_module(self, entity_name: str, module_name: str = "",
                    repo_name: str = "", *, group=None) -> AsModule:
@@ -207,8 +244,9 @@ class AsProcessingChain():
         module = self.library.get_module_instance(entity_name, repo_name)
         if not module:
             raise AsModuleError(
-                module_name=entity_name, msg=("Could not find a module with "
-                              "this name in the module library!"))
+                module_name=entity_name, msg=(
+                    "Could not find a module with "
+                    "this name in the module library!"))
         # Give the module a name, if none was provided
         if module_name == "":
             module_list = self.modules
@@ -219,6 +257,7 @@ class AsProcessingChain():
         module.name = module_name
         # Add the module to this chains list of modules
         module.assign_to(group)
+        module.chain = self
         group.modules.append(module)
         self.modules.append(module)
 
@@ -226,7 +265,8 @@ class AsProcessingChain():
             # Assign a unique name to all interfaces, so that two as_streams
             # for example, don't have the same name, append the module name
             as_conh.set_unique_name(inter, module)
-        LOG.debug("Module '%s' added as '%s'.", entity_name, module_name)
+        LOG.info("Module '%s' added to chain as '%s'.",
+                 entity_name, module_name)
         return module
 
     # WIP!!!
@@ -269,6 +309,12 @@ class AsProcessingChain():
         return next((mod for mod in self.modules
                      if mod.name == module_name), None)
 
+    def get_module_group(self, module_name: str) -> AsModuleGroup:
+        """Return the first module group of the current processing chain
+        that matches the name 'module_name'. If none is found, returns None."""
+        return next((mod for mod in self.module_groups
+                     if mod.name == module_name), None)
+
     def list_address_space(self):
         """Prints the current address space of the slave registers."""
         print("{} registers per ASTERICS module."
@@ -286,9 +332,8 @@ class AsProcessingChain():
 
         self.auto_connect_run = True
 
-
         # Collect all modules
-        all_modules = [self.top, self.as_main]
+        all_modules = []
         all_modules.extend(self.modules)
 
         # Determine the maximum amount of registers per module
@@ -301,26 +346,38 @@ class AsProcessingChain():
 
         # Assign generics to ports
         for mod in all_modules:
-            for port in mod.get_full_port_list():
-                gens = as_help.extract_generics(port.data_width)
-                for gen in gens:
-                    gen_obj = mod.get_generic(gen, suppress_error=True)
-                    if not gen_obj:
-                        LOG.error(("VHDL error! Generic '%s' in port '%s', "
-                                   "but not in containing module '%s'!"),
-                                  gen, port.code_name, mod.entity_name)
-                        continue
-                    port.generics.append(gen_obj)
+            self._extract_generics(mod)
+        # Handle generics in ports of as_main and toplevel
+        self._extract_generics(self.as_main)
+        self._extract_generics(self.top)
 
         # Run user connection definitions
         for con in self.user_cons:
-            self.__connect__(con[0], con[1], top=con[2])
+            try:
+                self.__connect__(con[0], con[1], top=con[2])
+            except AsError:
+                pass
+                # Errors at this stage are OK
+                # We'll collect them, so the user has all errors that their
+                # design causes at once.
 
-        # TODO: Decide wether this call should be allowed to be optional
-        # (And then implement that)
-        # Automatically insert modules defined by
-        # 'instantiate_in_top' interface attributes
-        self.auto_instantiate()
+        # If any critical errors have occurred, we stop here!
+        # We don't want to pile any internal errors, caused by errors in their
+        # design, onto them!
+        if self.err_mgr.get_error_severity_count("Critical"):
+            raise AsTextError("Caused by user script",
+                              "Critical errors encountered!")
+
+        # If not done already, auto-instantiate modules defined in interfaces
+        if not self.auto_inst_done:
+            self.auto_instantiate()
+            all_modules.extend(self.auto_instantiated)
+            for mod in self.auto_instantiated:
+                self._extract_generics(mod)
+
+        # Now add all module groups to module list
+        all_modules.append(self.as_main)
+        all_modules.append(self.top)
 
         # Propagate generics that have no value set to toplevel
         for mod in all_modules:
@@ -330,13 +387,26 @@ class AsProcessingChain():
         for mod in self.modules:
             # Run connection automation for standard ports, ...
             self.connect_standard_ports(mod, self.as_main)
-            # ... register interfaces and ...
-            self.connect_register_interfaces(mod)
             # ... external interfaces (interfaces facing out towards 'as_main')
             for inter in mod.interfaces:
+                # If the interface has a 'connect_to' attribute, we need to
+                # automatically connect it to an AsModule, stored there
+                connect_to = getattr(inter, "connect_to", None)
+                if connect_to:
+                    # If the connection target is on the same level as the
+                    # requesting module, connect them!
+                    if connect_to.parent == mod.parent:
+                        self._handle_connect_to(inter, connect_to)
+                        continue
+                    # If the connection target is "higher up" in the ASTERICS
+                    # chain, we can't handle the connection => propagate up
+                    else:
+                        inter.to_external = True
                 # FIXME: Can we make this more generic using
                 # 'make_interface_external'? Method might have to be modified...
                 self.propagate_interface_up_once(inter)
+            # ... and register interfaces!
+            self.connect_register_interfaces(mod)
             # Update the 'connected'-status for the module
             mod.set_connected(mod.is_connect_complete())
 
@@ -369,26 +439,30 @@ class AsProcessingChain():
                 # Connect auto-inserted modules
                 connect_to = getattr(inter, "connect_to", None)
                 if connect_to:
-                    inter.set_connected_all(False)
-                    if inter.direction == "in":
-                        self.__connect__(connect_to, inter, top=mod.parent)
-                    else:
-                        self.__connect__(inter, connect_to, top=mod.parent)
-                    inter.to_external = False
+                    self._handle_connect_to(inter, connect_to)
                     continue
                 # FIXME: This call should be replaced by
                 # 'make_interface_external'. Requires more testing!
                 self.propagate_interface_up_once(inter, False)
 
+        # Handle unconnected ports:
+        # Assign default values and report to user
         for mod in all_modules:
             if mod is self.top:
                 continue
             self.handle_unconnected_ports(mod)
         self.handle_unconnected_ports(self.top)
 
+        # Evaluate generics and replace with calculated values, where possible
         for mod in self.module_groups:
             self.resolve_generics(mod)
+            mod.__minimize_port_names__()
+        
+        self.top.__minimize_port_names__(
+                self.NAME_FRAGMENTS_REMOVED_ON_TOPLEVEL)
 
+        # Now, with resolved generics, try to calculate the data widths of 
+        # all ports of modules and signals in module groups
         for mod in all_modules:
             for port in mod.get_full_port_list():
                 port.data_width = as_conh.resolve_data_width(port)
@@ -396,8 +470,57 @@ class AsProcessingChain():
                 for sig in mod.signals:
                     sig.data_width = as_conh.resolve_data_width(sig)
             except AttributeError:
+                # Signals only present in module groups
                 pass
 
+    def _handle_connect_to(self, inter: Interface, connect_to: AsModule):
+        """This method connects the instantiating interface to the 
+        auto-instantiated module. A suitable interface is filtered for,
+        the first matching is selected and the connect_interface method called.
+        """
+        # Source interfaces parent module
+        mod = inter.parent
+        # Make sure the connection will complete
+        inter.set_connected_all(False)
+        # We're looking for an interface of the same type and opposite direction
+        ci_direction = "in" if inter.direction == "out" else "out"
+        ci_type = inter.type
+        con_inters = connect_to.get_interfaces_filtered(ci_direction, ci_type)
+        if not con_inters:
+            # No interfaces found! Potentially not good!
+            LOG.warning(("The auto-instantiated module '%s' could not be "
+                         "connected! No suitable interfaces found for "
+                         "instantiating interface '%s' of module '%s'."),
+                        connect_to.name, inter.name, inter.parent.name)
+        else:
+            # We'll try the first matching interface
+            con_inter = con_inters[0]
+            
+            # Make sure the connection will complete
+            con_inter.set_connected_all(False)
+            # Interface direction is important!
+            if inter.direction == "in":
+                self.__connect_interface__(con_inter, inter, top=mod.parent)
+            else:
+                self.__connect_interface__(inter, con_inter, top=mod.parent)
+            # Make sure the interface is not also included in the
+            # ModuleGroup entity!
+            inter.to_external = False
+
+
+    def _extract_generics(self, module: AsModule):
+        """For each port of module, adds all generics it finds
+        in the data width definition."""
+        for port in module.get_full_port_list():
+            gens = as_help.extract_generics(port.data_width)
+            for gen in gens:
+                gen_obj = module.get_generic(gen, suppress_error=True)
+                if not gen_obj:
+                    LOG.error(("VHDL error! Generic '%s' in port '%s', "
+                                "but not in containing module '%s'!"),
+                                gen, port.code_name, module.entity_name)
+                    continue
+                port.generics.append(gen_obj)
 
     def resolve_generics(self, groupmod: AsModuleGroup):
         """Resolve the generics in data widths of signals
@@ -528,30 +651,46 @@ class AsProcessingChain():
                 # Is 'instantiate_in_top' set?
                 if inter.instantiate_in_top is None:
                     continue
-                if (inter.incoming or inter.outgoing):
-                    continue
+                # Get the referenced module group:
+                gmod_name = inter.instantiate_in_top[1]
+                if gmod_name == "":
+                    gmod = self.top
+                else:
+                    gmod = self.get_module_group(gmod_name)
+                    if gmod is None:
+                        err = "Could not find module group '{}'!" \
+                              .format(gmod_name)
+                        LOG.error(err)
+                        raise AsModuleError(err)
+                inst_mod = inter.instantiate_in_top[0]
+
                 # If yes: Add the referenced module to the system toplevel
-                ret = self.add_module(
-                    inter.instantiate_in_top,
-                    "{}_{}".format(
-                        module.name,
-                        inter.instantiate_in_top), group=self.top)
+                ret = self.add_module(inst_mod, "{}_{}".format(module.name,
+                                      inst_mod), group=gmod)
                 # Error message if the module wasn't found
                 if ret is None:
                     LOG.error(
                         ("Could not find module '%s' set as "
                          "automatic toplevel instantiation for "
                          "interface '%s' of module '%s'!"),
-                        inter.instantiate_in_top,
-                        inter.name,
-                        module.name)
+                        inst_mod, inter.name, module.name)
                     continue
+                try:  # Run special config function
+                    ret.auto_inst_config(ret, module)
+                    LOG.debug("Ran autoconfig function for '%s'", repr(ret))
+                except AttributeError:
+                    pass  # OK if function doesn't exist -> no special config
                 out.append(ret)
+                LOG.info(("Automatically instantiated module '%s' to '%s' "
+                          "from interface '%s' of module '%s'"), ret.name,
+                         gmod.name, inter.unique_name, module.name)
                 for iinter in ret.interfaces:
                     if iinter.to_external:
-                        prefix = module.name + "_"
-                        iinter.name_prefix = prefix
+                        iinter.name_prefix = module.name \
+                                + "_" + iinter.name_prefix
+
                 setattr(inter, "connect_to", ret)
+        self.auto_instantiated = out
         return out
 
     def make_interface_external(self, inter: Interface):
@@ -564,7 +703,7 @@ class AsProcessingChain():
         return last_inter
 
     def propagate_interface_up_once(self, inter: Interface,
-                                    add_module_name : bool = True) -> Interface:
+                                    add_module_name: bool = True) -> Interface:
         """Adds a copy of 'inter' to the next higher level module group.
         Returns a reference to the new interface if successful, else None."""
         if not inter.to_external:
@@ -577,10 +716,18 @@ class AsProcessingChain():
         ext_inter = inter.duplicate()
         ext_inter.parent = inter.parent
 
+        to_remove = []
         # Substitute generics with those available on the next higher level
         for port in ext_inter.ports:
+            # port.in_entity overrides "make external"
+            if not port.in_entity:
+                to_remove.append(port.code_name)
+                continue
             self.resolve_generic(port)
-
+        # Remove ports from external interface that would not appear in entity 
+        for portname in to_remove:
+            ext_inter.remove_port(portname)
+        
         # Now associate the duplicated interface with the next module group
         top.add_interface(ext_inter)
         # Register new connections between inter and ext_inter
@@ -593,6 +740,8 @@ class AsProcessingChain():
 
         # Connect all the ports between the two interfaces
         for port in inter.ports:
+            if port.code_name in to_remove:
+                continue
             ext_port = ext_inter.get_port(port.name)
             if port.get_direction_normalized() == "in":
                 port.incoming = ext_port
@@ -639,8 +788,15 @@ class AsProcessingChain():
                       port.code_name, module.name)
             # Look for matching ports and signals in the modules assigned group
             target = parent.get_port(port.code_name, suppress_error=True)
+            if not target:
+                target = parent.get_port(port.name, suppress_error=True)    
             if not target and isinstance(parent, AsModuleGroup):
                 target = parent.get_signal(port.code_name)
+                if not target:
+                    target = parent.get_signal(port.name)
+                #if target:
+                #    port.remove_condition("external_port")
+
             # Even if we couldn't identify a target, run the connect method
             # This will make sure that the ruleset for all ports is evaluated
             ret = self.__connect_port__(port, target,
@@ -672,6 +828,9 @@ class AsProcessingChain():
         # For all register interfaces in the module
         for regif in module.register_ifs:
             LOG.debug("Handling register interface '%s'...", str(regif))
+            if not any((con.parent.entity_name == "as_regmgr" for con in regif.outgoing)):
+                LOG.debug("No connected as_regmgr! Skipping...")
+                continue
             # Check if the address space is out of bounds
             if (self.asterics_base_addr + self.cur_addr >
                     self.asterics_top_addr):
@@ -683,13 +842,24 @@ class AsProcessingChain():
 
             # Assign this register interface to the current address offset
             self.address_space[str(self.cur_addr)] = regif
+            regif_num = self.cur_addr / \
+                    (self.addr_per_reg * self.max_regs_per_module)
             # Set register interface attributes
-            regif.set_module_base_addr(self.cur_addr + self.asterics_base_addr)
+            regif.set_module_base_addr(self.cur_addr + self.asterics_base_addr,
+                                       int(regif_num))
             regif.set_connected()
             # Update the current address offset
             self.cur_addr += self.addr_per_reg * self.max_regs_per_module
             LOG.debug("Assigned address '%s' to register interface '%s'",
                       "{:#8X}".format(regif.base_address), str(regif))
+            mgrs = [mod for mod in module.module_connections 
+                    if mod.entity_name == "as_regmgr"]
+            for regmgr in mgrs:
+                regmgr.set_generic_value("REG_COUNT", regif.reg_count)
+                
+                glue_sigs = [rport.glue_signal for rport in regif.ports]
+                for glue in glue_sigs:
+                    self.resolve_generic(glue)
 
     def connect_standard_ports(self, module: AsModule, top: AsModule):
         """Calls the 'connect' method for all standard ports of the module."""
@@ -698,8 +868,12 @@ class AsProcessingChain():
             LOG.debug("Handling port '%s'", port.code_name)
             # Call connect_port for the standard port and None, so that
             # the necessary rule actions are executed (mark as external, etc.)
-            self.__connect_port__(
-                port, AsModule.get_parent_module(port).parent, top=top)
+            parent = AsModule.get_parent_module(port).parent
+            for s_port in parent.standard_ports:
+                if self.__connect_port__(port, s_port, top=top):
+                    break
+            #self.__connect_port__(
+            #    port, AsModule.get_parent_module(port).parent, top=top)
 
     @staticmethod
     def connect_generics(module: AsModule):
@@ -820,6 +994,12 @@ class AsProcessingChain():
            of modules, interfaces and ports."""
         LOG.debug("Connect called for source '%s' and sink '%s'",
                   str(source), str(sink))
+        
+        if source is None or sink is None:
+                raise AsTextError("Source or Sink is None",
+                        "Connect statement received no sink or source!",
+                        severity="Critical")
+        LOG.info("Connecting '%s' to '%s'...", str(source), str(sink))
         if top is None:
             top = self.as_main
         try:
@@ -828,16 +1008,18 @@ class AsProcessingChain():
             elif isinstance(source, Interface):
                 self.__connect_interface__(source, sink, top=top)
             elif isinstance(source, Port):
+                source.overwrite_rule("both_present", "forceconnect")
                 self.__connect_port__(source, sink, top=top)
             else:
                 LOG.error(("'connect()' called with incompatible parameters!"
                            " '%s' and '%s'"), str(source), str(sink))
-        # except AsModuleError:
-        #    pass
-        except Exception as exc:
-            print(("Connect method for source '{}' and sink '{}' failed with "
-                   "Exception: '{}").format(source, sink, exc))
-            raise Exception("Connection error thrown!")
+        except AsModuleError:
+            pass
+        #except Exception as exc:
+        #    print(("Connect method for source '{}' and sink '{}' failed with "
+        #           "Exception: '{}").format(source, sink, exc))
+        #    raise Exception("Connection error thrown!")
+    
 
     def __connect_module__(self, source: AsModule,
                            sink, *, top):
@@ -859,7 +1041,7 @@ class AsProcessingChain():
                 if from_inter.direction == "in":
                     continue
                 for to_inter in sink.interfaces:
-                    if to_inter.name != from_inter.name:
+                    if to_inter.type != from_inter.type:
                         continue
                     if to_inter.direction == from_inter.direction:
                         continue
@@ -925,17 +1107,21 @@ class AsProcessingChain():
             out = False
             # If the sink interface is already connected, stop here
             if source.connected or sink.connected:
+                LOG.warning(("Connection attempted with or from an already "
+                             "connected interface! Source: '%s', Sink: '%s'"),
+                            repr(source), repr(sink))
                 return None
 
             # Also make sure both interfaces are of the same "type"
             # (name == name) and the Interfaces have differing
             # directions (out <-> in)
-            if source.name != sink.name or (
-                    not source.to_external and source.direction == sink.direction):
+            if source.type != sink.type or (
+                    not source.to_external and 
+                        source.direction == sink.direction):
                 return None
             # If there are templates set, make sure they match
             if source.template is not None and sink.template is not None:
-                if source.template.name != sink.template.name:
+                if source.template.type != sink.template.type:
                     return None
             # Call connect_port for each port of the source interface
             for from_port in source.ports:
@@ -995,11 +1181,16 @@ class AsProcessingChain():
                         ret = self.__connect_port__(source, to_port, top=top)
                         if ret is not None:
                             return ret
+            
         else:
             LOG.debug("Looking to connect port '%s' to '%s'",
                       source.code_name, str(sink))
             # If source is already connected, stop
-            if source.connected:
+            if source.connected and not isinstance(source, StandardPort):
+                LOG.warning(("Connection attempted from an already "
+                             "connected port! '%s' of module '%s'"),
+                            source.code_name,
+                            AsModule.get_parent_module(source).name) 
                 return None
             # Evaluate the port rules. The method returns the determined target
             target = self.eval_port_rules(source, sink, sink_parent)
@@ -1013,9 +1204,12 @@ class AsProcessingChain():
                     glue = self.__generate_glue_signal__(source, source,
                                                          target)
                     if glue is not None:
-                        top.signals.append(glue)
+                        if not top.add_signal(glue):
+                            glue = top.get_signal(glue.code_name)
+                        #top.signals.append(glue)
                         source.set_glue_signal(glue)
                         target.set_glue_signal(glue)
+
                 try:
                     # Register connection and set connected attribute
                     self.propagate_connection(source, target)
@@ -1040,6 +1234,7 @@ class AsProcessingChain():
         else:
             dsrc = source
             dsink = sink
+
 
         # Register connection locally (Port objects)
         dsrc.outgoing.append(dsink)
@@ -1072,9 +1267,12 @@ class AsProcessingChain():
         dsrc_mod.register_connection(dsink_mod)
         dsink_mod.register_connection(dsrc_mod)
 
+        LOG.debug("Registered connection from '%s' of '%s' to '%s' of '%s'.",
+                dsrc.code_name, dsrc_mod.name, dsink.code_name, dsink_mod.name)
+
     def eval_port_rules(self, source: Port, sink, sink_parent):
         """Evaluate the ruleset of a Port object when trying to connect it to
-           a sink object. Calls 'apply_port_ruleset_action' for execution of
+           a sink object. Calls 'apply_port_ruleset_actions' for execution of
            the rule actions."""
         target = None
         # For each condition in the ruleset of the source port
@@ -1092,7 +1290,7 @@ class AsProcessingChain():
                 LOG.debug("Condition met! Now executing linked actions: '%s'",
                           str(source.get_rule_actions(cond)))
                 # Condition met, execute the rule actions
-                ret = self.apply_port_ruleset_action(
+                ret = self.apply_port_ruleset_actions(
                     source, sink, cond, target, sink_parent)
                 if ret is not None:
                     LOG.debug("Identified target for port '%s': '%s'",
@@ -1102,191 +1300,223 @@ class AsProcessingChain():
 
     SKIPPED_ACTIONS = ("note", "warning", "error")
 
-    def apply_port_ruleset_action(self, source: Port, sink, cond: str,
+    def apply_port_ruleset_actions(self, source: Port, sink, cond: str,
                                   target, sink_parent):
         """Apply/Execute the rule actions of a met rule condition."""
         result = target
         # For each action of this condition
         for action in source.get_rule_actions(cond):
+            try:
+                result = self.apply_port_rule(action, source, sink, cond, target,
+                                              sink_parent, result)
+            except AsError:
+                if self.err_mgr.get_error_severity_count("Critical"):
+                    raise AsConnectionError(source,
+                            "Critical error encountered - Connection aborted!")
+                else:
+                    pass
+        return result
+    
+    def apply_port_rule(self, action, source: Port, sink, cond: str, target, 
+                        sink_parent, result):
+        """Apply a single action of a condition in a Port's ruleset."""
 
-            # When handling unconnected ports of connected interfaces
-            if source.port_type == "interface" and source.parent.connected:
-                # Only execute certain actions (Skipped actions filtered here)
-                if action in self.SKIPPED_ACTIONS:
-                    # Notify user
-                    LOG.debug(("Skipped action '%s' of source '%s' from "
-                               "inteface '%s' since it is already connected."),
-                              action, source.code_name, source.parent.name)
-                    continue
+        # When handling unconnected ports of connected interfaces
+        if source.port_type == "interface" and source.parent.connected \
+                and (sink is None or sink.port_type == "interface"):
+            # Only execute certain actions (Skipped actions filtered here)
+            if action in self.SKIPPED_ACTIONS:
+                # Notify user
+                LOG.debug(("Skipped action '%s' of source '%s' from "
+                            "inteface '%s' since it is already connected."),
+                            action, source.code_name, source.parent.name)
+                return result
 
-            LOG.debug("Handling action '%s'...", action)
-            # On action "connect": simple checks for compatibility:
-            # port direction and port names (not code_names)
-            if action == "connect":
-                if source.name != sink.name:
-                    LOG.debug("Port names didn't match! '%s' != '%s'",
-                              source.name, sink.name)
-                    continue
-                if (source.get_direction_normalized() ==
-                        sink.get_direction_normalized()):
-                    if not ((source.port_type == "interface" and
-                             source.parent.to_external) or
-                            source.port_type == "external"):
-                        LOG.debug("Normalized port directions are the same!")
-                        LOG.debug(
-                            "Source '%s':'%s'; Sink '%s':'%s'",
-                            str(source),
-                            source.get_direction_normalized(),
-                            str(sink),
-                            sink.get_direction_normalized())
-                        continue
-                if source.data_type != sink.data_type:
-                    continue
-                if not as_conh.manage_data_widths(source, sink):
-                    # pass
-                    # TODO: The function 'manage_data_widths' has been quite
-                    # a headache. Need a more formal implementation of
-                    # data width management.
-                    # FIXME: What should happen if we end up here?
-                    LOG.warning("Failed data width management: %s", str(source))
-                    LOG.warning("%s",str(AsModule.get_parent_module(source)))
+        LOG.debug("Handling action '%s'...", action)
+        # On action "connect": simple checks for compatibility:
+        # port direction and port names (not code_names)
+        if action in ("connect", "forceconnect"):
+            if action == "connect" and source.name != sink.name:
+                LOG.debug("Port names didn't match! '%s' != '%s'",
+                            source.name, sink.name)
+                return result
+            if (source.get_direction_normalized() ==
+                    sink.get_direction_normalized()):
+                if not ((source.port_type == "interface" and
+                            source.parent.to_external) or
+                        source.port_type == "external"):
+                    LOG.debug("Normalized port directions are the same!")
+                    LOG.debug(
+                        "Source '%s':'%s'; Sink '%s':'%s'",
+                        str(source),
+                        source.get_direction_normalized(),
+                        str(sink),
+                        sink.get_direction_normalized())
+                    return result
+            if source.data_type != sink.data_type:
+                return result
+            if not as_conh.manage_data_widths(source, sink):
+                # pass
+                # TODO: The function 'manage_data_widths' has been quite
+                # a headache. Need a more formal implementation of
+                # data width management.
+                # FIXME: What should happen if we end up here?
+                LOG.warning(
+                    "Failed data width management! From: %s ", str(source))
+                LOG.warning("Of: %s", str(AsModule.get_parent_module(source)))
+                if sink:
+                    LOG.warning("To: %s", str(sink))
+                    LOG.warning("Of: %s", str(AsModule.get_parent_module(sink)))
+                raise AsConnectionError(source, "Failed data width management",
+                                        severity="Warning")
 
-                LOG.debug("Matching ports identified: '%s' and '%s'",
-                          source.code_name, sink.code_name)
-                result = sink
-            # For 'bundle_...' actions, the target is either "and" or "or"
-            elif "bundle" in action:
-                btype = action.replace("bundle", "").strip("_ ")
-                source_mod = AsModule.get_parent_module(source)
-                try:
-                    # Add to a list of ports to be bundled
-                    self.bundles[btype].append(source)
-                except KeyError:
-                    # If the bundle action is neither 'and' nor 'or', error!
-                    LOG.error(
-                        ("Invalid bundle-action identified: '%s' for port"
-                         " '%s' of module '%s'"),
-                        action,
-                        source.code_name,
-                        str(source_mod))
-                top_mod = source_mod.parent
-                # Check if toplevel already has the port
+            LOG.debug("Matching ports identified: '%s' and '%s'",
+                        source.code_name, sink.code_name)
+            return sink
+            
+        # For 'bundle_...' actions, the target is either "and" or "or"
+        elif "bundle" in action:
+            btype = action.replace("bundle", "").strip("_ ")
+            source_mod = AsModule.get_parent_module(source)
+            try:
+                # Add to a list of ports to be bundled
+                self.bundles[btype].append(source)
+            except KeyError:
+                # If the bundle action is neither 'and' nor 'or', error!
+                errtxt = ("Invalid bundle-action identified: '{}' for port"
+                            " '{}' of module '{}'").format(action,
+                            source.code_name, str(source_mod))
+                LOG.error(errtxt)
+                raise AsTextError(action, errtxt)
+            top_mod = source_mod.parent
+            # Check if toplevel already has the port
+            ext_port = top_mod.get_port(source.code_name,
+                                        suppress_error=True)
+            # If the port is not in the next higher module,
+            # make source external
+            if not ext_port:
+                self.make_external_port(source)
+                # Now get the reference to the new external port
                 ext_port = top_mod.get_port(source.code_name,
                                             suppress_error=True)
-                # If the port is not in the next higher module,
-                # make source external
-                if not ext_port:
-                    self.make_external_port(source)
-                    # Now get the reference to the new external port
-                    ext_port = top_mod.get_port(source.code_name,
-                                                suppress_error=True)
-                    if not ext_port:  # If that didn't work, raise an error!
-                        LOG.error("Failed to make port '%s' external!",
-                                  str(source))
-                        raise AsConnectionError(
-                            msg="Bundle Signal, make '{}' external"
-                            .format(str(source)), affected_obj=source)
-
-                # Generate a new signal used to "feed" the bundling gate
-                signal_name = "{}_{}_{}".format(source_mod.name,
-                                                source.code_name, btype)
-                signal = GlueSignal(name=signal_name,
-                                    data_type=source.data_type,
-                                    data_width=source.data_width)
-                # Connect the signal and associate it with the higher module
-                signal.incoming.append(source)
-                signal.outgoing.append(ext_port)
-                signal.assign_to(top_mod)
-                top_mod.signals.append(signal)
-
-                # Add it as source's glue signal
-                source.set_glue_signal(signal)
-                source.set_connected()
-                result = ext_port
-
-            elif action == "make_external":
-                if target:
-                    continue
-                # If source is already on toplevel
-                top_mod = AsModule.get_parent_module(source)
-                if top_mod == self.top:
-                    continue  # No need for action
-                # Else, make the port external
-                if not self.make_external_port(source, False):
-                    LOG.error(
-                        "Failed to make port '%s' external!",
-                        str(source))
+                if not ext_port:  # If that didn't work, raise an error!
+                    LOG.error("Failed to make port '%s' external!",
+                                str(source))
                     raise AsConnectionError(
-                        msg="Bundle Signal, make '{}' external" .format(
-                            str(source)), affected_obj=source)
-                # Set next higher up connected port as the target
-                ext_mod = getattr(AsModule.get_parent_module(source),
-                                  "parent", None)
-                target = ext_mod.get_port(
-                    source.code_name, suppress_error=True)
+                        msg="Bundle Signal, make '{}' external"
+                        .format(str(source)), affected_obj=source)
 
-            elif "fallback_port" in action:
-                # This action is only valid if no other connection target is
-                # found: Check parent of sink for the fallback port
-                if result is not None:
-                    continue
-                # For 'fallback_port(...)', try to find the passed port name
-                # among the port of the parent of the sink port.
-                fbp_name = action.replace("fallback_port", "").strip("()")
-                if sink is None:
-                    to_port = sink_parent.get_port(fbp_name,
-                                                   suppress_error=True)
-                else:
-                    to_port = sink.parent.get_port(fbp_name,
-                                                   suppress_error=True)
-                if to_port is not None and not to_port.connected:
-                    result = to_port
+            # Generate a new signal used to "feed" the bundling gate
+            signal_name = "{}_{}_{}".format(source_mod.name,
+                                            source.code_name, btype)
+            signal = GlueSignal(name=signal_name,
+                                data_type=source.data_type,
+                                data_width=source.data_width)
+            # Connect the signal and associate it with the higher module
+            signal.incoming.append(source)
+            signal.outgoing.append(ext_port)
+            signal.assign_to(top_mod)
+            top_mod.signals.append(signal)
 
-            elif "set_value" in action:
-                # Only use this constant value action if no target
-                if result is not None:
-                    continue
-                # For 'set_value(...)', extract the value
-                value = action.replace("set_value", "").strip("()_ ")
-                glue = GlueSignal(name=value, code_name=value,
-                                  port_type=source.port_type,
-                                  data_width=source.data_width,
-                                  optional=False)
-                glue.is_signal = False
-                glue.set_connected()
-                source.set_connected()
-                source.set_glue_signal(glue)
-                result = None
-            # The actions 'note', 'warning' and 'error' report to the user
-            elif action == "note":
-                LOG.info("%s triggered by '%s'",
-                         as_conh.__get_port_rule_message__(source), cond)
-                # Remove the action so it is only displayed once
-                source.remove_rule(cond, action)
-            elif action == "warning":
-                LOG.warning("%s triggered by '%s'",
-                            as_conh.__get_port_rule_message__(source), cond)
-                # Remove the action so it is only displayed once
-                source.remove_rule(cond, action)
-            elif action == "error":
-                LOG.error("%s triggered by '%s'",
-                          as_conh.__get_port_rule_message__(source), cond)
-                # No removal necessary, automatics should halt after diplaying
-                print(("AsAutomatics stopped because of a triggered 'error' "
-                       "rule for port {} of {}").format(source, source.parent))
+            # Add it as source's glue signal
+            source.set_glue_signal(signal)
+            source.set_connected()
+            return ext_port
+
+        elif action == "make_external":
+            if target:
+                return result
+            # If source is already on toplevel
+            top_mod = AsModule.get_parent_module(source)
+            if top_mod == self.top:
+                return result  # No need for action
+            # Else, make the port external
+            if not self.make_external_port(source, False):
+                LOG.error(
+                    "Failed to make port '%s' external!",
+                    str(source))
                 raise AsConnectionError(
-                    msg="Port connection error raised by ruleset",
-                    detail="rule condition '{}'".format(cond),
-                    affected_obj=source)
-            elif action == "none":
-                # No action! YEAH!
-                pass
+                    msg="Make external, make '{}' external".format(
+                        str(source)), affected_obj=source)
+            # Set next higher up connected port as the target
+            ext_mod = getattr(AsModule.get_parent_module(source),
+                                "parent", None)
+            target = ext_mod.get_port(
+                source.code_name, suppress_error=True)
+            return target
+
+        elif "fallback_port" in action:
+            # This action is only valid if no other connection target is
+            # found: Check parent of sink for the fallback port
+            if result is not None:
+                return result
+            # For 'fallback_port(...)', try to find the passed port name
+            # among the port of the parent of the sink port.
+            fbp_name = action.replace("fallback_port", "").strip("()")
+            if sink is None:
+                sink = sink_parent
+                to_port = sink.get_port(fbp_name, suppress_error=True)
             else:
-                LOG.warning(("Invalid port rule action detected: '%s' for "
-                             "condition '%s' of port '%s' of module '%s'."),
-                            action, cond, source.code_name,
-                            AsModule.get_parent_module(source).name)
-        return result
+                to_port = sink.parent.get_port(fbp_name,
+                                               suppress_error=True)
+            if to_port is None:
+                to_port = AsModule.get_parent_module(sink).get_port(fbp_name,
+                         suppress_error=True)
+            if to_port is not None and not to_port.connected:
+                return to_port
+
+        elif "set_value" in action:
+            # Only use this constant value action if no target
+            if result is not None:
+                return result
+            # For 'set_value(...)', extract the value
+            value = action.replace("set_value", "")[1:-1]
+            # Generate a "fake" glue signal with the desired value as the name
+            glue = GlueSignal(name=value, code_name=value,
+                                port_type=source.port_type,
+                                data_width=source.data_width,
+                                optional=False)
+            glue.is_signal = False
+            glue.set_connected()
+            source.set_connected()
+            source.set_glue_signal(glue)
+            source.in_entity = False
+            return None
+        # The actions 'note', 'warning' and 'error' report to the user
+        elif action == "note":
+            LOG.info("%s triggered by '%s'",
+                        as_conh.__get_port_rule_message__(source), cond)
+            # Remove the action so it is only displayed once
+            source.remove_rule(cond, action)
+            return result
+        elif action == "warning":
+            LOG.warning("%s triggered by '%s'",
+                        as_conh.__get_port_rule_message__(source), cond)
+            # Remove the action so it is only displayed once
+            source.remove_rule(cond, action)
+            return result
+        elif action == "error":
+            LOG.error("%s triggered by '%s'",
+                        as_conh.__get_port_rule_message__(source), cond)
+            # No removal necessary, automatics should halt after diplaying
+            print(("AsAutomatics stopped because of a triggered 'error' "
+                    "rule for port {} of {}").format(source, source.parent))
+            raise AsConnectionError(
+                msg="Port connection error raised by ruleset",
+                detail="rule condition '{}'".format(cond),
+                affected_obj=source)
+        elif action == "none":
+            # No action! YEAH!
+            return result
+        else:
+            LOG.warning(("Invalid port rule action detected: '%s' for "
+                            "condition '%s' of port '%s' of module '%s'."),
+                        action, cond, source.code_name,
+                        AsModule.get_parent_module(source).name)
+            raise AsTextError(action, "Invalid port rule action found!",
+                              severity="Warning")
+
+
 
     @staticmethod
     def __generate_glue_signal__(port: Port, con_from: Port,
@@ -1331,7 +1561,18 @@ class AsProcessingChain():
                 return False
             # Check if port is already in the current module
             new_port = pmod.get_port(port.code_name, suppress_error=True)
+            if not new_port:
+                new_port = pmod.get_port(port.name, suppress_error=True)
             
+            if new_port is None and isinstance(pmod, AsModuleGroup):
+                signal = pmod.get_signal(port.code_name)
+                if not signal:
+                    signal = pmod.get_signal(port.name)
+                if signal:
+                    port.glue_signal = signal
+                    self.propagate_connection(port, signal)
+                    return True
+
             # Check if port with new name is current module
             if not keep_name and not new_port:
                 new_port_name = tmod.name + "_" + port.code_name

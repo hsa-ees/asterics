@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 """
 as_automatics_builder.py
@@ -46,9 +46,10 @@ from datetime import datetime
 
 from as_automatics_proc_chain import AsProcessingChain
 from as_automatics_module import AsModule
-from as_automatics_exceptions import AsFileError
+from as_automatics_exceptions import AsFileError, AsModuleError
 from as_automatics_helpers import append_to_path
 import as_automatics_logging as as_log
+import as_automatics_helpers as as_help
 
 LOG = as_log.get_log()
 
@@ -109,8 +110,17 @@ def get_dependencies(chain: AsProcessingChain, module: AsModule,
             module_list.append(dep)
             # ... and determine further dependencies of the new dependency
             dep_mod = chain.library.get_module_template(dep)
+            if dep_mod is None:
+                dep_mod = chain.library.get_module_template(dep,
+                                                            window_module=True)
+                if dep_mod is None:
+                    LOG.error("Module '%s' not found! Required by '%s'.", dep,
+                            module.entity_name)
+                    raise AsModuleError(dep, "Module not found!", 
+                            "Required by '{}'.".format(module.entity_name))
             # Let's go down the rabbit hole! Recursion time!
             get_dependencies(chain, dep_mod, module_list)
+
 
 
 def prepare_output_path(source_path: str, output_path: str,
@@ -119,7 +129,7 @@ def prepare_output_path(source_path: str, output_path: str,
     Parameters:
       source_path: path to the folder to copy.
       output_path: Where to copy source_path to.
-      allow_deletion: If output_path is not empty delete the contents if 
+      allow_deletion: If output_path is not empty delete the contents if
                       allow_deletion is True, else throw an error."""
     LOG.info("Preparing output project directory...")
     if os.path.isdir(output_path) and os.listdir(output_path):
@@ -128,8 +138,10 @@ def prepare_output_path(source_path: str, output_path: str,
             try:
                 rmtree(output_path)
             except Exception as err:
-                LOG.error("Could not clean project output directory '%s'! '%s'",
-                          output_path, str(err))
+                LOG.error(
+                    "Could not clean project output directory '%s'! '%s'",
+                    output_path,
+                    str(err))
                 raise AsFileError(
                     output_path,
                     detail=str(err),
@@ -143,7 +155,7 @@ def prepare_output_path(source_path: str, output_path: str,
             copytree(source_path, output_path)
         except Exception as err:
             LOG.error("Could not create system output tree in '%s'! '%s'",
-                    output_path, str(err))
+                      output_path, str(err))
             raise AsFileError(
                 output_path,
                 detail=str(err),
@@ -154,27 +166,61 @@ VEARS_REL_PATH = "ipcores/VEARS/"
 
 
 def add_vears_core(output_path: str, asterics_path: str,
-                   use_symlinks: bool = True):
+                   use_symlinks: bool = True, force: bool = False):
     """Link or copy the VEARS IP-Core from the ASTERICS installation
     to the output path.
     Parameters:
       output_path: Directory to link/copy VEARS to.
       asterics_path: Toplevel folder of the ASTERICS installation.
-      use_symlinks: If True, VEARS will be linked, else copied."""
+      use_symlinks: If True, VEARS will be linked, else copied.
+      force: If True, the link or folder will be deleted if already present."""
     vears_path = append_to_path(asterics_path, VEARS_REL_PATH)
+    vears_path = os.path.realpath(vears_path)
     target = append_to_path(output_path, "VEARS", add_trailing_slash=False)
+
+    if force and os.path.exists(target):
+        if os.path.islink(target) or os.path.isfile(target):
+            try:
+                os.remove(target)
+            except IOError as err:
+                LOG.error("Could not remove file '%s'! VEARS not added!",
+                        target)
+                raise AsFileError(target,
+                    "Could not remove file to link/copy VEARS!", str(err))
+        else:
+            try:
+                rmtree(target)
+            except IOError as err:
+                LOG.error("Could not remove folder '%s'! VEARS not added!",
+                        target)
+                raise AsFileError(target,
+                    "Could not remove folder to link/copy VEARS!", str(err))
+        
     if use_symlinks:
+        if not os.path.exists(output_path):
+            try:
+                os.makedirs(output_path, mode=0o755, exist_ok=True)
+            except IOError as err:
+                LOG.error("Could not create directory for VEARS: '%s'! - '%s'",
+                          output_path, str(err))
+                raise AsFileError(output_path, 
+                        "Could not create directory for VEARS!", str(err))
         try:
+            target = os.path.realpath(target)
             os.symlink(vears_path, target, target_is_directory=True)
         except IOError as err:
             LOG.error("Could not create a link to the VEARS IP-Core! - '%s'",
                       str(err))
+            raise AsFileError(target, "Could not create link to VEARS!",
+                              str(err))
     else:
         try:
-            os.mkdir(target, mode=0o755)
+            os.makedirs(target, mode=0o755, exist_ok=True)
+            target = os.path.realpath(target)
             copytree(vears_path, target)
         except IOError as err:
             LOG.error("Could not copy the VEARS IP-Core!")
+            raise AsFileError(output_path, "Could not copy VEARS!", str(err))
 
 
 def write_config_c(output_path: str):
@@ -203,7 +249,7 @@ ASTERICS_H_TEMPLATE = \
     """
 /*------------------------------------------------------------------------------
 --  This file is part of the ASTERICS Framework.
---  Copyright (C) Hochschule Augsburg, University of Applied Sciences
+--  (C) 2019 Hochschule Augsburg, University of Applied Sciences
 --------------------------------------------------------------------------------
 -- File:           asterics.h
 --
@@ -255,7 +301,6 @@ extern "C"
 {module_driver_includes}
 
 /************************** ASTERICS IP-Core Base Address ***************************/
-//xparamters.h is broken in Vivado 2015.4 for user modules -> set the Base Address manually:
 #define ASTERICS_BASEADDR {base_addr:#8X}
 
 #define AS_REGISTERS_PER_MODULE {regs_per_mod}
@@ -267,6 +312,9 @@ extern "C"
 /************************** Module Address Mapping ***************************/
 
 {addr_map}
+
+
+{module_additions}
 
 #ifdef __cplusplus
 }}
@@ -292,6 +340,18 @@ def write_asterics_h(chain: AsProcessingChain, output_path: str):
         "#define AS_MODULE_BASEADDR_{modname} ((uint32_t*)(ASTERICS_BASEADDR + "
         "(AS_MODULE_BASEREG_{modname} * 4 * AS_REGISTERS_PER_MODULE)))\n")
 
+    # Build a list of module additions to asterics.h
+    # Additions should be unique 
+    # (two HW instances of an ASTERICS module use the same driver)
+    module_additions = set()
+    for module in chain.modules:
+        module_additions.update(module.get_software_additions())
+    # Format module additions: One line per additional string
+    module_additions = "\n".join(module_additions)
+    module_additions = ("/************************** Module Defines and "
+                        "Additions ***************************/\n\n") \
+                       + module_additions
+
     # Get list of modules
     unique_modules = get_unique_modules(chain)
 
@@ -309,7 +369,6 @@ def write_asterics_h(chain: AsProcessingChain, output_path: str):
     # Register base definition list and register range order
     reg_bases = ""
     reg_addrs = ""
-    count = 0
     # Generate register definitions
     for addr in chain.address_space:
         # Get register interface object
@@ -320,10 +379,9 @@ def write_asterics_h(chain: AsProcessingChain, output_path: str):
             regif_modname += regif.name_suffix
         reg_bases += module_base_reg_template.format(
             modname=regif_modname.upper(),
-            offset=count)
+            offset=regif.regif_num)
         reg_addrs += module_base_addr_template.format(
             modname=regif_modname.upper())
-        count += 1
 
     try:
         with open(asterics_h_path + ASTERICS_H_NAME, "w") as file:
@@ -332,7 +390,8 @@ def write_asterics_h(chain: AsProcessingChain, output_path: str):
                 base_addr=chain.asterics_base_addr,
                 regs_per_mod=chain.max_regs_per_module,
                 module_driver_includes=include_list,
-                base_regs=reg_bases, addr_map=reg_addrs))
+                base_regs=reg_bases, addr_map=reg_addrs,
+                module_additions=module_additions))
 
     except IOError as err:
         print("Couldn't write {}: '{}'".format(
@@ -346,7 +405,7 @@ TCL_HEADER = \
     """
 #------------------------------------------------------------------------------
 #-  This file is part of the ASTERICS Framework.
-#-  Copyright (C) Hochschule Augsburg, University of Applied Sciences
+#-  (C) 2019 Hochschule Augsburg, University of Applied Sciences
 #-------------------------------------------------------------------------------
 #- File:           {}
 #-
@@ -381,7 +440,7 @@ TCL_FOLDER = "vivado_cores/ASTERICS/"
 
 
 def write_vivado_package_tcl(chain: AsProcessingChain,
-                             output_path: str, additions_c1 : str = "") -> bool:
+                             output_path: str, additions_c1: str = "") -> bool:
     """Write two TCL script fragments sourced by the packaging TCL script.
     This function generates Vivado-specific TCL commands!
     The first fragment is sourced very early in the packaging script and
@@ -397,49 +456,48 @@ def write_vivado_package_tcl(chain: AsProcessingChain,
     output_path - String: Toplevel folder of the current project
     Returns a boolean value: True on success, False otherwise"""
 
-
-    as_iic_map_tcl_template = \
-        ("# Set up interface properties:\n"
-         "ipx::add_bus_interface {iic_if_name} [ipx::current_core]\n"
-         "set_property abstraction_type_vlnv xilinx.com:interface:iic_rtl:1.0 "
-         "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]\n"
-         "set_property bus_type_vlnv xilinx.com:interface:iic:1.0 "
-         "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]\n"
-         "set_property interface_mode master "
-         "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]\n"
-         "set_property display_name asterics_{iic_if_name} "
-         "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]\n"
-         "# IIC port mapping:\n"
-         "ipx::add_port_map SCL_T [ipx::get_bus_interfaces {iic_if_name} "
-         "-of_objects [ipx::current_core]]\n"
-         "set_property physical_name {iic_signal_prefix}scl_out_enable "
-         "[ipx::get_port_maps SCL_T -of_objects "
-         "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]]\n"
-         "ipx::add_port_map SDA_O [ipx::get_bus_interfaces {iic_if_name} "
-         "-of_objects [ipx::current_core]]\n"
-         "set_property physical_name {iic_signal_prefix}sda_out "
-         "[ipx::get_port_maps SDA_O -of_objects "
-         "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]]\n"
-         "ipx::add_port_map SDA_I [ipx::get_bus_interfaces {iic_if_name} "
-         "-of_objects [ipx::current_core]]\n"
-         "set_property physical_name {iic_signal_prefix}sda_in "
-         "[ipx::get_port_maps SDA_I -of_objects "
-         "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]]\n"
-         "ipx::add_port_map SDA_T [ipx::get_bus_interfaces {iic_if_name} "
-         "-of_objects [ipx::current_core]]\n"
-         "set_property physical_name {iic_signal_prefix}sda_out_enable "
-         "[ipx::get_port_maps SDA_T -of_objects "
-         "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]]\n"
-         "ipx::add_port_map SCL_O [ipx::get_bus_interfaces {iic_if_name}"
-         " -of_objects [ipx::current_core]]\n"
-         "set_property physical_name {iic_signal_prefix}scl_out "
-         "[ipx::get_port_maps SCL_O -of_objects "
-         "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]]\n"
-         "ipx::add_port_map SCL_I [ipx::get_bus_interfaces {iic_if_name} "
-         "-of_objects [ipx::current_core]]\n"
-         "set_property physical_name {iic_signal_prefix}scl_in "
-         "[ipx::get_port_maps SCL_I -of_objects "
-         "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]]\n")
+    as_iic_map_tcl_template = (
+        "# Set up interface properties:\n"
+        "ipx::add_bus_interface {iic_if_name} [ipx::current_core]\n"
+        "set_property abstraction_type_vlnv xilinx.com:interface:iic_rtl:1.0 "
+        "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]\n"
+        "set_property bus_type_vlnv xilinx.com:interface:iic:1.0 "
+        "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]\n"
+        "set_property interface_mode master "
+        "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]\n"
+        "set_property display_name asterics_{iic_if_name} "
+        "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]\n"
+        "# IIC port mapping:\n"
+        "ipx::add_port_map SCL_T [ipx::get_bus_interfaces {iic_if_name} "
+        "-of_objects [ipx::current_core]]\n"
+        "set_property physical_name {iic_signal_prefix}scl_out_enable "
+        "[ipx::get_port_maps SCL_T -of_objects "
+        "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]]\n"
+        "ipx::add_port_map SDA_O [ipx::get_bus_interfaces {iic_if_name} "
+        "-of_objects [ipx::current_core]]\n"
+        "set_property physical_name {iic_signal_prefix}sda_out "
+        "[ipx::get_port_maps SDA_O -of_objects "
+        "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]]\n"
+        "ipx::add_port_map SDA_I [ipx::get_bus_interfaces {iic_if_name} "
+        "-of_objects [ipx::current_core]]\n"
+        "set_property physical_name {iic_signal_prefix}sda_in "
+        "[ipx::get_port_maps SDA_I -of_objects "
+        "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]]\n"
+        "ipx::add_port_map SDA_T [ipx::get_bus_interfaces {iic_if_name} "
+        "-of_objects [ipx::current_core]]\n"
+        "set_property physical_name {iic_signal_prefix}sda_out_enable "
+        "[ipx::get_port_maps SDA_T -of_objects "
+        "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]]\n"
+        "ipx::add_port_map SCL_O [ipx::get_bus_interfaces {iic_if_name}"
+        " -of_objects [ipx::current_core]]\n"
+        "set_property physical_name {iic_signal_prefix}scl_out "
+        "[ipx::get_port_maps SCL_O -of_objects "
+        "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]]\n"
+        "ipx::add_port_map SCL_I [ipx::get_bus_interfaces {iic_if_name} "
+        "-of_objects [ipx::current_core]]\n"
+        "set_property physical_name {iic_signal_prefix}scl_in "
+        "[ipx::get_port_maps SCL_I -of_objects "
+        "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]]\n")
 
     # Class to manage the AXI interface information for the TCL packaging
     # script
@@ -459,7 +517,8 @@ def write_vivado_package_tcl(chain: AsProcessingChain,
             "set {ref} [ipx::get_bus_interfaces -of_objects "
             "[ipx::current_core] {busif}]\n")
         memory_map_tcl_template = \
-            ("ipx::remove_memory_map {ref} [ipx::current_core]\n"
+            ("ipx::remove_memory_map slave_s_axi [ipx::current_core]\n"
+             "ipx::remove_memory_map {ref} [ipx::current_core]\n"
              "# ^ Remove any memory maps from the interface\n"
              "# (potentially) Re-add a memory map\n"
              "ipx::add_memory_map {mem_map_ref} [ipx::current_core]\n"
@@ -535,38 +594,30 @@ def write_vivado_package_tcl(chain: AsProcessingChain,
     # Possible AXI interface types
     templates = ("AXI_Slave", "AXI_Master")
 
-    # Search for AXI Interface modules in the chain and process them
-    for module in chain.top.modules:
-        # Using the entity name of the module,
-        # decide whether it's an AXI interface
-        slave, master = (templ in module.name for templ in templates)
+    for inter in chain.top.interfaces:
+        temp = None
+        if inter.type.lower() in ("axi_slave_external", "axi_master_external"):
+            slave = templates[0] in inter.type
+            if slave:
+                # For AXI slaves: Populate the TCL AXI class
+                temp = TCL_AXI_Interface(templates[0])
+                # And set parameters for the memory map (slave registers)
+                temp.memory_range = 65536
+                temp.if_type = "axi_lite"
+            else:
+                temp = TCL_AXI_Interface(templates[1])
+            temp.refname = as_help.minimize_name(inter.name_prefix) \
+                    .replace(temp.axi_type.lower(), "").strip("_")
+            temp.bus_if_name = inter.ports[0].code_name.rsplit("_", 1)[0]
+            
 
-        if slave:
-            # For AXI slaves: Populate the TCL AXI class
-            temp = TCL_AXI_Interface("AXI_Slave")
-            prefix = module.name.replace(temp.axi_type, "").strip("_")
-            temp.bus_if_name = module.name + "_" + prefix
-            # And set parameters for the memory map (slave registers)
-            temp.memory_range = 65536
-            temp.if_type = "axi_lite"
-
-        elif master:
-            # For AXI masters: Add the additional suffix to the bus name
-            temp = TCL_AXI_Interface("AXI_Master")
-            prefix = module.name.replace(temp.axi_type, "").strip("_")
-            temp.bus_if_name = module.name + "_" + prefix + "_m_axi"
-        else:
-            # Skip all other modules
-            continue
-
-        # Set the reference name and update the clock and reset names
-        temp.refname = prefix.strip("_ ")
-        temp.update()
-        # Generate the bus association commands for all interfaces
-        content2 += temp.get_tcl_bus_assoc_commands()
-        if slave:
-            # Only slaves have a memory map
-            content2 += temp.get_tcl_mem_commands()
+            # Set the reference name and update the clock and reset names
+            temp.update()
+            # Generate the bus association commands for all interfaces
+            content2 += temp.get_tcl_bus_assoc_commands()
+            if slave:
+                # Only slaves have a memory map
+                content2 += temp.get_tcl_mem_commands()
     
     # Build interface instantiation strings for as_iic modules
     iic_if_inst_str = ["\n"]
@@ -574,18 +625,21 @@ def write_vivado_package_tcl(chain: AsProcessingChain,
         if module.entity_name == "as_iic":
             if_name = module.name
             top_if = chain.top.__get_interface_by_un_fuzzy__(
-                     module.get_interface("iic_interface").unique_name)
+                module.get_interface("in", if_type="iic_interface").unique_name)
             if top_if is None:
                 LOG.error(("Was not able to determine port names for IIC "
                            "interface '%s' - IIC interface not found!"),
                           if_name)
                 mod_prefix = ""
             else:
-                mod_prefix = top_if.name_prefix
+                mod_prefix = as_help.minimize_name(top_if.name_prefix,
+                        chain.NAME_FRAGMENTS_REMOVED_ON_TOPLEVEL)
             iic_if_inst_str.append("#Instantiate interface for {}\n"
                                    .format(if_name))
-            iic_if_inst_str.append(as_iic_map_tcl_template
-                .format(iic_signal_prefix=mod_prefix, iic_if_name=if_name))
+            iic_if_inst_str.append(
+                as_iic_map_tcl_template.format(
+                    iic_signal_prefix=mod_prefix,
+                    iic_if_name=if_name))
             iic_if_inst_str.append("# END Instantiate interface for {}\n\n"
                                    .format(if_name))
     # Assemble the IIC interface string and add to the TCL fragment
@@ -614,10 +668,11 @@ def write_vivado_package_tcl(chain: AsProcessingChain,
                           str(err))
 
 
-VIVADO_TCL_COMMANDLINE_TEMPLATE = ('ees-vivado -mode tcl -source {}packaging.tcl '
-                                   '-notrace -tclargs "{}package_config.tcl"')
+VIVADO_TCL_COMMANDLINE_TEMPLATE = (
+    'ees-vivado -mode tcl -source {}packaging.tcl '
+    '-notrace -tclargs "{}package_config.tcl"')
 
-HOUSE_CLEANING_LIST_VIVADO = ("package_axi_config.tcl",
+HOUSE_CLEANING_LIST_VIVADO = ("package_interface_config.tcl",
                               "package_config.tcl",
                               "asterics.hw",
                               "asterics.cache",
@@ -629,7 +684,7 @@ HOUSE_CLEANING_LIST_VIVADO = ("package_axi_config.tcl",
 
 
 def run_vivado_packaging(chain: AsProcessingChain, output_path: str,
-                         tcl_additions : str = ""):
+                         tcl_additions: str = ""):
     """Write the necessary TCL fragments and then run the TCL packaging script.
     Requires Vivado to be installed and in callable from the current terminal.
     Parameters:
@@ -840,7 +895,8 @@ def gather_sw_files(chain: AsProcessingChain, output_folder: str,
                              " - '%s"), mode, sw_file, entity, str(err))
                         return False
                 except IOError as err:
-                    LOG.critical(("Could not %s driver file '%s' of module '%s'"
-                                  "! - '%s"), mode, sw_file, entity, str(err))
+                    LOG.critical(
+                        ("Could not %s driver file '%s' of module '%s'"
+                         "! - '%s"), mode, sw_file, entity, str(err))
                     return False
     return True

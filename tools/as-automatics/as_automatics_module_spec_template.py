@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 """
 as_<module>_spec.py
@@ -48,7 +48,7 @@ from as_automatics_module import AsModule
 
 # class <InterfaceName>(Interface):
 #     def __init__(self):
-#        super().__init__("<interface_name>")
+#        super().__init__("<interface_type_name>")
 # Each port of the interface needs to be defined in this manner:
 # The default value for each parameter is marked with curly braces {}
 # For single signal data types, the data_width parameter can be ignored
@@ -61,6 +61,17 @@ from as_automatics_module import AsModule
 #                           optional=<True/{False}>))
 # This method can be used to set a common pre/suffix for ALL ports
 #        self.set_prefix_suffix(prefix="<prefix>", suffix="<suffix>")
+# In the Interface definition you can specify a module that is automatically
+# instantiated when a module with this interface is added to a chain.
+# For each instance of this interface the specified module will be added to the
+# chain once and the instantiating interface will be connected to it.
+# Use the following line in the __init__() method to declare a module 
+# to automatically instantiate:
+#   self.instantiate_module("<module name>")
+# If an interface your module uses automatically instantiates a module you don't
+# want in your system, use the following line in the user script to disable the 
+# functionality:
+# module.get("<interface name>").instantiate_no_module()
 
 
 # This is a template for a module specification used by the generator tool
@@ -119,15 +130,16 @@ def get_module_instance(module_dir: str) -> AsModule:
     # To add the defined interface to Automatics, you may use one of two methods
     # Use: 'AsModule.add_global_interface_template(InterfaceClassName())'
     # for interfaces used in more than one module.
-    # If the interface is exclusive to this module, use:
-    # 'module.add_local_interface_template(InterfaceClassName()):
+    # If the interface is exclusive to this or very few modules, use:
+    # 'module.add_local_interface_template(InterfaceClassName())
+    # in every module witht the interface.
 
     # Module configuration:
     # Here you can add/modify configuration parameters for interfaces, generics,
     # ports, register interfaces and the module itself.
-    # Here is a list o possible configuration options along with a brief
+    # Here is a list of possible configuration options along with a brief
     # explanation of what they do. For more detailed information, check
-    # the chapter about as_automatics in the ASTERICS manual.
+    # the chapter about Automatics in the ASTERICS manual.
 
     # Rules for ports:
     # Ports need to be assigned rules.
@@ -139,13 +151,9 @@ def get_module_instance(module_dir: str) -> AsModule:
 
     # Valid rule conditions:
     # Conditions for comparing two ports of interfaces:
-    #  - "any_missing"
     #  - "any_present" (this is always true)
     #  - "both_present"
-    #  - "sink_present"
     #  - "sink_missing"
-    #  - "source_present"
-    #  - "source_missing"
     # Conditions for ports not part of an interface:
     #  - "single_port"
     #  - "external_port"
@@ -166,17 +174,16 @@ def get_module_instance(module_dir: str) -> AsModule:
     #     Prints a warning message, continuing the process.
     # "note"
     #     Applicable for any condition.
-    #     Prints a note to the console output and build logs.
+    #     Prints a n information message to the console output and build log.
     # "set_value(<value>)"
-    #     Applicable to the conditions "any_missing", "single_port",
-    #     "sink_missing", "any_present" and "source_missing".
+    #     Applicable to the conditions "single_port",
+    #     "sink_missing", "any_present".
     #     Sets the port to the user defined <value>.
     #     This can be a VHDL signal name, VHDL keyword,
     #     number or data representation (eg. '1', X"F00BA5", open, reg_03).
     #     The "value" given will be directly copied into the VHDL source code.
     # "bundle_and"
-    #     Applicable to all conditions except for "both_missing",
-    #     "source_missing" and "any_missing"
+    #     Applicable to all conditions.
     #     Similar to "make_external", but bundles all ports with the same
     #     rule and name of all ASTERICS modules in this system.
     #     The signals are bundled together using a single big AND gate.
@@ -184,7 +191,7 @@ def get_module_instance(module_dir: str) -> AsModule:
     #     This rule behaves exactly like "bundle_and", except that for
     #     this rule the signals are bundled using a big OR gate.
     # "fallback_port(<port name>)"
-    #     Applicable to "source_missing" and "sink_missing",
+    #     Applicable to "sink_missing",
     #     depending on the ports data direction.
     #     This action defines another port the port may be connected to, if its
     #     counterpart is missing.
@@ -193,37 +200,38 @@ def get_module_instance(module_dir: str) -> AsModule:
 
     # By default all ports are assigned a minimal ruleset:
     #   1. "both_present" -> "connect"
-    #   2. "sink_missing" -> "warning"
+    #   2. "sink_missing" -> "note"
 
     # Use the following functions to modify the rulesets of ports to fit
     # your needs:
 
     # Use this line to add a rule to a port, one rule action at a time.
-    # module.get_port("<Port name>").add_rule("<rule_condition>", "<rule_action>")
+    # module.port_rule_add("<Port name>", "<rule_condition>", "<rule_action>")
 
     # Use this line to replace all rule actions for a single condition with
     # a new rule action.
-    # module.get_port("<Port name>").overwrite_rule("<rule_condition>", "<new_rule_action>")
+    # module.port_rule_overwrite("<Port name>", "<rule_condition>",
+    #                            "<new_rule_action>")
 
     # Use this line to remove a rule condition from a port
-    # module.get_port("<Port name>").remove_rule("<rule_condition>")
+    # module.port_rule_remove("<Port name>", "<rule_condition>")
 
     # Use this line to remove all rules from a port
-    # module.get_port("<Port name>").set_ruleset([])
+    # module.get("<Port Name>").set_ruleset([])
 
     # More configuration functions:
 
     # Configure generics:
-    # "to_external"-attribute: Default value is "True", setting this to "False"
-    # will cause Automatics to not propagate this Generic to toplevel, if no
-    # value is set.
-    # module.get_generic("<generic name>").to_external = True
+    # "to_external"-attribute: Default value is "False", setting this to "True"
+    # will cause Automatics to propagate this Generic to toplevel, if no
+    # value is set in the user script.
+    # module.make_generic_external("<generic name>")
 
     # "link_to"-attribute: The generic will be set to the generic provided.
     # Automatics will search each higher level module for matching generics.
     # Using this attribute you can set a custom generic to any of the external
     # or standard toplevel generics (such as AXI specific generics).
-    # module.get_generic("<generic name>").link_to = "<generic to link to>"
+    # module.link_generic("<generic name>", "<generic to link to>")
 
     # You can define a function that is used to check the values the generic
     # is "allowed" to take on:
@@ -235,5 +243,23 @@ def get_module_instance(module_dir: str) -> AsModule:
     # module.get_generic("DIN_WIDTH").set_value_check(func)
     # This function will check the value that
     # the generic is set to in the user script.
+
+    # In case you want to have your module automatically instantiated, you have
+    # the option to define an additional configuration function here, that is
+    # run only if this module is added by way of automatic instantiation.
+    # This has the benefit that at the time the function is run, additional
+    # information is available, most noteably the object of the instantiating
+    # module. Furthermore, the function is run after all user specified
+    # connection methods have been run - the processing system is mostly
+    # built already.
+    # Here is an example definition of the configuration function - for a real
+    # use case example, see the specification file of the as_regmgr module in 
+    # "modules/as_misc/hardware/automatics/as_regmgr_spec.py"
+    #
+    # def auto_inst_config(this_module, instantiated_from):
+    #     # Add first Generic of instantiating module to this module
+    #     this_module.set_generic(instantiated_from.generics[0])
+
+    
 
     return module

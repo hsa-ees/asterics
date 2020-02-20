@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 """
 as_helpers_spec.py
@@ -44,10 +44,8 @@ from as_automatics_module import AsModule
 
 
 def get_module_instance(module_dir: str) -> AsModule:
-    module = AsModule("as_helpers")
+    module = AsModule()
 
-    #                "hardware/hdl/vhdl/pkg/as_sim_ram_pkg.vhd",
-    #toplevel_file = "hardware/hdl/vhdl/pkg/helpers.vhd"
     module.files = ["hardware/hdl/vhdl/pkg/helpers.vhd"]
     module.dependencies = []
     
@@ -56,7 +54,7 @@ def get_module_instance(module_dir: str) -> AsModule:
     # so Automatics can work with it normally
     module.module_dir = module_dir
     module.repository_name = "default"
-    module.name = "helpers"
+    module.name = ""
     module.entity_name = "helpers"
     module.generics = []
     module.standard_ports = []
@@ -64,8 +62,6 @@ def get_module_instance(module_dir: str) -> AsModule:
     module.interfaces = []
 
     # Automatic module discovery would run into errors (no entity in 'helpers')
-    # as_automatics now automatically parses the toplevel file and discovers
-    # ports, generics, existing interfaces and register interfaces
     #module.discover_module("{mdir}/{toplevel}"
     #                       .format(mdir=module_dir, toplevel=toplevel_file))
 

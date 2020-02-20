@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 """
 as_automatics_register.py
@@ -15,7 +15,7 @@ Author:
 Philip Manke
 
 Description:
-Implements the class 'SlaveRegisterLink' for as_automatics.
+Contains VHDL Code strings for use in as_automatics.
 """
 # --------------------- LICENSE -----------------------------------------------
 # This program is free software; you can redistribute it and/or
@@ -37,14 +37,14 @@ Implements the class 'SlaveRegisterLink' for as_automatics.
 ##
 # @file as_automatics_register.py
 # @author Philip Manke
-# @brief Implements the class 'SlaveRegisterLink' for as_automatics.
+# @brief Contains VHDL Code strings for use in as_automatics.
 # -----------------------------------------------------------------------------
 
 
 HEADER = (
     "----------------------------------------------------------------------------------\n"
     "--  This file is part of the ASTERICS Framework.                                  \n"
-    "--  Copyright (C) Hochschule Augsburg, University of Applied Sciences             \n"
+    "--  (C) 2019 Hochschule Augsburg, University of Applied Sciences             \n"
     "----------------------------------------------------------------------------------\n"
     "-- Entity:         {entity_name}                                                  \n"
     "--                                                                                \n"
@@ -91,21 +91,10 @@ AS_TOP_ENTITY = "asterics"
 AS_TOP_DESC = ("Toplevel VHDL file for the ASTERICS IP-Core. Instanciates "
                "AXI interfaces and as_main.")
 
-REGMGR_MATCH_LIST_PORTS = \
-    {"clk": "clk", "rst_n": "reset_n",
-     "sw_address": "sw_address",
-     "sw_data_in": "axi_slv_reg_write_data",
-     "sw_data_out": "mod_read_data_arr(c_{}_regif_num{})",
-     "sw_data_in_ena": "axi_slv_reg_write_enable",
-     "sw_data_out_ena": "axi_slv_reg_read_enable",
-     "sw_byte_mask": "axi_slv_reg_write_byte_strobe",
-     "hw_reg_data_out": "{}_slv_ctrl_reg{}",
-     "hw_reg_data_in": "{}_slv_status_reg{}",
-     "hw_reg_modify": "{}_slv_reg_modify{}",
-     "hw_reg_config": "{}_slv_reg_config{}"}
+ASSIGNMENT_TEMPL = "  {} <= {};\n"
 
 AS_MAIN_ARCH_BODY_STATIC = (
-    "  reset <= not reset_n;\n"
+    #"  reset <= not reset_n;\n"
     "  -- Extract the module address from the AXI read address\n"
     "  read_module_addr <= to_integer(unsigned(\n"
     "    axi_slv_reg_read_address(c_slave_reg_addr_width + 1 downto c_reg_addr_width + 2)));\n"
@@ -142,8 +131,13 @@ AS_MAIN_ARCH_BODY_STATIC = (
     "  end process;\n")
 
 AS_TOP_ARCH_BODY_STATIC = (
-    "  -- Get clock from AXI Slave Interface:\n"
-    "  clk <= as_main_AXI_Slave_as_main_aclk;\n"
-    "  reset_n <= as_main_AXI_Slave_as_main_aresetn;\n"
-    "\n"
+    #"  -- Get clock from AXI Slave Interface:\n"
+    #"  clk <= slave_s_axi_aclk;\n"
+    #"  reset_n <= slave_s_axi_aresetn;\n"
+    "  \n"
 )
+
+REGMGR_BASEADDR_VAL = "c_{}_regif_num"
+REGMGR_SW_DATA_OUT_TARGET = "mod_read_data_arr(c_{}_regif_num{})"
+
+PIPE_WINDOW_TYPE = "t_generic_window"

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 """
 as_automatics_connection_helper.py
@@ -43,6 +43,7 @@ connection phase when building/generating a processing chain.
 
 from math import ceil, log2
 from typing import Sequence
+from copy import copy
 
 from as_automatics_port import Port
 from as_automatics_interface import Interface
@@ -65,7 +66,7 @@ def get_max_regs_per_module(modules: Sequence[AsModule]) -> int:
     for mod in modules:
         regifs.extend(mod.register_ifs)
     # Determine the highest number of registers in any of the interfaces
-    max_reg_count = max([regif.get_reg_count() for regif in regifs])
+    max_reg_count = max([regif.get_reg_count() for regif in regifs], default=2)
     # Round up to the next higher power of two
     max_reg_count = 2 ** ceil(log2(max_reg_count))
     # Set the max_regs-attribute for the interfaces
@@ -81,8 +82,9 @@ def set_unique_name(inter: Interface, module: AsModule):
     inter: Interface to give a unique name to.
     module: inter's parent module, or the module to use for the unique name
     No return value."""
-    inter.unique_name = "{}_{}_{}".format(module.name, str(inter),
-                                          inter.direction)
+    inter.unique_name = "{}_{}{}{}_{}" \
+        .format(module.name, inter.name_prefix, inter.type, 
+                inter.name_suffix, inter.direction)
 
 
 def list_address_space(address_space: dict, addr_per_reg: int,
@@ -106,6 +108,9 @@ def list_address_space(address_space: dict, addr_per_reg: int,
             if reg != "None":
                 print("{:#8X}: {}: {}".format(base_addr + offset,
                                               regif.parent.name, reg))
+            else:
+                print("{:#8X}: {}: {}".format(base_addr + offset,
+                                              regif.parent.name, "Inactive"))
             offset += addr_per_reg
 
 
@@ -261,6 +266,17 @@ def manage_data_widths(source: Port, sink: Port) -> bool:
                   pout.code_name, pin.code_name, pout_mod, pin_mod,
                   pout.code_name, pout_dw, pout_rdw,
                   pin.code_name, pin_dw, pin_rdw, all_gens)
+
+    # Special case for "slv_reg_interface" connections to as_regmgr
+    if ((pin.parent.type == "slv_reg_interface") 
+            and (pout.parent.type == "slv_reg_interface")):
+        if pin_mod.entity_name == "as_regmgr":
+            pin.data_width = copy(pout.data_width)
+            return True
+        if pout_mod.entity_name == "as_regmgr":
+            pout.data_width = copy(pin.data_width)
+            return True
+
     return False
 
 

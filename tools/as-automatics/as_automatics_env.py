@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 """
 as_automatics_env.py
@@ -42,15 +42,14 @@ Capsules the entire as_automatics environment.
 
 import os
 
+from as_automatics_helpers import append_to_path
+from as_automatics_module_lib import AsModuleLibrary
+from as_automatics_vhdl_writer import VHDLWriter
+from as_automatics_exceptions import AsError, AsFileError, AsErrorManager
+
 import as_automatics_builder as as_build
 import as_automatics_logging as as_log
 import as_automatics_templates as as_templates
-from as_automatics_helpers import \
-    append_to_path
-from as_automatics_module_lib import \
-    AsModuleLibrary
-from as_automatics_vhdl_writer import \
-    VHDLWriter
 
 LOG = as_log.get_log()
 
@@ -70,22 +69,32 @@ class AsAutomatics():
 
         self.library = AsModuleLibrary(self.asterics_dir)
         self.current_chain = None
+        self.windowpipes = []
 
         self.design_name = "asterics"
         self.board_target = ""
         self.partname_hw = "xc7z010clg400-1"
 
+        self.ipcore_name = "ASTERICS"
+        self.ipcore_descr = "ASTERICS Image Processing Chain"
+
         # Construct and assign interface templates
         as_templates.add_templates()
-        # Import modules included with ASTERICS
-        module_path = append_to_path(self.asterics_dir, "modules")
-        self.add_module_repository(module_path, "default")
 
-    def set_hardware_target_definitions(self, partname : str, design : str,
-                                        board : str):
-        self.design_name = design
-        self.board_target = board
-        self.partname_hw = partname
+    def set_hardware_target_definitions(self, partname: str = "",
+                                        design: str = "", board: str = ""):
+        if design:
+            self.design_name = design
+        if board:
+            self.board_target = board
+        if partname:
+            self.partname_hw = partname
+
+    def set_ipcore_name(self, display_name: str):
+        self.ipcore_name = display_name
+    
+    def set_ipcore_description(self, description_text: str):
+        self.ipcore_descr = description_text
 
     def add_module_repository(self, module_dir: str, repo_name: str) -> list:
         """Add a repository of ASTERICS modules.
@@ -99,7 +108,6 @@ class AsAutomatics():
         repo_name: Name that is internally used to refer to the repository.
         Returns a list of the names of the found modules."""
         return self.library.add_module_repository(module_dir, repo_name)
-
 
     @staticmethod
     def __check_and_get_output_path__(path: str) -> bool:
@@ -127,27 +135,36 @@ class AsAutomatics():
     SYSTEM_TEMPLATE_PATH = "support/sys_template/"
 
     def __write_hw__(self, path: str, use_symlinks: bool = True,
-                allow_deletion: bool = False) -> bool:
+                     allow_deletion: bool = False):
         # Make sure path is good
-        path = self.__check_and_get_output_path__(path)
-        if not path:
-            return False
-        path = append_to_path(path, "/")
+        opath = self.__check_and_get_output_path__(path)
+        if not opath:
+            raise AsFileError(path, "Could not create output folder!")
+        opath = append_to_path(opath, "/")
         # Clean up if not empty
         try:
-            as_build.prepare_output_path(None, path, allow_deletion)
+            as_build.prepare_output_path(None, opath, allow_deletion)
         except IOError as err:
             LOG.error(("Could not prepare the output directory '%s'"
-                        "! - '%s'"), path, str(err))
-            return False
+                       "! - '%s'"), opath, str(err))
+            raise AsFileError(opath, "Could not write to output folder!")
         # Generate and collect hardware files
         try:
-            self.__gen_hw__(path, use_symlinks)
+            self.__gen_hw__(opath, use_symlinks)
         except IOError:
+            LOG.error(("Cannot write to '%s'! - "
+                       "Could not create VHDL source files!"), opath)
             return False
-        return True
+        except AsError as err:
+            LOG.error(str(err))
+            return False
 
     def __gen_hw__(self, path: str, use_symlinks: bool = True):
+        err_mgr = self.current_chain.err_mgr
+        if err_mgr.has_errors():
+            LOG.critical("%s errors encountered!\nGeneration aborted!",
+                         str(err_mgr.get_error_count()))
+            raise AsError(severity="Critical")
         # Instantiate VHDL writer class
         writer = VHDLWriter(self.current_chain)
         # Generate as_main.vhd and asterics.vhd
@@ -156,8 +173,12 @@ class AsAutomatics():
         # Collect the hardware and software source files
         as_build.gather_hw_files(self.current_chain, path, use_symlinks)
 
-    def __write_sw__(self, path: str, use_symlinks: bool = True,
-                allow_deletion: bool = False, module_driver_dirs: bool = False):
+    def __write_sw__(
+            self,
+            path: str,
+            use_symlinks: bool = True,
+            allow_deletion: bool = False,
+            module_driver_dirs: bool = False):
         # Make sure path is good
         path = self.__check_and_get_output_path__(path)
         if not path:
@@ -168,24 +189,34 @@ class AsAutomatics():
             as_build.prepare_output_path(None, path, allow_deletion)
         except IOError as err:
             LOG.error(("Could not prepare the output directory '%s'"
-                        "! - '%s'"), path, str(err))
+                       "! - '%s'"), path, str(err))
             return False
         # Generate and collect software files
         try:
             self.__gen_sw__(path, use_symlinks, module_driver_dirs)
-        except IOError:
+        except (IOError, AsError) as err:
+            LOG.error(str(err))
             return False
         return True
-    
+
     def __gen_sw__(self, path: str, use_symlinks: bool = True,
                    module_driver_dirs: bool = False):
+        err_mgr = self.current_chain.err_mgr
+        if err_mgr.has_errors():
+            LOG.critical("%s errors encountered!\nGeneration aborted!",
+                         str(err_mgr.get_error_count()))
+            raise AsError(severity="Critical")
         as_build.write_asterics_h(self.current_chain, path)
         as_build.write_config_c(path)
         as_build.gather_sw_files(self.current_chain, path,
                                  use_symlinks, module_driver_dirs)
 
-    def __write_asterics_core__(self, path: str, use_symlinks: bool = True,
-                allow_deletion: bool = False, module_driver_dirs: bool = False):
+    def __write_asterics_core__(
+            self,
+            path: str,
+            use_symlinks: bool = True,
+            allow_deletion: bool = False,
+            module_driver_dirs: bool = False) -> bool:
         path = self.__check_and_get_output_path__(path)
         if not path:
             return False
@@ -193,30 +224,42 @@ class AsAutomatics():
             as_build.prepare_output_path(None, path, allow_deletion)
         except IOError as err:
             LOG.error(("Could not prepare the output directory '%s'"
-                        "! - '%s'"), path, str(err))
+                       "! - '%s'"), path, str(err))
             return False
-        self.__write_hw__(append_to_path(path, "hardware"), use_symlinks,
-                      allow_deletion)
-        self.__write_sw__(append_to_path(path, "software"), use_symlinks,
-                      allow_deletion, module_driver_dirs)
+        try:
+            self.__write_hw__(append_to_path(path, "hardware"), use_symlinks,
+                            allow_deletion)
+            self.__write_sw__(append_to_path(path, "software"), use_symlinks,
+                            allow_deletion, module_driver_dirs)
+        except (IOError, AsError) as err:
+            LOG.error(str(err))
+            return False
+        return True
 
     TCL_ADDITIONS = ('set design "{design}"\n'
                      'set partname "{part}"\n'
-                     'set boardpart "{board}"\n')
+                     'set boardpart "{board}"\n'
+                     'set display_name "{display_name}"\n'
+                     'set description "{description}"\n')
 
-    def __write_ip_core_xilinx__(self, path: str, use_symlinks: bool = True,
-                allow_deletion: bool = False, module_driver_dirs: bool = False):
+    def __write_ip_core_xilinx__(
+            self,
+            path: str,
+            use_symlinks: bool = True,
+            allow_deletion: bool = False,
+            module_driver_dirs: bool = False):
         # Make sure path is good
         path = self.__check_and_get_output_path__(path)
         if not path:
             return False
         # Clean up if not empty
         try:
-            src_path = append_to_path(self.asterics_dir, self.IP_CORE_TEMPLATE_PATH)
+            src_path = append_to_path(
+                self.asterics_dir, self.IP_CORE_TEMPLATE_PATH)
             as_build.prepare_output_path(src_path, path, allow_deletion)
         except IOError as err:
             LOG.error(("Could not prepare the output directory '%s'"
-                        "! - '%s'"), path, str(err))
+                       "! - '%s'"), path, str(err))
             return False
         # Get paths for HW and SW gen
         sw_path = append_to_path(path, self.DRIVERS_REL_PATH)
@@ -225,19 +268,30 @@ class AsAutomatics():
         try:
             self.__gen_sw__(sw_path, use_symlinks, module_driver_dirs)
             self.__gen_hw__(hw_path, use_symlinks)
-        except IOError:
+        except (IOError, AsError) as err:
+            LOG.error(str(err))
             return False
         add_c1 = self.TCL_ADDITIONS.format(design=self.design_name,
                                            part=self.partname_hw,
-                                           board=self.board_target)
+                                           board=self.board_target,
+                                           display_name=self.ipcore_name,
+                                           description=self.ipcore_descr)
         # Run packaging
         LOG.info("Running packaging in '%s'.", path)
-        as_build.run_vivado_packaging(self.current_chain, path, add_c1)
+        try:
+            as_build.run_vivado_packaging(self.current_chain, path, add_c1)
+        except (IOError, AsError) as err:
+            LOG.error(str(err))
+            return False
+        return True
 
-
-    def __write_system__(self, path: str, use_symlinks: bool = True,
-                allow_deletion: bool = False, module_driver_dirs: bool = False,
-                 add_vears: bool = False):
+    def __write_system__(
+            self,
+            path: str,
+            use_symlinks: bool = True,
+            allow_deletion: bool = False,
+            module_driver_dirs: bool = False,
+            add_vears: bool = False):
         # Make sure path is good
         path = self.__check_and_get_output_path__(path)
         ip_path = append_to_path(path, self.IP_CORE_REL_PATH)
@@ -245,11 +299,12 @@ class AsAutomatics():
             return False
         # Clean up if not empty
         try:
-            src_path = append_to_path(self.asterics_dir, self.SYSTEM_TEMPLATE_PATH)
+            src_path = append_to_path(
+                self.asterics_dir, self.SYSTEM_TEMPLATE_PATH)
             as_build.prepare_output_path(src_path, path, allow_deletion)
         except IOError as err:
             LOG.error(("Could not prepare the output directory '%s'"
-                        "! - '%s'"), path, str(err))
+                       "! - '%s'"), path, str(err))
             return False
         # Get paths for HW and SW gen
         sw_path = append_to_path(ip_path, self.DRIVERS_REL_PATH)
@@ -258,13 +313,25 @@ class AsAutomatics():
         try:
             self.__gen_sw__(sw_path, use_symlinks, module_driver_dirs)
             self.__gen_hw__(hw_path, use_symlinks)
-        except IOError:
+        except (IOError, AsError) as err:
+            LOG.error(str(err))
             return False
         # Run packaging
         LOG.info("Running packaging in '%s'.", ip_path)
-        as_build.run_vivado_packaging(self.current_chain, ip_path)
+
+        add_c1 = self.TCL_ADDITIONS.format(design=self.design_name,
+                                           part=self.partname_hw,
+                                           board=self.board_target,
+                                           display_name=self.ipcore_name,
+                                           description=self.ipcore_descr)
+        as_build.run_vivado_packaging(self.current_chain, ip_path, add_c1)
 
         # Add VEARS core
         if add_vears:
-            as_build.add_vears_core(append_to_path(path, "vivado_cores"),
-                                    self.asterics_dir, use_symlinks)
+            try:
+                as_build.add_vears_core(append_to_path(path, "vivado_cores"),
+                                        self.asterics_dir, use_symlinks)
+            except (IOError, AsError) as err:
+                LOG.error(str(err))
+                return False
+        return True

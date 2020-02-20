@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 """
 as_AXI_Master_spec.py
@@ -96,7 +96,7 @@ class AXISlaveExternal(Interface):
 
 
 def get_module_instance(module_dir: str) -> AsModule:
-    module = AsModule("AXI_Slave")
+    module = AsModule()
 
     module.add_local_interface_template(AXISlaveExternal())
     

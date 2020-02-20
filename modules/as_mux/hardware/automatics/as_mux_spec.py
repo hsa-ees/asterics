@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 """
 as_mux_spec.py
@@ -44,9 +44,9 @@ of the ASTERICS hardware module as_mux.
 from as_automatics_module import AsModule
 
 
-def get_module_instance(module_dir):
+def get_module_instance(module_dir: str) -> AsModule:
     
-    module = AsModule("as_mux")
+    module = AsModule()
     toplevel_file = "hardware/hdl/vhdl/as_mux.vhd"
     
     module.dependencies = []

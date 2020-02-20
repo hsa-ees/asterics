@@ -32,7 +32,8 @@ GHDL = ghdl
 
 SRC_TB = ../vhdl/as_iic_tb.vhd
 SRC_HW = ../../vhdl/
-SRC_HDL = $(SRC_HW)as_iic_tristate.vhd $(SRC_HW)as_iic.vhd
+SRC_HDL = $(SRC_HW)as_iic.vhd
+SRC_LIB = --work=asterics ../../../../../as_misc/hardware/hdl/vhdl/pkg/helpers.vhd
 
 UNIT = as_iic_tb
 ARCH_QUICK = testbench_quick
@@ -49,13 +50,14 @@ help:
 	@echo
 
 check:
-	$(GHDL) -s $(SRC_TB) $(SRC_HDL)
+	$(GHDL) -a $(SRC_LIB) $(SRC_HDL) 
+	$(GHDL) -a $(SRC_TB)
 
 elaborate_quick: check
-	$(GHDL) -c $(SRC_HDL) $(SRC_TB) -e $(UNIT) $(ARCH_QUICK)
+	$(GHDL) -c $(SRC_LIB) $(SRC_HDL) $(SRC_TB) -e $(UNIT) $(ARCH_QUICK)
 
 elaborate_generic: check
-	$(GHDL) -c $(SRC_HDL) $(SRC_TB) -e $(UNIT) $(ARCH_GENERIC)
+	$(GHDL) -c $(SRC_LIB) $(SRC_HDL) $(SRC_TB) -e $(UNIT) $(ARCH_GENERIC)
 
 simulate_quick: elaborate_quick
 	$(GHDL) -r $(UNIT) $(ARCH_QUICK) --assert-level=warning

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 #
 # --------------------- LICENSE -----------------------------------------------
 # This program is free software; you can redistribute it and/or
@@ -31,7 +31,11 @@ import os
 from as_automatics_env import AsAutomatics
 import as_automatics_builder as as_build
 from as_automatics_proc_chain import AsProcessingChain
+from as_automatics_2d_pipeline import As2DWindowPipeline
 import as_automatics_logging as as_log
+import as_automatics_visual as as_vis
+import as_automatics_exceptions as as_err
+from as_automatics_helpers import append_to_path
 
 LOG = as_log.init_log()
 
@@ -39,50 +43,139 @@ LOG = as_log.init_log()
 try:
     as_path = os.environ.get("ASTERICS_HOME")
 except KeyError:
-    print("ERROR: ASTERICS_HOME not set!")
-    print("Source the ASTERICS settings.sh file before running Automatics!")
-    exit()
+    as_path = None
 if not as_path:
     print("ERROR: ASTERICS_HOME not set!")
     print("Source the ASTERICS settings.sh file before running Automatics!")
     exit()
 
+
 # Initialize Automatics - scan default modules
 Auto = AsAutomatics(as_path)
-Chain = None
+Automatics_version = "0.2.012"
 
+def set_asterics_directory(path: str) -> bool:
+    # Cleanup path input
+    path = os.path.realpath(append_to_path(path, "/"))
+    if os.path.isdir(path):
+        Auto.asterics_dir = path
+        LOG.info("ASTERICS home directory set to '%s'.", path)
+        return True
+    # -> Else
+    LOG.warning("Path '%s' is not a directory! ASTERICS home not set!", path)
+    return False
 
-def new_chain():
+def print_version(only_version_number: bool = False):
+    if only_version_number:
+        print(Automatics_version)
+    else:
+        print("This is Automatics version " + Automatics_version)
+
+def requires_version(version: str) -> bool:
+    if Automatics_version != version:
+        LOG.error("Version check failed! This is Automatics version {}!"
+                  .format(Automatics_version))
+        raise ValueError(("Incompatible Automatics version! Script requires "
+                          "version {}").format(version))
+    else:
+        return True
+
+def requires_at_least_version(version: str) -> bool:
+    if Automatics_version <= version:
+        LOG.error("Version check failed! This is Automatics version {}!"
+                  .format(Automatics_version))
+        raise ValueError(("Incompatible Automatics version! Script requires at "
+                          "least version {}").format(version))
+    else:
+        return True
+
+def new_chain() -> AsProcessingChain:
     """Provide a new AsProcessingChain object.
     This allows you to specify and build a new ASTERICS processing chain.
     When building multiple systems in one script, make sure build the system,
     before calling this again to start the second system!"""
-    Chain = AsProcessingChain(Auto.library, parent=Auto)
-    Auto.current_chain = Chain
-    return Chain
+    AsProcessingChain.err_mgr = as_err.AsError.err_mgr
+    # Add "standard" ASTERICS modules
+    Auto.add_module_repository(append_to_path(as_path, "modules"), "default")
+    Auto.current_chain = AsProcessingChain(Auto.library, parent=Auto)
+    return Auto.current_chain
 
-def define_hardware_target(partname : str, design_name : str, board : str = ""):
+
+def new_2d_window_pipeline(image_width: int,
+                           image_height: int) -> As2DWindowPipeline:
+    """Provide a new As2DWindowPipeline object.
+    This allows you to specify and build a new ASTERICS 2D Window Pipeline for
+    processing image data using convolution and other two dimensional filters.
+    You need to provide the dimensions of the image data you want to process,
+    as the pipeline size and resource usage is highly dependend on the size of
+    the image data.
+    Parameters:
+        image_width: The number of horizontal pixels per image row
+        image_height: The number of vertical pixels per image column
+    Returns a new As2DWindowPipeline object."""
+    if not Auto.current_chain:
+        LOG.error(
+            ("Before creating a new 2D Window Pipeline, you first have to"
+             " create an ASTERICS Processing Chain using"
+             " 'asterics.new_chain()'"))
+        raise as_err.AsTextError("", msg=("2D Window Pipeline construction "
+                                          "requires a processing chain."),
+                        detail=("Call 'asterics.new_chain()' before "
+                                "'asterics.new_2d_window_pipeline()'."),
+                        severity="Critical")
+    pipe = As2DWindowPipeline(image_width, image_height,
+                              chain=Auto.current_chain)
+    Auto.windowpipes.append(pipe)
+    return pipe
+
+
+def define_hardware_target(partname: str = "", design_name: str = "",
+                           board: str = ""):
+    """Define parameters for your hardware target.
+    Caution: This will set attributes into a TCL script imported by 
+    the synthesis tool! Make sure you get the internal names used by your tool!
+    """
     Auto.set_hardware_target_definitions(partname, design_name, board)
 
-def add_module_repository(path: str, repository_name: str = "user"):
+def set_ipcore_name(name: str, description: str=""):
+    """Set a new name and optionally a description of the ASTERICS IP-Core.
+    Defaults are: name = "ASTERICS"
+                  description = "ASTERICS Image Processing Chain"."""
+    Auto.set_ipcore_name(name)
+    if description:
+        Auto.set_ipcore_description(description)
+
+def add_module_repository(path: str, repository_name: str = "user") -> bool:
     """Retrieve ASTERICS modules from another location.
-    Prints the names of found modules.
     Parameters:
         path: Where to scan for ASTERICS modules.
         repository_name: (optional) Store the found modules in a reposotory of
                          this name. Default: 'user'
+    Returns True or False
     """
-    modules = Auto.add_module_repository(path, repository_name)
-    print("Imported the following list of modules:")
-    print(modules)
+    try:
+        modules = Auto.add_module_repository(path, repository_name)
+    except as_err.AsError:
+        return False
+    LOG.info("Imported the following list of modules:")
+    LOG.info(str(modules))
+    return True
 
-def vears(path: str, use_symlinks: bool = True):
+
+def vears(path: str, use_symlinks: bool = True, force: bool = False) -> bool:
     """Copy or link the VEARS video output IP-Core.
     Parameters:
         path: Where to copy/link VEARS to.
         use_symlinks: Wether to link or copy VEARS. Default: True -> Link VEARS
+        force: Allow Automatics to overwrite 'path' if it already exists.
+               Warning - This will permanently delete data! Default: False
     """
-    as_build.add_vears_core(path, as_path, use_symlinks)
+    try:
+        as_build.add_vears_core(path, as_path, use_symlinks, force)
+    except as_err.AsError:
+        return False
+    return True
+
 
 def set_loglevel(console: str = "warning", logfile: str = "info"):
     """Set the logging severity level for the console and log file outputs.
@@ -91,3 +184,52 @@ def set_loglevel(console: str = "warning", logfile: str = "info"):
         console: The loglevel for the console output [default: warning].
         logfile: The loglevel for the logfile output [default: info]."""
     as_log.set_loglevel(console, logfile)
+
+def quiet():
+    """Set the loglevel for the console to CRITICAL."""
+    set_loglevel(console="CRITICAL")
+
+def verbose():
+    """Set the loglevel for the console to INFO."""
+    set_loglevel(console="INFO")
+
+def write_system_graph(system,
+                       out_file: str="asterics_graph", 
+                       show_toplevels: bool=False,
+                       show_auto_inst: bool=False, 
+                       show_ports: bool=False, 
+                       show_unconnected: bool=False):
+    """Generates and writes a graph representation of the ASTERICS chain
+    and, if present, the 2D Window Pipelines using GraphViz Dot.
+    Parameters:
+        system: Chain or pipe object to visualize
+                (AsProcessingChain or As2DWindowPipeline).
+        out_file: Path and filename of the graph to generate.
+                  Default=[asterics_graph]
+        show_toplevels: Include the toplevel module groups. [False]
+        show_auto_inst: Include the automatically included modules. [False]
+        show_ports: Add all ports to the interface edges. [False]
+        show_unconnected: Write a list of unconnected ports into the module
+                          nodes. WARNING: Many false positives! [False]
+    """
+    if not as_vis.graphviz_available:
+        LOG.critical(("Could not find python package 'graphviz' on your system!"
+                      " Cannot generate system graph!\nTry installing it "
+                      "using: 'pip install graphviz'"))
+        
+    elif isinstance(system, AsProcessingChain):
+        as_vis.system_graph(system, out_file, show_ports, show_auto_inst,
+                            show_unconnected, show_toplevels)
+    elif isinstance(system, As2DWindowPipeline):
+        graph = as_vis.system_graph(system.chain, "", show_ports,
+                                    show_auto_inst, show_unconnected, 
+                                    show_toplevels, return_graph=True)
+        as_vis.add_2dpipe_subgraph(system, graph)
+        as_vis.write_graph_svg(graph, out_file)
+    else:
+        LOG.error(("Could not generate system graph from the passed object!"
+                   "'asterics.write_system_graph()' expects an ASTERICS "
+                   "processing chain or 2D window pipeline object!"))
+
+def list_errors():
+    as_err.list_errors()

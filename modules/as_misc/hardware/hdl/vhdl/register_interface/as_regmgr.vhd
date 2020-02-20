@@ -58,7 +58,7 @@ generic(
     );
 port(
     clk : in std_logic;
-    rst_n : in std_logic;
+    reset_n : in std_logic;
 
     -- Signals from / to AXI Slave (regmgr <=> SW)
     -- Address from software [unused | module address | register address]
@@ -76,12 +76,12 @@ port(
     
     -- Signals from / to hardware modules (HW <=> regmgr)
     -- IN and OUT registers facing hardware
-    hw_reg_data_out : out slv_reg_data(0 to REG_COUNT - 1);
-    hw_reg_data_in : in slv_reg_data(0 to REG_COUNT - 1);
+    slv_ctrl_reg : out slv_reg_data(0 to REG_COUNT - 1);
+    slv_status_reg : in slv_reg_data(0 to REG_COUNT - 1);
     -- Modify (write enable) bit mask per register
-    hw_reg_modify : in std_logic_vector(0 to REG_COUNT - 1);
+    slv_reg_modify : in std_logic_vector(0 to REG_COUNT - 1);
     -- Constant signal defining in/out capabilities per register
-    hw_reg_config : in slv_reg_config_table(0 to REG_COUNT - 1)
+    slv_reg_config : in slv_reg_config_table(0 to REG_COUNT - 1)
     );
 end entity as_regmgr;
 
@@ -121,7 +121,7 @@ architecture RTL of as_regmgr is
 begin
     
     -- Handle requests:
-    reg_address_decode: process(sw_address, sw_data_in_ena, arr_sw_data_out, sw_data_out_ena, hw_reg_config)
+    reg_address_decode: process(sw_address, sw_data_in_ena, arr_sw_data_out, sw_data_out_ena, slv_reg_config)
         variable module_address : integer;
         variable register_number : integer;
     begin
@@ -144,7 +144,7 @@ begin
             if module_address = MODULE_BASEADDR and register_number < REG_COUNT then
                 
                 -- Make sure the addressed register is modifiable by software
-                if hw_reg_config(register_number)(1) = '1' then
+                if slv_reg_config(register_number)(1) = '1' then
                     -- Set data in enable for the addressed register
                     arr_sw_data_in_ena(register_number) <= '1';
                 else
@@ -161,7 +161,7 @@ begin
             if module_address = MODULE_BASEADDR and register_number < REG_COUNT then
         
                 -- Make sure the addressed register is readable by software
-                if hw_reg_config(register_number)(0) = '1' then
+                if slv_reg_config(register_number)(0) = '1' then
                     -- Set the sw_data_out port to the addressed registers data output
                     sw_data_out <= arr_sw_data_out(register_number);
                 else
@@ -184,15 +184,15 @@ begin
             )
         port map(
             clk => clk,
-            rst_n => rst_n,
-            register_behaviour => hw_reg_config(N),
+            rst_n => reset_n,
+            register_behaviour => slv_reg_config(N),
             sw_data_in => sw_data_in,
             sw_data_out => arr_sw_data_out(N),
             sw_byte_mask => sw_byte_mask,
             sw_data_in_ena => arr_sw_data_in_ena(N),
-            hw_data_in => hw_reg_data_in(N),
-            hw_data_out => hw_reg_data_out(N),
-            hw_modify => hw_reg_modify(N));
+            hw_data_in => slv_status_reg(N),
+            hw_data_out => slv_ctrl_reg(N),
+            hw_modify => slv_reg_modify(N));
             
     end generate;
     

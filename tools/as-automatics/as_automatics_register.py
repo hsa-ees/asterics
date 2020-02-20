@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 """
 as_automatics_register.py
@@ -15,7 +15,9 @@ Author:
 Philip Manke
 
 Description:
-Implements the class 'SlaveRegisterLink' for as_automatics.
+Implements the class 'SlaveRegisterInterface' for as_automatics.
+The SlaveRegisterInterface extends the Interface class by functionality to
+manage registers and the required 'as_regmgr' module.
 """
 # --------------------- LICENSE -----------------------------------------------
 # This program is free software; you can redistribute it and/or
@@ -37,12 +39,13 @@ Implements the class 'SlaveRegisterLink' for as_automatics.
 ##
 # @file as_automatics_register.py
 # @author Philip Manke
-# @brief Implements the class 'SlaveRegisterLink' for as_automatics.
+# @brief Implements the class 'SlaveRegisterInterface' for as_automatics.
 # -----------------------------------------------------------------------------
 
 from collections import namedtuple
 from typing import Sequence
 
+from as_automatics_interface import Interface
 from as_automatics_port import Port
 from as_automatics_generic import Generic
 from as_automatics_constant import Constant
@@ -51,15 +54,7 @@ import as_automatics_logging as as_log
 
 LOG = as_log.get_log()
 
-
-PortTemplate = namedtuple("PortTemplate", "name direction data_type")
-REGIF_PORTS = (PortTemplate("slv_status_reg", "out", "slv_reg_data"),
-               PortTemplate("slv_ctrl_reg", "in", "slv_reg_data"),
-               PortTemplate("slv_reg_modify", "out", "std_logic_vector"),
-               PortTemplate("slv_reg_config", "out", "slv_reg_config_table"))
-
-
-class SlaveRegisterInterface():
+class SlaveRegisterInterface(Interface):
     """Describes the interface between an ASTERICS hardware module
        and the systems software in the form of slave registers
        of an AXI interface."""
@@ -68,7 +63,11 @@ class SlaveRegisterInterface():
     DEFAULT_NAME = "slv_reg_interface"
     # Mapping for VHDL register type configuration <=> internal representation
     REG_DIR_MATCH = {"00": "None", "01": "HW -> SW",
-                     "10": "HW <- SW", "11": "HW <=> SW"}
+                     "10": "HW <- SW", "11": "HW <=> SW",
+                     "AS_REG_NONE": "None",
+                     "AS_REG_STATUS": "HW -> SW",
+                     "AS_REG_CONTROL": "HW <- SW",
+                     "AS_REG_BOTH": "HW <=> SW"}
 
     @classmethod
     def is_register_port(cls, port_name: str) -> bool:
@@ -84,109 +83,33 @@ class SlaveRegisterInterface():
 
     def __init__(self, parent=None, data_width: int = 32,
                  address: int = 0):
+        super().__init__(self.DEFAULT_NAME)
         self.parent = parent
         self.base_address = address
         self.data_width = data_width
         self.hwtosw_regs = 0
         self.swtohw_regs = 0
         self.bidirectional_regs = 0
+        self.inactive_regs = 0
         self.reg_count = 0
+        self.regif_num = 0
         self.register_table = []
-        self.ports = []
         self.generics = [Generic("REG_COUNT"),
                          Generic("MODULE_BASEADDR")]
         self.config = None
-        self.name_prefix = ""
-        self.name_suffix = ""
-        self.name = self.DEFAULT_NAME
         self.config_applied = False
-        self.connected = False
-
+        self.instantiate_module("as_regmgr", "as_main")
+        self.to_external = False
+    
     def __str__(self) -> str:
         return self.name_prefix + self.name + self.name_suffix
 
-    def add_port(self, port_obj: Port) -> bool:
-        """Adds a port to this register interface instance."""
-        this_prefix, this_suffix = \
-            as_help.get_prefix_suffix(port_obj.name,
-                                      port_obj.code_name,
-                                      Port.directions)
-        if self.ports:
-            # If this is not the first port, the pre-/suffix need to match
-            if ((this_suffix != self.name_suffix) or
-                    (this_prefix != self.name_prefix)):
-                LOG.debug("Port '%s' didn't fit, prefix/suffix mismatch!",
-                          port_obj.code_name)
-                return False
-        else:  # If this is the first port, use its pre-/suffix for this regif
-            self.name_prefix = this_prefix
-            self.name_suffix = this_suffix
 
-        # Check if the port is already present
-        for port in self.ports:
-            # LOG.debug("Checking '%s' against '%s'", port_obj.code_name,
-            #           port.name)
-            if port.name == port_obj.name:
-                LOG.warning(("The port '%s' is already present "
-                             "for this register interface!"),
-                            port.name)
-                return False
-        template = next((templ for templ in REGIF_PORTS
-                         if templ.name == port_obj.name), None)
-        # Make sure the port is part of the register interface and direction
-        # and data type match
-        if (template is None or template.direction != port_obj.direction or
-                template.data_type != port_obj.data_type):
-            LOG.debug(
-                "'%s' is not a valid name for a register interface port.",
-                port_obj.name)
-            return False
-
-        port_obj.assign_to(self)
-        port_obj.port_type = "register_interface"
-        self.ports.append(port_obj)
-        return True
-
-    def remove_port(self, port_name: str) -> bool:
-        """Removes a port of this register interface instance
-           by name ('port_name')."""
-        for port in self.ports:
-            if port.name is port_name:
-                self.ports.remove(port)
-                return True
-        return False
-
-    def has_generic(self, generic_name: str) -> bool:
-        """Returns True/False, depending on whether a generic with the name
-           'generic_name' is assigned to this register interface."""
-        return generic_name in [gen.name for gen in self.generics]
-
-    def get_generic(self, generic_name: str) -> Generic:
-        """Returns the first generic matching 'generic_name' that's associated
-        with this object. If none are found, returns None."""
-        return next((gen for gen in self.generics if gen.name == generic_name),
-                    None)
-
-    def add_generic(self, generic_obj):
-        """Add a generic to this interface instance."""
-        # Check if the passed object is a generic object
-        if not isinstance(generic_obj, Generic):
-            LOG.error("Couldn't add generic, not a generic (VHDL) object!")
-            return False
-        # Only add the generic if it's not already added
-        if self.has_generic(generic_obj.name):
-            LOG.debug("Interface '%s' already has a generic '%s'", str(self),
-                      generic_obj.name)
-            return False
-        # Add the generic
-        generic_obj.assign_to(self)
-        self.generics.append(generic_obj)
-        return True
-
-    def set_module_base_addr(self, base_addr: int):
+    def set_module_base_addr(self, base_addr: int, regif_num : int):
         """Set the base address for this register interface
         (used for the as_regmgr)."""
         self.base_address = base_addr
+        self.regif_num = regif_num
         self.get_generic("MODULE_BASEADDR").value = \
             "c_{}_base_addr".format(self.parent.name)
 
@@ -237,6 +160,7 @@ class SlaveRegisterInterface():
         self.bidirectional_regs = 0
         self.hwtosw_regs = 0
         self.swtohw_regs = 0
+        self.inactive_regs = 0
         self.register_table = []
         self.reg_count = 0
         self.config = None
@@ -272,7 +196,10 @@ class SlaveRegisterInterface():
     def __decode_slvreg_table__(self) -> bool:
         """Decodes the value of the config Constant object. Assumes that the
            value is in the format: '('{'"XX"',}','' '['others => "XX"']')'
-           Where the 'X's may be either '0' or '1'."""
+           Where the 'X's may be either '0' or '1'.
+           Additionally, instead of "XX", the constants "AS_REG_X" may be used,
+           where the 'X' can be any of: "NONE", "STATUS", "CONTROL" and "BOTH".
+           """
         self.config_applied = False
         # Do we even have a config Constant assigned?
         if self.config is None:
@@ -297,7 +224,7 @@ class SlaveRegisterInterface():
                 current_reg = self.REG_DIR_MATCH[item]
             except KeyError:
                 # If that didn't work (string is not a direct register descr.)
-                if "others" in item:
+                if "OTHERS" in item:
                     # If it is an "others" directive, extract the register
                     # description string
                     temp = item.strip(' "()').split("=>")
@@ -321,7 +248,9 @@ class SlaveRegisterInterface():
                     # type list
                     LOG.debug("'others' found, with register type '%s'.",
                               others_reg)
-                    self.register_table.append(others_reg)
+                    reg_count = self.ports[0].data_width.b + 1
+                    while len(self.register_table) < reg_count:
+                        self.register_table.append(others_reg)
                     break
                 elif "0 =>" in item or "0=>" in item:
                     temp = item.strip(' "()').split("=>")
@@ -345,20 +274,24 @@ class SlaveRegisterInterface():
                     return False
             # If the match succeeded, add this registers type to the list
             self.register_table.append(current_reg)
+        
+        self.config_applied = True
         # Update the register type count (count: HW->SW, SW->HW, HW<=>SW)
         self.__count_register_types__()
         self.get_generic("REG_COUNT").value = self.reg_count
         LOG.debug("Register configuration decoded as: '%s'",
                   str(self.register_table))
-        self.config_applied = True
         return True
 
     def __count_register_types__(self):
         """This method is used to update the attributes 'bidirectional_regs',
            'hwtosw_regs' and 'swtohw_regs'."""
+        if not self.config_applied:
+            self.__decode_slvreg_table__()
         self.bidirectional_regs = 0
         self.hwtosw_regs = 0
         self.swtohw_regs = 0
+        self.inactive_regs = 0
         for reg in self.register_table:
             if reg == "HW <=> SW":
                 self.bidirectional_regs += 1
@@ -366,26 +299,15 @@ class SlaveRegisterInterface():
                 self.hwtosw_regs += 1
             elif reg == "HW <- SW":
                 self.swtohw_regs += 1
+            elif reg == "None":
+                self.inactive_regs += 1
         self.reg_count = (self.bidirectional_regs + self.hwtosw_regs +
-                          self.swtohw_regs)
+                          self.swtohw_regs + self.inactive_regs)
 
     def assign_to(self, parent):
         """Assigns this instance as part of/linked to 'parent'"""
         self.parent = parent
 
-    def is_complete(self) -> bool:
-        """Checks if this register interface has all mandatory ports assigned.
-        """
-        # Collect all port names assigned to this register interface
-        present_ports = [port.name for port in self.ports]
-        reg_names = [templ.name for templ in REGIF_PORTS]
-        # Check across the required port names
-        if not all([portname in present_ports for portname in reg_names]):
-            return False
-        # Check if this configuration constant is assigned
-        if self.config is None:
-            return False
-        return True
 
     def set_connected(self, value: bool = True):
         """Sets the 'connected' attribute of this interface."""
@@ -393,7 +315,7 @@ class SlaveRegisterInterface():
         for port in self.ports:
             port.set_connected(value)
 
-    def list_regif(self, verbose: bool = False):
+    def print_interface(self, verbose: bool = False):
         """Print an exhaustive listing of information about this interface."""
         if not self.config_applied:
             self.__decode_slvreg_table__()
@@ -404,6 +326,8 @@ class SlaveRegisterInterface():
         print("{} HW <=> SW registers,".format(self.bidirectional_regs))
         print("{} HW -> SW registers,".format(self.hwtosw_regs))
         print("{} HW <- SW registers.".format(self.swtohw_regs))
+        print("{} Inactive registers.".format(self.inactive_regs))
+        
 
         if verbose:
             print("Register table:\n{}".format(self.register_table))

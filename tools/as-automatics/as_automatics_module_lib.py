@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 # -----------------------------------------------------------------------------
 """
 as_automatics_module_lib.py
@@ -47,7 +47,8 @@ from typing import Sequence
 from copy import copy, deepcopy
 
 from as_automatics_module import AsModule
-from as_automatics_exceptions import AsModuleError
+from as_automatics_window_module import AsWindowModule
+from as_automatics_exceptions import AsModuleError, AsFileError, AsError
 from as_automatics_helpers import append_to_path
 import as_automatics_logging as as_log
 
@@ -62,29 +63,67 @@ class AsModuleRepo():
         self.name = repo_name
         self.path = os.path.realpath(path)
         self.module_names = []
+        self.window_modules = []
         self.modules = {}
 
     def register_module(self, module: AsModule):
         """Add a module to this repository object."""
         if module.entity_name not in self.module_names:
             self.module_names.append(module.entity_name)
+            if isinstance(module, AsWindowModule):
+                self.window_modules.append(module.entity_name)
             self.modules[module.entity_name] = module
             module.repository_name = self.name
             return True
         return False
 
+    def has_module_generic(self, entity_name: str) -> bool:
+        """Returns True if a module or window module with the name
+        'entity_name' is stored in this repository."""
+        regular = self.has_module(entity_name)
+        if not regular:
+            return self.has_window_module(entity_name)
+        return regular
+
     def has_module(self, entity_name: str) -> bool:
         """Returns 'True' if a module with the name 'entity_name'
         is stored in this repository object."""
-        return entity_name in self.module_names
+        return ((entity_name in self.module_names) and
+                (entity_name not in self.window_modules))
+
+    def get_module_generic(self, entity_name: str) -> AsModule:
+        try:
+            return self.get_module(entity_name)
+        except AsModuleError as err:
+            AsError.err_mgr.clear_error(err)
+            return self.get_window_module(entity_name)
 
     def get_module(self, entity_name: str) -> AsModule:
         """Return the module object template of the module with the name
         'entity_name' if it is present in this repository object."""
+        if not self.has_module(entity_name):
+            raise AsModuleError(entity_name, msg="Could not find module")
         try:
             return self.modules[entity_name]
         except KeyError:
             raise AsModuleError(entity_name, msg="Could not find module")
+
+    def has_window_module(self, entity_name: str) -> bool:
+        """Returns 'True' if a module with the name 'entity_name'
+        is stored in this repository object."""
+        return entity_name in self.window_modules
+
+    def get_window_module(self, entity_name: str) -> AsModule:
+        """Return the module object template of the module with the name
+        'entity_name' if it is present in this repository object."""
+        if not self.has_window_module(entity_name):
+            raise AsModuleError(
+                entity_name, msg="Could not find window module")
+        try:
+            return self.modules[entity_name]
+        except KeyError:
+            raise AsModuleError(
+                entity_name, msg="Could not find window module")
 
 
 class AsModuleLibrary():
@@ -118,7 +157,7 @@ class AsModuleLibrary():
         LOG.info(("Found and registered %i modules in repository '%s'"
                   " from '%s'."), len(module_names), repo_name, path)
         return module_names
-
+ 
     def get_repo(self, repo_name: str) -> AsModuleRepo:
         """Return the module repository with the name 'repo_name'.
         Returns 'None' if no match is found."""
@@ -151,8 +190,8 @@ class AsModuleLibrary():
                 return True
         return False
 
-    def get_module_template(self, module_name: str,
-                            repo_name: str = "") -> AsModule:
+    def get_module_template(self, module_name: str, repo_name: str = "",
+                            window_module: bool = None) -> AsModule:
         """Search for and return a reference to the AsModule with the entity
         name 'module_name' in the AsModuleLibrary.
         Alternatively search only in module repository 'repo_name'.
@@ -162,24 +201,40 @@ class AsModuleLibrary():
         module_name: The module name to search for.
                 Modules are named after their toplevel VHDL entity.
         repo_name: Optional. Search only in module repository 'repo_name'.
+        window_module: Optional. Search only among window modules (True),
+                       regular modules (False), or both (omitted).
         Returns a reference to the matching module, 'None' if no match found.
         """
         repo = None
         module_name = module_name.lower()
         # If no reponame was defined, check all repos
+        # Select the first repo containing the module
         if repo_name == "":
             for irepo in self.repos:
-                if irepo.has_module(module_name):
+                # Differentiate between regular and window modules
+                if window_module is None:
+                    found = irepo.has_module_generic(module_name)
+                elif window_module:
+                    found = irepo.has_window_module(module_name)
+                else:
+                    found = irepo.has_module(module_name)
+                if found:
                     repo = irepo
                     break
         else:
+            # If a specific repo is given, get that
             repo = self.get_repo(repo_name)
         if repo is None:
-            return None
+            return None  # Error if it doesn't exist
+        # Get the module
+        if window_module is None:
+            return repo.get_module_generic(module_name)
+        if window_module:
+            return repo.get_window_module(module_name)
         return repo.get_module(module_name)
 
-    def get_module_instance(self, module_name: str,
-                            repo_name: str = "") -> AsModule:
+    def get_module_instance(self, module_name: str, repo_name: str = "",
+                            window_module: bool = None) -> AsModule:
         """Search for and return a copy to the AsModule with the entity
         name 'module_name' in the AsModuleLibrary.
         Alternatively search only in module repository 'repo_name'.
@@ -191,7 +246,8 @@ class AsModuleLibrary():
         repo_name: Optional. Search only in module repository 'repo_name'.
         Returns a copy to the matching module object, 'None' if no match found.
         """
-        template = self.get_module_template(module_name, repo_name)
+        template = self.get_module_template(module_name,
+                                            repo_name, window_module)
         if template:
             return deepcopy(template)
         # Else ->
@@ -223,8 +279,7 @@ class AsModuleLibrary():
                 if repo_name != reponame:
                     continue
             print("Repository '{}':".format(reponame))
-            modnames = list(mods[reponame].keys())
-            modnames.sort()
+            modnames = sorted(mods[reponame].keys())
             if verbosity == 0:
                 print(modnames)
                 continue
@@ -233,7 +288,6 @@ class AsModuleLibrary():
                 mods[reponame][module].list_module(verbosity - 1)
                 print("~~~~~~")
             print("\n")
-
 
     @staticmethod
     def add_module(module: AsModule, repo: AsModuleRepo) -> bool:
@@ -259,7 +313,7 @@ class AsModuleLibrary():
     def get_module_repo(self, module_name: str) -> str:
         """Return the repository name of the module matching 'module_name'."""
         for repo in self.repos:
-            if repo.has_module(module_name):
+            if repo.has_module_generic(module_name):
                 return repo.name
         raise AsModuleError(
             module_name, msg="Could not find module in library")
@@ -272,7 +326,13 @@ class AsModuleLibrary():
     def __get_module_scripts_in_dir__(cls, module_dir: str) -> Sequence[str]:
         scripts = []
         module_dir = os.path.realpath(module_dir)
-        mod_folders = os.listdir(append_to_path(module_dir, ""))
+        try:
+            mod_folders = os.listdir(append_to_path(module_dir, ""))
+        except IOError as err:
+            LOG.error("Could not find module repository folder '%s'!",
+                      module_dir)
+            raise AsFileError("Could not find module repository folder {}!"
+                              .format(module_dir))
         for folder in mod_folders:
             folder_path = append_to_path(module_dir, folder)
             if not os.path.isdir(folder_path):
@@ -292,6 +352,7 @@ class AsModuleLibrary():
         module_list = []
         # Get all module initialization scripts
         script_list = cls.__get_module_scripts_in_dir__(module_dir)
+        
         for script in script_list:
             module_folder = script[0]
             script_path = script[1]

@@ -3,6 +3,7 @@ ASTERICS - Augsburg Sophisticated Toolbox for Embedded Realtime Image Crunching 
 This project is generally licensed under the LGPLv3.
 However, for some parts other licenses apply:
  - VEARS HDMI interface by Digilent (ipcores/VEARS/hw/hdl/vhdl/3rdparty/digilent) -> BSD 3-clause license
+ - EES Tools (tools/ees/*) -> GPLv3
 Please refer to the license notices inside the respective files.
 
 Below, copies of the GPLv3 and LGPLv3 are provided.

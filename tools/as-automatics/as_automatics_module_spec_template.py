@@ -28,7 +28,7 @@ of the ASTERICS hardware module <module name here>.
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -42,6 +42,7 @@ of the ASTERICS hardware module <module name here>.
 # -----------------------------------------------------------------------------
 
 from as_automatics_module import AsModule
+
 # from as_automatics_interface import Interface
 # from as_automatics_port import Port
 # from as_automatics_generic import Generic
@@ -65,11 +66,11 @@ from as_automatics_module import AsModule
 # instantiated when a module with this interface is added to a chain.
 # For each instance of this interface the specified module will be added to the
 # chain once and the instantiating interface will be connected to it.
-# Use the following line in the __init__() method to declare a module 
+# Use the following line in the __init__() method to declare a module
 # to automatically instantiate:
 #   self.instantiate_module("<module name>")
 # If an interface your module uses automatically instantiates a module you don't
-# want in your system, use the following line in the user script to disable the 
+# want in your system, use the following line in the user script to disable the
 # functionality:
 # module.get("<interface name>").instantiate_no_module()
 
@@ -84,6 +85,7 @@ from as_automatics_module import AsModule
 # it has to be placed in the module's folder under
 # "<module repository>/<module folder>/hardware/automatics/<script file>.py"!
 # The file name must be: "as_<module name>_spec.py"!
+
 
 def get_module_instance(module_dir: str) -> AsModule:
     # Instantiate 'module' as a new ASTERICS module
@@ -104,11 +106,13 @@ def get_module_instance(module_dir: str) -> AsModule:
 
     # Here all other required files in the module's folder need to be specified.
     # The search path starts at the module's folder, as with the toplevel.
-    module.files = ["hardware/hdl/vhdl/common_file.vhd",
-                    "hardware/hdl/vhdl/library.vhd",
-                    "hardware/hdl/vhdl/extra_component.vhd",
-                    "hardware/hdl/verilog/vendor_lib.v",
-                    "hardware/hdl/vhdl/subfolder/shared_component.vhd"]
+    module.files = [
+        "hardware/hdl/vhdl/common_file.vhd",
+        "hardware/hdl/vhdl/library.vhd",
+        "hardware/hdl/vhdl/extra_component.vhd",
+        "hardware/hdl/verilog/vendor_lib.v",
+        "hardware/hdl/vhdl/subfolder/shared_component.vhd",
+    ]
 
     # If this module uses files from other modules or from a shared module
     # such as the files in the "as_misc" folder (not technically a module),
@@ -119,8 +123,9 @@ def get_module_instance(module_dir: str) -> AsModule:
 
     # as_automatics now automatically parses the toplevel file and discovers
     # ports, generics, existing interfaces and register interfaces
-    module.discover_module("{mdir}/{toplevel}"
-                           .format(mdir=module_dir, toplevel=toplevel_file))
+    module.discover_module(
+        "{mdir}/{toplevel}".format(mdir=module_dir, toplevel=toplevel_file)
+    )
 
     # Custom Interfaces:
     # Your module may implement a new interface that the generator could
@@ -239,7 +244,7 @@ def get_module_instance(module_dir: str) -> AsModule:
     # The function can be any Python function that takes one value and returns
     # True or False. It is recommended to use lambda expressions for brevity
     # Example: Allow only values between 16 and 256 for generic "DIN_WIDTH"
-    #func = lambda value: (value > 15) and (value < 257)
+    # func = lambda value: (value > 15) and (value < 257)
     # module.get_generic("DIN_WIDTH").set_value_check(func)
     # This function will check the value that
     # the generic is set to in the user script.
@@ -253,13 +258,11 @@ def get_module_instance(module_dir: str) -> AsModule:
     # connection methods have been run - the processing system is mostly
     # built already.
     # Here is an example definition of the configuration function - for a real
-    # use case example, see the specification file of the as_regmgr module in 
+    # use case example, see the specification file of the as_regmgr module in
     # "modules/as_misc/hardware/automatics/as_regmgr_spec.py"
     #
     # def auto_inst_config(this_module, instantiated_from):
     #     # Add first Generic of instantiating module to this module
     #     this_module.set_generic(instantiated_from.generics[0])
-
-    
 
     return module

@@ -27,7 +27,7 @@ Implements the class 'Generic' for as_automatics.
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -46,7 +46,7 @@ import as_automatics_logging as as_log
 LOG = as_log.get_log()
 
 
-class Generic():
+class Generic:
     """Description of a single generic as defined in the entity of the
        associated module's top_level VHDL-file.
        Additionally, some meta information for as_automatics and data
@@ -55,13 +55,14 @@ class Generic():
     generic_types = "interface", "module"
 
     def __init__(
-            self,
-            name: str,
-            default_value: str = None,
-            code_name: str = "",
-            data_type: str = "integer",
-            link_to: str = "",
-            to_external: bool = False):
+        self,
+        name: str,
+        default_value: str = None,
+        code_name: str = "",
+        data_type: str = "integer",
+        link_to: str = "",
+        to_external: bool = False,
+    ):
 
         self.value_check_function = lambda value: True
 
@@ -83,11 +84,10 @@ class Generic():
 
     def __str__(self) -> str:
         """Print the configuration of this generic instance."""
-        return (
-            "{}('{}'): {} with default value: {}".format(
-                self.name, self.code_name, self.data_type, str(
-                    self.default_value)))
-    
+        return "{}('{}'): {} with default value: {}".format(
+            self.name, self.code_name, self.data_type, str(self.default_value)
+        )
+
     def __repr__(self) -> str:
         return self.code_name
 
@@ -111,8 +111,9 @@ class Generic():
         if isfunction(function):
             self.value_check_function = function
         else:
-            LOG.error(("Setting value check function failed. "
-                       "Parameter is not a function!"))
+            LOG.error(
+                ("Setting value check function failed. " "Parameter is not a function!")
+            )
 
     def get_value(self, top_default: bool = True):
         """Return the value of this generic object (the 'value' attribute).

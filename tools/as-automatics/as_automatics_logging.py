@@ -27,7 +27,7 @@ This module sets up Pythons logging module for as_automatics.
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -43,8 +43,12 @@ This module sets up Pythons logging module for as_automatics.
 import logging
 
 
-def init_log(logfilename: str = "as_automatics.log", *,
-             loglevel_console="WARNING", loglevel_file="INFO"):
+def init_log(
+    logfilename: str = "as_automatics.log",
+    *,
+    loglevel_console="WARNING",
+    loglevel_file="INFO"
+):
     """Initialize logging and return the logger.
        Should only be run once per kernel."""
     # Setup logging
@@ -64,9 +68,9 @@ def init_log(logfilename: str = "as_automatics.log", *,
 
     # Set format for log entries
     formatter_logfile = logging.Formatter(
-        '%(asctime)s, %(module)s: %(levelname)s - %(message)s')
-    formatter_console = logging.Formatter(
-        'Automatics %(levelname)s: %(message)s')
+        "%(asctime)s, %(module)s: %(levelname)s - %(message)s"
+    )
+    formatter_console = logging.Formatter("Automatics %(levelname)s: %(message)s")
 
     # Setup logfile log handler
     logfile = logging.FileHandler(logfilename)

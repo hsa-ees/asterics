@@ -28,7 +28,7 @@ module as_automatics_interface.py
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -117,12 +117,10 @@ class TestInterface(ut.TestCase):
         self.assertIn("strobe", [port.name for port in self.tif.ports])
         # Check if the interface accepts any other port ...
         self.assertTrue(fut(Port("itsarandomportname")))
-        self.assertIn("itsarandomportname",
-                      [port.name for port in self.tif.ports])
+        self.assertIn("itsarandomportname", [port.name for port in self.tif.ports])
         # But should still reject any other object
         self.assertFalse(fut(Generic("totallyavalidport")))
-        self.assertNotIn("totallyavalidport",
-                         [port.name for port in self.tif.ports])
+        self.assertNotIn("totallyavalidport", [port.name for port in self.tif.ports])
 
     def test_fit_and_add_port(self):
         LOG.debug("*UNITTEST* <running test_fit_and_add_port>")
@@ -137,8 +135,7 @@ class TestInterface(ut.TestCase):
         self.assertNotIn("error_data", [port.name for port in self.tif.ports])
         # Same check, but for suffix
         self.assertFalse(fut(Port("data_invalid")))
-        self.assertNotIn("data_invalid",
-                         [port.name for port in self.tif.ports])
+        self.assertNotIn("data_invalid", [port.name for port in self.tif.ports])
         # Check if the interface rejects objects that aren't ports
         self.assertFalse(fut(Generic("hsync")))
         self.assertNotIn("hsync", [port.name for port in self.tif.ports])
@@ -198,8 +195,7 @@ class TestInterface(ut.TestCase):
 
         # Check if the interface rejects an object, that's not a Generic
         self.assertFalse(fut(Port("NOTAGENERIC")))
-        self.assertNotIn("NOTAGENERIC",
-                         [gen.name for gen in self.tif.generics])
+        self.assertNotIn("NOTAGENERIC", [gen.name for gen in self.tif.generics])
 
         # Make sure the interface rejects a duplicate generic
         self.assertFalse(fut(Generic("AGENERIC")))
@@ -207,8 +203,14 @@ class TestInterface(ut.TestCase):
     def test_remove_generic(self):
         LOG.debug("*UNITTEST* <running test_remove_generic>")
         fut = self.tif.remove_generic
-        self.tif.generics.extend([Generic("AGENERIC"), Generic("AGENERIC"),
-                                  Generic("ANOTHERONE"), Generic("LASTONE")])
+        self.tif.generics.extend(
+            [
+                Generic("AGENERIC"),
+                Generic("AGENERIC"),
+                Generic("ANOTHERONE"),
+                Generic("LASTONE"),
+            ]
+        )
 
         # Make sure the method can remove an existing generic
         self.assertTrue(fut("ANOTHERONE"))
@@ -241,7 +243,7 @@ class TestInterface(ut.TestCase):
         self.tif = None
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     LOG = as_log.init_log()
     LOG.disabled = True
     ut.main(exit=False)

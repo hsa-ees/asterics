@@ -27,7 +27,7 @@ Implements the class 'Port' for as_automatics.
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -48,7 +48,7 @@ import as_automatics_logging as as_log
 LOG = as_log.get_log()
 
 
-class Port():
+class Port:
     """Description of a single port (^= signal interfacing with a hardware
        module within an ASTERICS processing chain), along with some
        meta-information for as_automatics (the processing chain generator)"""
@@ -58,42 +58,68 @@ class Port():
     WindowReference = namedtuple("WindowReference", "x y intername")
 
     directions = ("in", "out", "inout")
-    port_types = ("external", "single", "interface", "register",
-                  "signal", "glue_signal")
+    port_types = (
+        "external",
+        "single",
+        "interface",
+        "register",
+        "signal",
+        "glue_signal",
+    )
     necessity_types = ("mandatory", "optional")
-    rule_conditions = ("any_missing", "any_present", "both_missing",
-                       "both_present", "sink_present", "sink_missing",
-                       "source_present", "source_missing", "single_port",
-                       "external_port", "type_signal")
-    rule_actions = ("connect", "make_external", "error", "warning", "note",
-                    "set_value(<value>)", "bundle_and", "bundle_or",
-                    "fallback_port(<port name>)", "none", "forceconnect")
+    rule_conditions = (
+        "any_missing",
+        "any_present",
+        "both_missing",
+        "both_present",
+        "sink_present",
+        "sink_missing",
+        "source_present",
+        "source_missing",
+        "single_port",
+        "external_port",
+        "type_signal",
+    )
+    rule_actions = (
+        "connect",
+        "make_external",
+        "error",
+        "warning",
+        "note",
+        "set_value(<value>)",
+        "bundle_and",
+        "bundle_or",
+        "fallback_port(<port name>)",
+        "none",
+        "forceconnect",
+    )
 
-    rule_condition_eval = \
-        {"any_missing": lambda src, sink: src is None or sink is None,
-         "any_present": lambda src, sink: not (src is None and sink is None),
-         "both_missing": lambda src, sink: src is None and sink is None,
-         "both_present": lambda src, sink: not (src is None or sink is None),
-         "sink_present": lambda src, sink: sink is not None,
-         "sink_missing": lambda src, sink: sink is None,
-         "source_present": lambda src, sink: src is not None,
-         "source_missing": lambda src, sink: src is None,
-         "single_port": lambda src, sink: src.port_type == "single",
-         "external_port": lambda src, sink: src.port_type == "external",
-         "type_signal": lambda src, sink: src.port_type == "signal"}
+    rule_condition_eval = {
+        "any_missing": lambda src, sink: src is None or sink is None,
+        "any_present": lambda src, sink: not (src is None and sink is None),
+        "both_missing": lambda src, sink: src is None and sink is None,
+        "both_present": lambda src, sink: not (src is None or sink is None),
+        "sink_present": lambda src, sink: sink is not None,
+        "sink_missing": lambda src, sink: sink is None,
+        "source_present": lambda src, sink: src is not None,
+        "source_missing": lambda src, sink: src is None,
+        "single_port": lambda src, sink: src.port_type == "single",
+        "external_port": lambda src, sink: src.port_type == "external",
+        "type_signal": lambda src, sink: src.port_type == "signal",
+    }
     # The ruleset describes how this port is going to be connected
-    default_rules = [Rule("both_present", "connect"),
-                     Rule("sink_missing", "note")]
+    default_rules = [Rule("both_present", "connect"), Rule("sink_missing", "note")]
 
     def __init__(
-            self,
-            name: str = "",
-            code_name: str = "",
-            direction: str = "in",
-            port_type: str = "single",
-            data_type: str = "std_logic",
-            optional: bool = False,
-            data_width=DataWidth(1, None, None)):
+        self,
+        name: str = "",
+        code_name: str = "",
+        direction: str = "in",
+        port_type: str = "single",
+        data_type: str = "std_logic",
+        optional: bool = False,
+        data_width=DataWidth(1, None, None),
+    ):
 
         self.ruleset = deque(self.default_rules)
 
@@ -150,9 +176,14 @@ class Port():
         try:
             self.generics.remove(gen)
         except ValueError:
-            LOG.warning(("Could not remove Generic reference for '%s' from "
-                         "port '%s', Generic not assigned to this port!"),
-                        gen.code_name, self.code_name)
+            LOG.warning(
+                (
+                    "Could not remove Generic reference for '%s' from "
+                    "port '%s', Generic not assigned to this port!"
+                ),
+                gen.code_name,
+                self.code_name,
+            )
             return False
         return True
 
@@ -161,8 +192,9 @@ class Port():
         if port_type in Port.port_types:
             self.port_type = port_type
         else:
-            LOG.warning("Port type '%s' of port '%s' is not valid!",
-                        port_type, self.code_name)
+            LOG.warning(
+                "Port type '%s' of port '%s' is not valid!", port_type, self.code_name
+            )
 
     def set_direction(self, direction: str):
         """Set the direction of the dataflow for this port.
@@ -194,18 +226,21 @@ class Port():
 
     def __str__(self) -> str:
         """Print the configuration of this port instance."""
-        return (("{name}('{code}'): {necessity}, {direction} as "
-                 "{data_type}({data_width}), type: {port_type}")
-                .format(name=self.name,
-                        necessity=("optional" if self.optional
-                                   else "mandatory"),
-                        direction=self.direction,
-                        data_type=self.data_type,
-                        data_width=self.data_width_to_string(self.data_width),
-                        port_type=self.port_type,
-                        code=self.code_name))
+        return (
+            "{name}('{code}'): {necessity}, {direction} as "
+            "{data_type}({data_width}), type: {port_type}"
+        ).format(
+            name=self.name,
+            necessity=("optional" if self.optional else "mandatory"),
+            direction=self.direction,
+            data_type=self.data_type,
+            data_width=self.data_width_to_string(self.data_width),
+            port_type=self.port_type,
+            code=self.code_name,
+        )
+
     def __repr__(self) -> str:
-        return self.code_name 
+        return self.code_name
 
     def set_window_reference(self, tags: iter):
         """Set the reference data required for ports of the 2D Window Pipeline
@@ -236,8 +271,9 @@ class Port():
         value: Boolean value to set [Default: True]"""
         self.connected = value
 
-    def add_rule(self, rule_condition: str,
-                 rule_action: str, priority: bool = True) -> bool:
+    def add_rule(
+        self, rule_condition: str, rule_action: str, priority: bool = True
+    ) -> bool:
         """Add a rule to this port, defining how Automatics will handle this
         port when building the processing chain.
         Parameters:
@@ -269,22 +305,36 @@ class Port():
         modname = getattr(mod, "name", "Unknown")
 
         if rule.condition not in self.rule_conditions:
-            LOG.error(("Tried to set an invalid rule condition '%s' "
-                       "to port '%s' of module '%s'."), rule.condition,
-                      self.code_name, modname)
+            LOG.error(
+                (
+                    "Tried to set an invalid rule condition '%s' "
+                    "to port '%s' of module '%s'."
+                ),
+                rule.condition,
+                self.code_name,
+                modname,
+            )
             return False
-        if (rule.action not in self.rule_actions) and not \
-                ("set_value" in rule.action or "fallback_port" in rule.action):
-            LOG.error(("Tried to set an invalid rule action '%s' ",
-                       "to port '%s' of module '%s'."), rule.action,
-                      self.code_name, modname)
+        if (rule.action not in self.rule_actions) and not (
+            "set_value" in rule.action or "fallback_port" in rule.action
+        ):
+            LOG.error(
+                (
+                    "Tried to set an invalid rule action '%s' ",
+                    "to port '%s' of module '%s'.",
+                ),
+                rule.action,
+                self.code_name,
+                modname,
+            )
             return False
         return True
 
     def get_rule_actions(self, rule_condition: str) -> Sequence[str]:
         """Return a list of all actions set for 'rule_contition'."""
-        return [rule.action for rule in self.ruleset
-                if rule.condition == rule_condition]
+        return [
+            rule.action for rule in self.ruleset if rule.condition == rule_condition
+        ]
 
     def get_rule_conditions(self) -> Sequence[str]:
         """Return a list of all rule conditions
@@ -317,16 +367,31 @@ class Port():
 
     def remove_rule(self, condition: str, action: str) -> bool:
         """Remove a specific port rule, defined by both condition and action."""
-        rule = [rule for rule in self.ruleset 
-                if (action in rule.action) and rule.condition == condition]
+        rule = [
+            rule
+            for rule in self.ruleset
+            if (action in rule.action) and rule.condition == condition
+        ]
         if len(rule) > 1:
-            LOG.warning(("Found multiple rules to remove for port '%s'! "
-                         "Removing only rule ('%s' -> '%s')."), self.code_name,
-                        rule.condition, rule.action)
+            LOG.warning(
+                (
+                    "Found multiple rules to remove for port '%s'! "
+                    "Removing only rule ('%s' -> '%s')."
+                ),
+                self.code_name,
+                rule.condition,
+                rule.action,
+            )
         if not rule:
-            LOG.warning(("Could not remove rule ('%s' -> '%s') for port '%s'."
-                         " Rule does not exist."), condition, action,
-                        self.code_name)
+            LOG.warning(
+                (
+                    "Could not remove rule ('%s' -> '%s') for port '%s'."
+                    " Rule does not exist."
+                ),
+                condition,
+                action,
+                self.code_name,
+            )
             return False
         else:
             rule = rule[0]
@@ -391,12 +456,10 @@ class Port():
             print("No rules defined for port '{}'.".format(self.name))
             return 0
 
-        print("Listing {} rule(s) for port '{}':"
-              .format(len(self.ruleset), self.name))
+        print("Listing {} rule(s) for port '{}':".format(len(self.ruleset), self.name))
         idx = 0
         for rule in self.ruleset:
-            print("Rule {}: {} -> {}"
-                  .format(str(idx), rule.condition, rule.action))
+            print("Rule {}: {} -> {}".format(str(idx), rule.condition, rule.action))
             idx += 1
         return idx
 
@@ -421,8 +484,7 @@ class Port():
             # Else ->
             return "0"
         # Else ->
-        if self.data_type in ("std_logic_vector", "std_ulogic_vector",
-                              "bit_vector"):
+        if self.data_type in ("std_logic_vector", "std_ulogic_vector", "bit_vector"):
             return "(others => '0')"
         # Else ->
         return "0"
@@ -451,7 +513,7 @@ class Port():
             pass
         return False
 
-    def make_external(self, value: bool=True) -> bool:
+    def make_external(self, value: bool = True) -> bool:
         """Set the required port rule and port type to have Automatics
         make this port external."""
         if self.port_type == "interface":
@@ -462,7 +524,7 @@ class Port():
         else:
             if self.port_type == "external":
                 self.port_type = "single"
-            self.remove_condition("external_port")            
+            self.remove_condition("external_port")
             return True
 
     def duplicate(self):
@@ -485,17 +547,19 @@ class StandardPort(Port):
     between "normal" and "standard" ports."""
 
     def __init__(
-            self,
-            name: str = "",
-            code_name: str = "",
-            direction: str = "in",
-            port_type: str = "single",
-            data_type: str = "std_logic",
-            optional: bool = False,
-            data_width=Port.DataWidth(1, None, None),
-            extra_rules: list = None):
-        super().__init__(name, code_name, direction, port_type, data_type,
-                         optional, data_width)
+        self,
+        name: str = "",
+        code_name: str = "",
+        direction: str = "in",
+        port_type: str = "single",
+        data_type: str = "std_logic",
+        optional: bool = False,
+        data_width=Port.DataWidth(1, None, None),
+        extra_rules: list = None,
+    ):
+        super().__init__(
+            name, code_name, direction, port_type, data_type, optional, data_width
+        )
 
         self.remove_condition("sink_missing")
         self.remove_condition("source_missing")
@@ -511,15 +575,17 @@ class GenericSignal(Port):
     Models a generic VHDL signal in an architecture."""
 
     def __init__(
-            self,
-            name: str = "",
-            code_name: str = "",
-            port_type: str = "signal",
-            data_type: str = "std_logic",
-            optional: bool = False,
-            data_width=Port.DataWidth(1, None, None)):
-        super().__init__(name, code_name, "inout", port_type,
-                         data_type, optional, data_width)
+        self,
+        name: str = "",
+        code_name: str = "",
+        port_type: str = "signal",
+        data_type: str = "std_logic",
+        optional: bool = False,
+        data_width=Port.DataWidth(1, None, None),
+    ):
+        super().__init__(
+            name, code_name, "inout", port_type, data_type, optional, data_width
+        )
         self.incoming = []
         self.is_signal = True
 
@@ -539,12 +605,12 @@ class GlueSignal(GenericSignal):
     Used only to connect a port to a VHDL component in a port map."""
 
     def __init__(
-            self,
-            name: str = "",
-            code_name: str = "",
-            port_type: str = "glue_signal",
-            data_type: str = "std_logic",
-            optional: bool = False,
-            data_width=Port.DataWidth(1, None, None)):
-        super().__init__(name, code_name, port_type,
-                         data_type, optional, data_width)
+        self,
+        name: str = "",
+        code_name: str = "",
+        port_type: str = "glue_signal",
+        data_type: str = "std_logic",
+        optional: bool = False,
+        data_width=Port.DataWidth(1, None, None),
+    ):
+        super().__init__(name, code_name, port_type, data_type, optional, data_width)

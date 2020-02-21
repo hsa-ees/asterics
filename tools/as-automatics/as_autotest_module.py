@@ -28,7 +28,7 @@ module as_automatics_module.py
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -55,22 +55,27 @@ LOG = as_log.get_log()
 
 
 class TestAsModule(ut.TestCase):
-
     def setUp(self):
         as_templates.add_templates()
         self.mut = AsModule("Testmodule")
         test_if = Interface("as-stream")
         test_if.template = as_templates.AsStream()
-        test_if.ports.extend([Port("strobe"), Port("hsync"),
-                              Port("stall", direction="out")])
+        test_if.ports.extend(
+            [Port("strobe"), Port("hsync"), Port("stall", direction="out")]
+        )
         self.mut.interfaces = [test_if]
 
         test_regif = SlaveRegisterInterface()
         test_regif.ports.extend(
-            [Port("slv_status_reg",
-                  data_width=Port.DataWidth(a="MAX_REGS_PER_MODULE - 1",
-                                            sep="downto",
-                                            b=0))])
+            [
+                Port(
+                    "slv_status_reg",
+                    data_width=Port.DataWidth(
+                        a="MAX_REGS_PER_MODULE - 1", sep="downto", b=0
+                    ),
+                )
+            ]
+        )
         self.mut.register_ifs.append(test_regif)
 
         self.mut.generics.append(Generic("DATA_WIDTH"))
@@ -103,8 +108,9 @@ class TestAsModule(ut.TestCase):
         self.assertFalse(fut(Port("strobe")))
         # Make sure the module rejects duplicate generics
         self.assertFalse(fut(Generic("DATA_WIDTH")))
-        self.assertEqual(sum([1 for gen in self.mut.generics
-                              if gen.name == "DATA_WIDTH"]), 1)
+        self.assertEqual(
+            sum([1 for gen in self.mut.generics if gen.name == "DATA_WIDTH"]), 1
+        )
         # Check that the module accepts valid generics
         self.assertTrue(fut(Generic("REG_WIDTH")))
         self.assertIn("REG_WIDTH", [gen.name for gen in self.mut.generics])
@@ -152,10 +158,10 @@ class TestAsModule(ut.TestCase):
 
         self.assertTrue(fut(Port("data_error")))
         self.assertEqual(len(self.mut.interfaces), 2)
-        self.assertNotIn("data",
-                         [port.name for port in self.mut.interfaces[1].ports])
-        self.assertIn("data_error",
-                      [port.name for port in self.mut.interfaces[1].ports])
+        self.assertNotIn("data", [port.name for port in self.mut.interfaces[1].ports])
+        self.assertIn(
+            "data_error", [port.name for port in self.mut.interfaces[1].ports]
+        )
 
     def test_fit_port_to_existing_interface(self):
         LOG.debug("*UNITTEST* <running test_fit_port_to_existing_interface>")
@@ -164,16 +170,20 @@ class TestAsModule(ut.TestCase):
         # Check if the module rejects a port already present in the existing
         # interface
         self.assertFalse(fut(Port("strobe")))
-        self.assertEqual(sum([1 for port in self.mut.interfaces[0].ports
-                              if port.name == "strobe"]), 1)
+        self.assertEqual(
+            sum([1 for port in self.mut.interfaces[0].ports if port.name == "strobe"]),
+            1,
+        )
         # Check if the module rejects a port that doesn't match any interface
         self.assertFalse(fut(Port("notvalid")))
-        self.assertNotIn("notvalid",
-                         [port.name for port in self.mut.interfaces[0].ports])
+        self.assertNotIn(
+            "notvalid", [port.name for port in self.mut.interfaces[0].ports]
+        )
         # Check if the module accepts a valid port
         self.assertTrue(fut(Port("data_error")))
-        self.assertIn("data_error",
-                      [port.name for port in self.mut.interfaces[0].ports])
+        self.assertIn(
+            "data_error", [port.name for port in self.mut.interfaces[0].ports]
+        )
 
     def test_fit_port(self):
         LOG.debug("*UNITTEST* <running test_fit_port>")
@@ -192,8 +202,7 @@ class TestAsModule(ut.TestCase):
         self.assertTrue(fut(Port("data", data_type="std_logic_vector")))
         self.assertTrue(fut(Port("data", data_type="std_logic_vector")))
         # As a result, both interfaces now have both mandatory ports (complete)
-        self.assertTrue(all([inter.is_complete() for inter
-                             in self.mut.interfaces]))
+        self.assertTrue(all([inter.is_complete() for inter in self.mut.interfaces]))
 
         self.assertTrue(fut(Port("clk")))
         self.assertIn("clk", [port.name for port in self.mut.standard_ports])
@@ -205,27 +214,34 @@ class TestAsModule(ut.TestCase):
         # Prepare test module
         asstream_0 = self.mut.interfaces[0]
         asstream_0.ports.append(
-            Port("data", data_width=Port.DataWidth(a="DATA_WIDTH - 1",
-                                                   sep="downto", b=0)))
-        asstream_1 = Interface("as-stream_inv",
-                               template=as_templates.AsStream())
+            Port(
+                "data", data_width=Port.DataWidth(a="DATA_WIDTH - 1", sep="downto", b=0)
+            )
+        )
+        asstream_1 = Interface("as-stream_inv", template=as_templates.AsStream())
         asstream_1.ports.append(
             Port(
-                "data",
-                data_width=Port.DataWidth(
-                    a="INV_WIDTH - 1",
-                    sep="downto",
-                    b=0)))
+                "data", data_width=Port.DataWidth(a="INV_WIDTH - 1", sep="downto", b=0)
+            )
+        )
         self.mut.interfaces.append(asstream_1)
         t_regif = SlaveRegisterInterface()
         t_regif.ports.append(
-            Port("slv_ctrl_reg",
-                 data_width=Port.DataWidth(a="MAX_REGS_PER_MODULE - 1",
-                                           sep="downto", b=0)))
+            Port(
+                "slv_ctrl_reg",
+                data_width=Port.DataWidth(
+                    a="MAX_REGS_PER_MODULE - 1", sep="downto", b=0
+                ),
+            )
+        )
         t_regif.ports.append(
-            Port("slv_reg_modify",
-                 data_width=Port.DataWidth(a="MAX_REGS_PER_MODULE - 1",
-                                           sep="downto", b=0)))
+            Port(
+                "slv_reg_modify",
+                data_width=Port.DataWidth(
+                    a="MAX_REGS_PER_MODULE - 1", sep="downto", b=0
+                ),
+            )
+        )
         self.mut.register_ifs.append(t_regif)
 
         # Test case 0: Generic that doesn't match any interface
@@ -266,13 +282,20 @@ class TestAsModule(ut.TestCase):
         # direction, the interface should be removed during "assign_interfaces"
         # The port should be added to the module itself, as a single/lone port
         self.mut.entity_ports = [
+            Port("data", data_type="std_logic_vector"),
+            Port("data_error", direction="out"),
             Port(
-                "data", data_type="std_logic_vector"), Port(
-                "data_error", direction="out"), Port(
-                "data", data_type="std_logic_vector", data_width=Port.DataWidth(
-                    a="DWIDTH - 1", sep="downto", b=0)), Port("strobe")]
-        self.mut.entity_generics = [Generic("DWIDTH"), Generic("NOMATCH"),
-                                    Generic("MAX_REGS_PER_MODULE")]
+                "data",
+                data_type="std_logic_vector",
+                data_width=Port.DataWidth(a="DWIDTH - 1", sep="downto", b=0),
+            ),
+            Port("strobe"),
+        ]
+        self.mut.entity_generics = [
+            Generic("DWIDTH"),
+            Generic("NOMATCH"),
+            Generic("MAX_REGS_PER_MODULE"),
+        ]
 
         fut()
         self.assertEqual(len(self.mut.interfaces), 2)
@@ -291,8 +314,10 @@ class TestAsModule(ut.TestCase):
         self.assertIn("DWIDTH", [gen.name for gen in self.mut.generics])
         # Check that the Generic matching the datawidth definition was assigned
         # to the (only) register interface
-        self.assertIn("MAX_REGS_PER_MODULE",
-                      [gen.name for gen in self.mut.register_ifs[0].generics])
+        self.assertIn(
+            "MAX_REGS_PER_MODULE",
+            [gen.name for gen in self.mut.register_ifs[0].generics],
+        )
         # Make sure the port not matching with any interfaces is assigned to
         # the module itself
         self.assertIn("data_error", [port.name for port in self.mut.ports])
@@ -316,26 +341,24 @@ class TestAsModule(ut.TestCase):
         # The module should recognize two full register interfaces with the
         # existing ports and those instanciated below.
         # The port "slv_reg_modify_supp" should end up assigned to the module
-        self.mut.entity_ports = \
-            [Port("slv_reg_modify", data_type="std_logic_vector",
-                  direction="out"),
-             Port("slv_ctrl_reg", data_type="slv_reg_data"),
-             Port("slv_reg_modify_sup", data_type="std_logic_vector",
-                  direction="out"),
-             Port("slv_ctrl_reg", data_type="slv_reg_data"),
-             Port("slv_reg_config_sup", data_type="slv_reg_config_table",
-                  direction="out"),
-             Port("slv_reg_config", data_type="slv_reg_config_table",
-                  direction="out"),
-             Port("slv_reg_modify_supp", data_type="std_logic_vector",
-                  direction="out"),
-             Port("slv_ctrl_reg_sup", data_type="slv_reg_data"),
-             Port("slv_status_reg_sup", data_type="slv_reg_data",
-                  direction="out")]
+        self.mut.entity_ports = [
+            Port("slv_reg_modify", data_type="std_logic_vector", direction="out"),
+            Port("slv_ctrl_reg", data_type="slv_reg_data"),
+            Port("slv_reg_modify_sup", data_type="std_logic_vector", direction="out"),
+            Port("slv_ctrl_reg", data_type="slv_reg_data"),
+            Port(
+                "slv_reg_config_sup", data_type="slv_reg_config_table", direction="out"
+            ),
+            Port("slv_reg_config", data_type="slv_reg_config_table", direction="out"),
+            Port("slv_reg_modify_supp", data_type="std_logic_vector", direction="out"),
+            Port("slv_ctrl_reg_sup", data_type="slv_reg_data"),
+            Port("slv_status_reg_sup", data_type="slv_reg_data", direction="out"),
+        ]
         # The constants should be assigned to the correct register interface.
-        self.mut.entity_constants = \
-            [Constant("slave_register_configuration"),
-             Constant("slave_register_configuration_sup")]
+        self.mut.entity_constants = [
+            Constant("slave_register_configuration"),
+            Constant("slave_register_configuration_sup"),
+        ]
 
         fut()
         # Check if the correct number of register interfaces was created
@@ -344,45 +367,37 @@ class TestAsModule(ut.TestCase):
         regif1 = self.mut.register_ifs[1]
 
         # Check if all ports for the register interfaces were assigned right
-        self.assertIn("slv_reg_modify",
-                      [port.code_name for port in regif0.ports])
-        self.assertIn("slv_reg_modify_sup",
-                      [port.code_name for port in regif1.ports])
-        self.assertIn("slv_reg_config",
-                      [port.code_name for port in regif0.ports])
-        self.assertIn("slv_reg_config_sup",
-                      [port.code_name for port in regif1.ports])
-        self.assertIn("slv_ctrl_reg",
-                      [port.code_name for port in regif0.ports])
-        self.assertIn("slv_ctrl_reg_sup",
-                      [port.code_name for port in regif1.ports])
-        self.assertIn("slv_status_reg",
-                      [port.code_name for port in regif0.ports])
-        self.assertIn("slv_status_reg_sup",
-                      [port.code_name for port in regif1.ports])
+        self.assertIn("slv_reg_modify", [port.code_name for port in regif0.ports])
+        self.assertIn("slv_reg_modify_sup", [port.code_name for port in regif1.ports])
+        self.assertIn("slv_reg_config", [port.code_name for port in regif0.ports])
+        self.assertIn("slv_reg_config_sup", [port.code_name for port in regif1.ports])
+        self.assertIn("slv_ctrl_reg", [port.code_name for port in regif0.ports])
+        self.assertIn("slv_ctrl_reg_sup", [port.code_name for port in regif1.ports])
+        self.assertIn("slv_status_reg", [port.code_name for port in regif0.ports])
+        self.assertIn("slv_status_reg_sup", [port.code_name for port in regif1.ports])
         # Check that the port "slv_reg_modify_supp" was added back to the
         # modules "entity_ports" list (it's register interface is incomplete)
         # Also check for the duplicate port "slv_ctrl_reg"
-        self.assertIn("slv_reg_modify_supp",
-                      [port.code_name for port in self.mut.entity_ports])
-        self.assertIn("slv_ctrl_reg",
-                      [port.code_name for port in self.mut.entity_ports])
+        self.assertIn(
+            "slv_reg_modify_supp", [port.code_name for port in self.mut.entity_ports]
+        )
+        self.assertIn(
+            "slv_ctrl_reg", [port.code_name for port in self.mut.entity_ports]
+        )
         # Check that the module has had no other ports assigned to entity_ports
         self.assertEqual(len(self.mut.entity_ports), 2)
         # Check if the suffix for regif1 was set correctly
         self.assertEqual("_sup", regif1.name_suffix)
         # Check if the constants were assigned correctly (matching the suffix)
-        self.assertEqual("slave_register_configuration",
-                         regif0.config.code_name)
-        self.assertEqual("slave_register_configuration_sup",
-                         regif1.config.code_name)
+        self.assertEqual("slave_register_configuration", regif0.config.code_name)
+        self.assertEqual("slave_register_configuration_sup", regif1.config.code_name)
 
     def tearDown(self):
         self.mut = None
         AsModule.interface_templates = []
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     LOG = as_log.init_log()
     LOG.disabled = True
     ut.main(exit=False)

@@ -28,7 +28,7 @@ included ASTERICS modules.
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -79,6 +79,7 @@ def define_invert(chain):
 
     # Connect: collect -> writer
     chain.connect(collect, writer)
+
 
 #############################################################
 
@@ -149,6 +150,7 @@ def define_myfilter(chain):
 
     # Connect: collect1 -> writer1
     chain.connect(collect1, writer1)
+
 
 #############################################################
 
@@ -225,18 +227,16 @@ def define_diff_image(chain):
 
     # splitter0 (1) -> sync => diff -> collect2 -> writer2 (diff image)
     # splitter1 (1) --->/
-    chain.connect(splitter0.get_interface("0"),
-                  sync.get_interface("1", "in"))
-    chain.connect(splitter1.get_interface("0"),
-                  sync.get_interface("0", "in"))
-    chain.connect(sync.get_interface("0", "out"),
-                  diff.get_interface("0", "in"))
-    chain.connect(sync.get_interface("1", "out"),
-                  diff.get_interface("1", "in"))
+    chain.connect(splitter0.get_interface("0"), sync.get_interface("1", "in"))
+    chain.connect(splitter1.get_interface("0"), sync.get_interface("0", "in"))
+    chain.connect(sync.get_interface("0", "out"), diff.get_interface("0", "in"))
+    chain.connect(sync.get_interface("1", "out"), diff.get_interface("1", "in"))
     chain.connect(diff, collect2)
     chain.connect(collect2, writer2)
 
+
 #############################################################
+
 
 def define_iic_test(chain):
     camera = chain.add_module("as_sensor_ov7670", "camera")
@@ -256,12 +256,13 @@ def build(demo_system):
     chain = asterics.new_chain()
 
     # Include user modules
-    asterics.add_module_repository("{}/demo_user_modules/"
-            .format(sys.argv[0].rsplit("/", maxsplit=1)[0]), "user")
+    asterics.add_module_repository(
+        "{}/demo_user_modules/".format(sys.argv[0].rsplit("/", maxsplit=1)[0]), "user"
+    )
 
     # Define system
     demo_system(chain)
-    
+
     # Build system
     chain.write_system("astertest/", use_symlinks=False, force=True)
 

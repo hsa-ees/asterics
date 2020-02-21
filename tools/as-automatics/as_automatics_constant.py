@@ -28,7 +28,7 @@ Used to store information about VHDL constants for use in as_automatics.
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -42,16 +42,13 @@ Used to store information about VHDL constants for use in as_automatics.
 # -----------------------------------------------------------------------------
 
 
-class Constant():
+class Constant:
     """Holds data about a VHDL-constant for easy assignment and retrieval.
        Used in as_automatics, especially the vhdl-reader class."""
 
     def __init__(
-            self,
-            name: str = "",
-            code_name: str = "",
-            data_type: str = "",
-            value=""):
+        self, name: str = "", code_name: str = "", data_type: str = "", value=""
+    ):
         self.name = name
         self.code_name = code_name
         self.data_type = data_type
@@ -68,9 +65,11 @@ class Constant():
 
     def list_constant(self):
         """Prints a complete list of information available for this constant"""
-        print("{name}: {data_type}-constant with value: {value}"
-              .format(name=self.code_name, data_type=self.data_type,
-                      value=self.value))
+        print(
+            "{name}: {data_type}-constant with value: {value}".format(
+                name=self.code_name, data_type=self.data_type, value=self.value
+            )
+        )
 
     def assign_to(self, parent):
         """Assigns this instance as part of/linked to 'parent'"""

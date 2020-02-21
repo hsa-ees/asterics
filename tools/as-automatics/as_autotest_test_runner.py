@@ -27,7 +27,7 @@ Module for discovering and running all unit tests of as_automatics.
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -46,7 +46,7 @@ import as_automatics_logging as as_log
 LOG = as_log.init_log()
 LOG.disabled = True
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     loader = ut.TestLoader()
 
     test_suite = loader.discover("./", pattern="as_autotest*.py")

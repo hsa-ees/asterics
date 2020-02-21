@@ -27,7 +27,7 @@ Contains VHDL Code strings for use in as_automatics.
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -73,28 +73,31 @@ HEADER = (
     "----------------------------------------------------------------------------------\n"
     "--! @file  {filename}                                                             \n"
     "--! @brief {briefdesc}                                                            \n"
-    "----------------------------------------------------------------------------------\n")
+    "----------------------------------------------------------------------------------\n"
+)
 
-LIBS_IEEE = ("library ieee;\n"
-             "use ieee.std_logic_1164.all;\n"
-             "use ieee.numeric_std.all;\n\n")
-LIBS_ASTERICS = ("library asterics;\n"
-                 "use asterics.helpers.all;\n")
+LIBS_IEEE = (
+    "library ieee;\n" "use ieee.std_logic_1164.all;\n" "use ieee.numeric_std.all;\n\n"
+)
+LIBS_ASTERICS = "library asterics;\n" "use asterics.helpers.all;\n"
 
 AS_MAIN_FILENAME = "as_main.vhd"
 AS_MAIN_ENTITY = "as_main"
-AS_MAIN_DESC = ("This file instanciates and connects all AsModules of this"
-                " processing system.")
+AS_MAIN_DESC = (
+    "This file instanciates and connects all AsModules of this" " processing system."
+)
 
 AS_TOP_FILENAME = "asterics.vhd"
 AS_TOP_ENTITY = "asterics"
-AS_TOP_DESC = ("Toplevel VHDL file for the ASTERICS IP-Core. Instanciates "
-               "AXI interfaces and as_main.")
+AS_TOP_DESC = (
+    "Toplevel VHDL file for the ASTERICS IP-Core. Instanciates "
+    "AXI interfaces and as_main."
+)
 
 ASSIGNMENT_TEMPL = "  {} <= {};\n"
 
 AS_MAIN_ARCH_BODY_STATIC = (
-    #"  reset <= not reset_n;\n"
+    # "  reset <= not reset_n;\n"
     "  -- Extract the module address from the AXI read address\n"
     "  read_module_addr <= to_integer(unsigned(\n"
     "    axi_slv_reg_read_address(c_slave_reg_addr_width + 1 downto c_reg_addr_width + 2)));\n"
@@ -128,12 +131,13 @@ AS_MAIN_ARCH_BODY_STATIC = (
     "    else\n"
     "        sw_address <= (others => '0');\n"
     "    end if;\n"
-    "  end process;\n")
+    "  end process;\n"
+)
 
 AS_TOP_ARCH_BODY_STATIC = (
-    #"  -- Get clock from AXI Slave Interface:\n"
-    #"  clk <= slave_s_axi_aclk;\n"
-    #"  reset_n <= slave_s_axi_aresetn;\n"
+    # "  -- Get clock from AXI Slave Interface:\n"
+    # "  clk <= slave_s_axi_aclk;\n"
+    # "  reset_n <= slave_s_axi_aresetn;\n"
     "  \n"
 )
 

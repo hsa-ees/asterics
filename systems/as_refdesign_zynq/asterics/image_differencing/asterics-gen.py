@@ -13,7 +13,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -40,8 +40,7 @@ chain = asterics.new_chain()
 # Image difference demo system structure:
 # CAM -> as_sensor -+-----------------------> collect0 -> writer0 -> RAM
 #                   \-------> sync => diff -> collect1 -> writer1 -> RAM
-# RAM -> reader -> disperse ->/ 
-#        as_iic ---------------------------------------------------> CAM
+# RAM -> reader -> disperse ->/
 
 # Camera
 camera = chain.add_module("as_sensor_ov7670")
@@ -79,32 +78,22 @@ writer1.set_generic_value("DIN_WIDTH", 32)
 
 # -------- Module connections ---------------------------
 
-chain.connect(camera,
-                splitter)
-                
+chain.connect(camera, splitter)
+
 # original image path:
-chain.connect(splitter.get("0"),
-                collect1)
-chain.connect(collect1,
-                writer1)
+chain.connect(splitter.get("0"), collect1)
+chain.connect(collect1, writer1)
 
 # previous image read path:
-chain.connect(reader,
-                disperse)
-                
+chain.connect(reader, disperse)
+
 # sync image pixels, diff and write back the result:
-chain.connect(disperse,
-                  sync.get("0", "in"))
-chain.connect(splitter.get("1"),
-                  sync.get("1", "in"))
-chain.connect(sync.get("0", "out"),
-              diff.get("0", "in"))
-chain.connect(sync.get("1", "out"),
-              diff.get("1", "in"))
-chain.connect(diff, 
-                collect0)
-chain.connect(collect0, 
-                writer0)
+chain.connect(disperse, sync.get("0", "in"))
+chain.connect(splitter.get("1"), sync.get("1", "in"))
+chain.connect(sync.get("0", "out"), diff.get("0", "in"))
+chain.connect(sync.get("1", "out"), diff.get("1", "in"))
+chain.connect(diff, collect0)
+chain.connect(collect0, writer0)
 
 
 ############### ↑ Difference System description ↑ ###############
@@ -112,9 +101,13 @@ chain.connect(collect0,
 ############### Automatics outputs ##############################
 
 if len(sys.argv) < 3:
-    print(("Not enough parameters!\n"
-           "Usage:\nasterics-gen.py build-target output-folder\n"
-           "Valid build-targets: 'vivado', 'core'"))
+    print(
+        (
+            "Not enough parameters!\n"
+            "Usage:\nasterics-gen.py build-target output-folder\n"
+            "Valid build-targets: 'vivado', 'core'"
+        )
+    )
     sys.exit()
 
 # Build chain: Generate output products
@@ -124,8 +117,9 @@ if len(sys.argv) < 3:
 success = False
 
 if sys.argv[1] == "vivado":
-    success = chain.write_ip_core_xilinx(sys.argv[2] + "/ASTERICS",
-                                         use_symlinks=True, force=True)
+    success = chain.write_ip_core_xilinx(
+        sys.argv[2] + "/ASTERICS", use_symlinks=True, force=True
+    )
     if success:
         # Create link to the VEARS IP-Core
         success = asterics.vears(sys.argv[2], use_symlinks=True, force=True)
@@ -135,7 +129,7 @@ else:
     sys.exit("Not a valid build target!")
 # On success, generate a system graph using dot
 if success:
-    asterics.write_system_graph(chain, "asterics_system_graph")
+    chain.write_system_graph("asterics_system_graph")
 
 # Report
 if success:

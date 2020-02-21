@@ -27,7 +27,7 @@ Implements the class 'Interface' for as_automatics.
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -50,14 +50,13 @@ import as_automatics_logging as as_log
 LOG = as_log.get_log()
 
 
-class Interface():
+class Interface:
     """Describes a hardware interface consisting of VHDL ports and generics."""
 
-    def __init__(self, type_name: str, template: object = None,
-                 default_name: str = ""):
+    def __init__(self, type_name: str, template: object = None, default_name: str = ""):
         self.ports = []  # List of this interface's Ports
         self.generics = []  # List of this interface's Generics
-        self.name = default_name  # This name 
+        self.name = default_name  # This name
         self.type = type_name  # The interface "type" (as_stream, AXI_Master, ...)
         self.parent = None
         self.template = None
@@ -81,8 +80,9 @@ class Interface():
             if isinstance(template, Interface):
                 self.template = template
             else:
-                LOG.error("Template passed to %s is not an Interface object!",
-                          self.type)
+                LOG.error(
+                    "Template passed to %s is not an Interface object!", self.type
+                )
 
     def __str__(self) -> str:
         """Return the 'user name' of this interface (not the unique name)"""
@@ -92,7 +92,7 @@ class Interface():
         if self.unique_name:
             return self.unique_name
         return self.int_name()
-    
+
     def connect(self, other):
         self.parent.chain.connect(self, other)
 
@@ -142,14 +142,14 @@ class Interface():
            the port must be part of it and have the matching direction."""
         # Make sure we got a port object
         if not isinstance(port_obj, Port):
-            LOG.error("'add_port' was passed the non-Port object '%s'.",
-                      repr(port_obj))
+            LOG.error("'add_port' was passed the non-Port object '%s'.", repr(port_obj))
             return False
 
         # Check if a port with the same name is already assigned
         if self.has_port(port_obj.name):
-            LOG.debug("Port '%s' already present in interface '%s'",
-                      port_obj.name, str(self))
+            LOG.debug(
+                "Port '%s' already present in interface '%s'", port_obj.name, str(self)
+            )
             return False
 
         # Checks for when a template is set
@@ -158,8 +158,11 @@ class Interface():
             tport = self.template.get_port(port_obj.name, suppress_error=True)
             add = bool(tport)
             if not add:
-                LOG.debug("Port '%s' not found in template '%s'",
-                          port_obj.name, str(self.template))
+                LOG.debug(
+                    "Port '%s' not found in template '%s'",
+                    port_obj.name,
+                    str(self.template),
+                )
                 return False
 
             if tport.data_type != port_obj.data_type:
@@ -181,14 +184,13 @@ class Interface():
             port_obj.in_entity = tport.in_entity
 
         # If the checks passed, add this port
-        LOG.debug("Add port '%s' to interface '%s'.",
-                  port_obj.code_name, str(self))
+        LOG.debug("Add port '%s' to interface '%s'.", port_obj.code_name, str(self))
         port_obj.assign_to(self)
         port_obj.port_type = "interface"
         self.ports.append(port_obj)
         return True
 
-    def make_external(self, value: bool=True):
+    def make_external(self, value: bool = True):
         """For use in the user script: Make this interface
         external, exposing it to the outside of the IP-Core."""
         self.to_external = value
@@ -212,38 +214,40 @@ class Interface():
         self.instantiate_in_top = None
         self.to_external = False
 
-    def get_ports(self, port_name: str, *,
-                  suppress_error: bool = False) -> Sequence[Port]:
+    def get_ports(
+        self, port_name: str, *, suppress_error: bool = False
+    ) -> Sequence[Port]:
         """Search for and return any Ports matching 'port_name'
         using the port.name attribute"""
         found = [port for port in self.ports if port.name == port_name]
         if not found and not suppress_error:
-            LOG.error("Could not find a port '%s' in interface '%s'!",
-                      port_name, str(self))
+            LOG.error(
+                "Could not find a port '%s' in interface '%s'!", port_name, str(self)
+            )
             raise NameError("No port {} found in {}!".format(port_name, self))
         return found
 
-    def get_port(self, port_name: str, *,
-                 suppress_error: bool = False) -> Port:
+    def get_port(self, port_name: str, *, suppress_error: bool = False) -> Port:
         """Search for and return the first Port matching 'port_name'
         using the port.name attribute"""
-        found = next((port for port in self.ports if port.name == port_name),
-                     None)
+        found = next((port for port in self.ports if port.name == port_name), None)
         if not found and not suppress_error:
-            LOG.error("Could not find a port '%s' in interface '%s'!",
-                      port_name, str(self))
+            LOG.error(
+                "Could not find a port '%s' in interface '%s'!", port_name, str(self)
+            )
             raise NameError("No port {} found in {}!".format(port_name, self))
         return found
 
-    def get_port_by_code_name(self, port_name: str, *,
-                              suppress_error: bool = False) -> Port:
+    def get_port_by_code_name(
+        self, port_name: str, *, suppress_error: bool = False
+    ) -> Port:
         """Search for and return the first Port matching 'port_name'
         using the port.code_name attribute"""
-        found = next((port for port in self.ports
-                      if port.code_name == port_name), None)
+        found = next((port for port in self.ports if port.code_name == port_name), None)
         if not found and not suppress_error:
-            LOG.error("Could not find a port '%s' in interface '%s'!",
-                      port_name, str(self))
+            LOG.error(
+                "Could not find a port '%s' in interface '%s'!", port_name, str(self)
+            )
             raise NameError("No port {} found in {}!".format(port_name, self))
         return found
 
@@ -267,8 +271,7 @@ class Interface():
     def get_generic(self, generic_name: str) -> Generic:
         """Returns the first generic matching 'generic_name' that's associated
             with this object. If none are found, returns None."""
-        return next((gen for gen in self.generics if gen.name == generic_name),
-                    None)
+        return next((gen for gen in self.generics if gen.name == generic_name), None)
 
     def has_generic(self, generic_name: str) -> bool:
         """Return 'True' if this interface has a Generic matching
@@ -320,20 +323,29 @@ class Interface():
            of the interface and port to add"""
         # Make sure we got a port object
         if not isinstance(port_obj, Port):
-            LOG.error("'fit_and_add_port' got the non-Port object '%s'.",
-                      repr(port_obj))
+            LOG.error(
+                "'fit_and_add_port' got the non-Port object '%s'.", repr(port_obj)
+            )
             return False
 
         # This method can only work if the template is set
         if self.template is None:
-            LOG.error(("'fit_and_add_port' called for port '%s' while "
-                       "interface '%s' had no template assigned!"),
-                      port_obj.code_name, str(self))
+            LOG.error(
+                (
+                    "'fit_and_add_port' called for port '%s' while "
+                    "interface '%s' had no template assigned!"
+                ),
+                port_obj.code_name,
+                str(self),
+            )
             return False
 
         # Check if the port is defined in this interfaces template
-        matchlist = [tport.name for tport in self.template.ports
-                     if tport.name in port_obj.code_name]
+        matchlist = [
+            tport.name
+            for tport in self.template.ports
+            if tport.name in port_obj.code_name
+        ]
         if not matchlist:
             LOG.debug("Port '%s' not found in template.", port_obj.code_name)
             return False
@@ -343,25 +355,23 @@ class Interface():
         port_obj.name = matchlist[0]
 
         # Pre-/Suffix check
-        this_prefix, this_suffix = \
-            as_help.get_prefix_suffix(port_obj.name,
-                                      port_obj.code_name,
-                                      Port.directions)
+        this_prefix, this_suffix = as_help.get_prefix_suffix(
+            port_obj.name, port_obj.code_name, Port.directions
+        )
         first_port = not self.ports
         if not first_port:
             # If this is not the first port, the pre-/suffix need to match
-            if ((this_suffix != self.name_suffix) or
-                    (this_prefix != self.name_prefix)):
-                LOG.debug("Port '%s' didn't fit, prefix/suffix mismatch!",
-                          port_obj.code_name)
+            if (this_suffix != self.name_suffix) or (this_prefix != self.name_prefix):
+                LOG.debug(
+                    "Port '%s' didn't fit, prefix/suffix mismatch!", port_obj.code_name
+                )
                 return False
         else:
             # If this is the first port, use its pre-/suffix for this regif
             self.name_prefix = this_prefix
             self.name_suffix = this_suffix
 
-        LOG.debug("Trying to add '%s' to interface '%s'", port_obj.code_name,
-                  str(self))
+        LOG.debug("Trying to add '%s' to interface '%s'", port_obj.code_name, str(self))
         # Try adding the port
         if not self.add_port(port_obj):
             return False
@@ -371,18 +381,25 @@ class Interface():
         """Remove port(s) from this interface instance by name 'port_name'."""
         to_remove = self.get_ports(port_name, suppress_error=True)
         if not to_remove:
-            LOG.error(("Couldn't remove '%s' from interface '%s'; no matching "
-                       "ports found"), port_name, str(self))
+            LOG.error(
+                (
+                    "Couldn't remove '%s' from interface '%s'; no matching "
+                    "ports found"
+                ),
+                port_name,
+                str(self),
+            )
             return False
 
         if len(to_remove) > 1:
             # This shouldn't happen, unless a duplicate port was added
             # by directly manipulating the ports list (interface.ports)
-            LOG.warning(("Found multiple ports to remove: %s - "
-                         "removing all!"), str(to_remove))
+            LOG.warning(
+                ("Found multiple ports to remove: %s - " "removing all!"),
+                str(to_remove),
+            )
         else:
-            LOG.debug("Removing port '%s' from interface '%s'",
-                      port_name, str(self))
+            LOG.debug("Removing port '%s' from interface '%s'", port_name, str(self))
         for rem_port in to_remove:
             self.ports.remove(rem_port)
         return True
@@ -395,8 +412,9 @@ class Interface():
             return False
         # Only add the generic if it's not already added
         if self.has_generic(generic_obj.name):
-            LOG.debug("Interface '%s' already has a generic '%s'", str(self),
-                      generic_obj.name)
+            LOG.debug(
+                "Interface '%s' already has a generic '%s'", str(self), generic_obj.name
+            )
             return False
         # Add the generic
         generic_obj.assign_to(self)
@@ -408,18 +426,24 @@ class Interface():
            interface instance by name ('generic_name')."""
         to_remove = [gen for gen in self.generics if gen.name == generic_name]
         if not to_remove:
-            LOG.error(("Couldn't remove '%s' from interface '%s', generic "
-                       "not found"), generic_name, str(self))
+            LOG.error(
+                ("Couldn't remove '%s' from interface '%s', generic " "not found"),
+                generic_name,
+                str(self),
+            )
             return False
 
         if len(to_remove) > 1:
             # This shouldn't happen, 'add_generic' prohibits copies of
             # generics, the generics-list could be modified directly though
-            LOG.warning(("Found multiple generics to remove: %s - "
-                         "removing all!"), str(to_remove))
+            LOG.warning(
+                ("Found multiple generics to remove: %s - " "removing all!"),
+                str(to_remove),
+            )
         else:
-            LOG.debug("Removing generic '%s' from interface '%s'",
-                      generic_name, str(self))
+            LOG.debug(
+                "Removing generic '%s' from interface '%s'", generic_name, str(self)
+            )
         for rem_gen in to_remove:
             self.generics.remove(rem_gen)
         return True
@@ -428,8 +452,7 @@ class Interface():
         """Return the direction of a port as it is defined in the VHDL file."""
         found = self.get_port(port_name, suppress_error=True)
         if found is None:
-            LOG.error("Couldn't find port '%s' in interface '%s'", port_name,
-                      str(self))
+            LOG.error("Couldn't find port '%s' in interface '%s'", port_name, str(self))
             return ""
         if self.direction == "in":
             return found.direction
@@ -438,11 +461,9 @@ class Interface():
     def print_interface(self, verbose: bool = False):
         """Print the interface configuration, listing all ports and generics.
            Prints only the mandatory ports if 'verbose' is set to 'False'."""
-        print("{}: {} with direction '{}'".format(str(self), self.type,
-                                                  self.direction))
+        print("{}: {} with direction '{}'".format(str(self), self.type, self.direction))
         if verbose:
-            print("Source module: {}"
-                  .format(str(as_help.get_source_module(self))))
+            print("Source module: {}".format(str(as_help.get_source_module(self))))
             if self.generics:
                 print("\nGenerics:")
                 self.list_generics()
@@ -453,9 +474,12 @@ class Interface():
                 instmod, togroup = self.instantiate_in_top
                 if togroup == "":
                     togroup = "asterics"
-                print(("This interface will automatically instantiate "
-                       "module '{}' in module group '{}'!")
-                      .format(instmod, togroup))
+                print(
+                    (
+                        "This interface will automatically instantiate "
+                        "module '{}' in module group '{}'!"
+                    ).format(instmod, togroup)
+                )
         else:
             print("Mandatory ports:")
             for port in self.ports:
@@ -491,13 +515,11 @@ class Interface():
         LOG.debug("Starting consistency check for interface '%s'", self.name)
         # For all ports of this interface's template
         present_portnames = [port.name for port in self.ports]
-        for mtport in [tport for tport in
-                       self.template.ports if not tport.optional]:
+        for mtport in [tport for tport in self.template.ports if not tport.optional]:
             # LOG.debug("Checking for port '%s'", mtport.name)
             # Make sure all !mandatory! (optional == False) ports are present
             if mtport.name not in present_portnames:
-                LOG.debug("Port '%s' isn't present! Removing interface.",
-                          mtport.name)
+                LOG.debug("Port '%s' isn't present! Removing interface.", mtport.name)
                 return False
         LOG.debug("Interface has all mandatory ports.")
         return True

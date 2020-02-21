@@ -28,7 +28,7 @@ connection phase when building/generating a processing chain.
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -82,13 +82,14 @@ def set_unique_name(inter: Interface, module: AsModule):
     inter: Interface to give a unique name to.
     module: inter's parent module, or the module to use for the unique name
     No return value."""
-    inter.unique_name = "{}_{}{}{}_{}" \
-        .format(module.name, inter.name_prefix, inter.type, 
-                inter.name_suffix, inter.direction)
+    inter.unique_name = "{}_{}{}{}_{}".format(
+        module.name, inter.name_prefix, inter.type, inter.name_suffix, inter.direction
+    )
 
 
-def list_address_space(address_space: dict, addr_per_reg: int,
-                       max_regs_per_module: int):
+def list_address_space(
+    address_space: dict, addr_per_reg: int, max_regs_per_module: int
+):
     """List the address space for the AXI slave register interface
         for this processing chain."""
     for key in address_space:
@@ -101,16 +102,21 @@ def list_address_space(address_space: dict, addr_per_reg: int,
         if len(reg_table) > max_regs_per_module:
             # If the register list is overlong: Error!
             LOG.error("Too many registers in '%s'", str(regif.parent))
-            raise Exception("Too many registers per module in {}"
-                            .format(str(regif.parent)))
+            raise Exception(
+                "Too many registers per module in {}".format(str(regif.parent))
+            )
         # For every allocated register: Print address and register type
         for reg in reg_table:
             if reg != "None":
-                print("{:#8X}: {}: {}".format(base_addr + offset,
-                                              regif.parent.name, reg))
+                print(
+                    "{:#8X}: {}: {}".format(base_addr + offset, regif.parent.name, reg)
+                )
             else:
-                print("{:#8X}: {}: {}".format(base_addr + offset,
-                                              regif.parent.name, "Inactive"))
+                print(
+                    "{:#8X}: {}: {}".format(
+                        base_addr + offset, regif.parent.name, "Inactive"
+                    )
+                )
             offset += addr_per_reg
 
 
@@ -135,17 +141,18 @@ def resolve_data_width(port: Port) -> tuple:
                 continue
         gvals[gen.code_name] = val
     # Evaluate the data width
-    new_data_width = \
-        as_help.eval_data_width(port, gvals)
+    new_data_width = as_help.eval_data_width(port, gvals)
     # If the evaluation could not complete
     if not is_data_width_resolved(new_data_width):
         LOG.info(
-            ("Can't automatically resolve data width of '%s' in '%s'. "
-             "Generic(-s) in '%s' have no value set or is(are) external!"),
+            (
+                "Can't automatically resolve data width of '%s' in '%s'. "
+                "Generic(-s) in '%s' have no value set or is(are) external!"
+            ),
             port.code_name,
             port.parent.name,
-            port.data_width_to_string(
-                port.data_width))
+            port.data_width_to_string(port.data_width),
+        )
         return port.data_width
     return new_data_width
 
@@ -182,8 +189,11 @@ def manage_data_widths(source: Port, sink: Port) -> bool:
         if pin.data_width == pout.data_width:
             return True
 
-    LOG.debug("Data widths of '%s' and '%s' not resolved, resolving...",
-              pin.code_name, pout.code_name)
+    LOG.debug(
+        "Data widths of '%s' and '%s' not resolved, resolving...",
+        pin.code_name,
+        pout.code_name,
+    )
     # Evaluate data widths
     pin_rdw = resolve_data_width(pin)
     pout_rdw = resolve_data_width(pout)
@@ -218,12 +228,20 @@ def manage_data_widths(source: Port, sink: Port) -> bool:
             pin_rdw = resolve_data_width(pin)
             # Did that resolve the difference?
             if pin_rdw == pout_rdw:
-                LOG.debug(("Generic Auto-Propagation: For ports '%s' and "
-                           "'%s' of modules '%s' and '%s': Set value of "
-                           "generic '%s' to generic '%s' of module '%s'."),
-                          pout.code_name, pin.code_name, pin_mod.name,
-                          pout_mod.name, igen.code_name, ogen.code_name,
-                          pout_mod.name)
+                LOG.debug(
+                    (
+                        "Generic Auto-Propagation: For ports '%s' and "
+                        "'%s' of modules '%s' and '%s': Set value of "
+                        "generic '%s' to generic '%s' of module '%s'."
+                    ),
+                    pout.code_name,
+                    pin.code_name,
+                    pin_mod.name,
+                    pout_mod.name,
+                    igen.code_name,
+                    ogen.code_name,
+                    pout_mod.name,
+                )
                 return True
             # If not, reverse the propagation and try the other way around
             igen.value = igen_v
@@ -232,12 +250,20 @@ def manage_data_widths(source: Port, sink: Port) -> bool:
             pout_rdw = resolve_data_width(pout)
             # Did that work?
             if pin_rdw == pout_rdw:
-                LOG.debug(("Generic Auto-Propagation: For ports '%s' and "
-                           "'%s' of modules '%s' and '%s': Set value of "
-                           "generic '%s' to generic '%s' of module '%s'."),
-                          pout.code_name, pin.code_name, pin_mod.name,
-                          pout_mod.name, ogen.code_name, igen.code_name,
-                          pin_mod.name)
+                LOG.debug(
+                    (
+                        "Generic Auto-Propagation: For ports '%s' and "
+                        "'%s' of modules '%s' and '%s': Set value of "
+                        "generic '%s' to generic '%s' of module '%s'."
+                    ),
+                    pout.code_name,
+                    pin.code_name,
+                    pin_mod.name,
+                    pout_mod.name,
+                    ogen.code_name,
+                    igen.code_name,
+                    pin_mod.name,
+                )
                 return True
             # If not, reverse the propagation and print the user warning
             ogen.value = ogen_v
@@ -258,18 +284,31 @@ def manage_data_widths(source: Port, sink: Port) -> bool:
         pin_rdw = Port.data_width_to_string(pin_rdw)
 
         # User warning message
-        LOG.error(("Data widths between ports '%s' and '%s' of modules "
-                   "'%s' and '%s' differ and must be adjusted manually!\n"
-                   "Data widths: For port '%s': (%s) - resolved as (%s) | "
-                   "For port '%s': (%s) - resolved as (%s).\n"
-                   "Use generics '%s' of the respective modules."),
-                  pout.code_name, pin.code_name, pout_mod, pin_mod,
-                  pout.code_name, pout_dw, pout_rdw,
-                  pin.code_name, pin_dw, pin_rdw, all_gens)
+        LOG.error(
+            (
+                "Data widths between ports '%s' and '%s' of modules "
+                "'%s' and '%s' differ and must be adjusted manually!\n"
+                "Data widths: For port '%s': (%s) - resolved as (%s) | "
+                "For port '%s': (%s) - resolved as (%s).\n"
+                "Use generics '%s' of the respective modules."
+            ),
+            pout.code_name,
+            pin.code_name,
+            pout_mod,
+            pin_mod,
+            pout.code_name,
+            pout_dw,
+            pout_rdw,
+            pin.code_name,
+            pin_dw,
+            pin_rdw,
+            all_gens,
+        )
 
     # Special case for "slv_reg_interface" connections to as_regmgr
-    if ((pin.parent.type == "slv_reg_interface") 
-            and (pout.parent.type == "slv_reg_interface")):
+    if (pin.parent.type == "slv_reg_interface") and (
+        pout.parent.type == "slv_reg_interface"
+    ):
         if pin_mod.entity_name == "as_regmgr":
             pin.data_width = copy(pout.data_width)
             return True
@@ -292,12 +331,13 @@ def update_interface_connected(inter: Interface):
 
 def __get_port_rule_message__(source: Port) -> str:
     if isinstance(source.parent, Interface):
-        return ("For source port '{}' of interface '{}' in module '{}'"
-                .format(source.code_name, source.parent,
-                        source.parent.parent.name))
+        return "For source port '{}' of interface '{}' in module '{}'".format(
+            source.code_name, source.parent, source.parent.parent.name
+        )
     if isinstance(source.parent, AsModule):
-        return ("For source port '{}' of module '{}'"
-                .format(source.code_name, source.parent))
+        return "For source port '{}' of module '{}'".format(
+            source.code_name, source.parent
+        )
     return "For source port '{}'".format(source.code_name)
 
 

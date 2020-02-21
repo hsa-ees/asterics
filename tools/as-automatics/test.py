@@ -15,7 +15,6 @@ import time
 
 import asterics
 
-#import as_automatics_visual as as_visual
 # ~~~~ TESTING ~~~~
 
 
@@ -90,17 +89,13 @@ def define_diff_image(chain):
 
     # splitter0 (1) -> sync => diff -> collect2 -> writer2 (diff image)
     # splitter1 (1) --->/
-    chain.connect(splitter0.get_interface("0"),
-                  sync.get_interface("1", "in"))
-    chain.connect(splitter1.get_interface("0"),
-                  sync.get_interface("0", "in"))
-    chain.connect(sync.get_interface("0", "out"),
-                  diff.get_interface("0", "in"))
-    chain.connect(sync.get_interface("1", "out"),
-                  diff.get_interface("1", "in"))
+    chain.connect(splitter0.get_interface("0"), sync.get_interface("1", "in"))
+    chain.connect(splitter1.get_interface("0"), sync.get_interface("0", "in"))
+    chain.connect(sync.get_interface("0", "out"), diff.get_interface("0", "in"))
+    chain.connect(sync.get_interface("1", "out"), diff.get_interface("1", "in"))
     chain.connect(diff, collect2)
     chain.connect(collect2, writer2)
-    
+
 
 def define_stream_sync_test(chain):
 
@@ -110,8 +105,7 @@ def define_stream_sync_test(chain):
 
     # Camera
     camera = chain.add_module("as_sensor_ov7670", "camera0")
-    camera.port_rule_add("VCOMPLETE_OUT",
-                         "sink_missing", "fallback_port(vsync_in)")
+    camera.port_rule_add("VCOMPLETE_OUT", "sink_missing", "fallback_port(vsync_in)")
 
     # Splitter
     splitter = chain.add_module("as_stream_splitter", "split0")
@@ -143,8 +137,9 @@ def define_stream_sync_test(chain):
 
     # -------- Module connections ---------------------------
     chain.connect(camera, splitter)
-    chain.connect(splitter.get_interface("as_stream_0"),
-                  sync.get_interface("as_stream_0"))
+    chain.connect(
+        splitter.get_interface("as_stream_0"), sync.get_interface("as_stream_0")
+    )
 
     chain.connect(splitter.get_interface("as_stream_1"), inverter)
     chain.connect(inverter, sync.get_interface("as_stream_1"))
@@ -172,8 +167,7 @@ def define_canny_eas(chain):
 
     collect1.set_generic("DOUT_ORDER_ASCENDING", "False")
 
-    camera.get_port("VCOMPLETE_OUT").add_rule("sink_missing",
-                                              "fallback_port(vsync_in)")
+    camera.get_port("VCOMPLETE_OUT").add_rule("sink_missing", "fallback_port(vsync_in)")
 
     writer0.set_generic("MEMORY_DATA_WIDTH", 32)
     writer0.set_generic("DIN_WIDTH", 32)
@@ -293,6 +287,7 @@ def define_canny(chain):
     # Connect: collect1 -> writer1
     chain.connect(collect1, writer1)
 
+
 #############################################################
 
 
@@ -312,9 +307,9 @@ def define_diff(chain):
     diff = chain.add_module("as_pixel_diff")
     # Collect modules
     collect0 = chain.add_module("as_collect", "collect0")
-    #collect0.set_generic_value("COLLECT_COUNT", 16)
+    # collect0.set_generic_value("COLLECT_COUNT", 16)
     collect1 = chain.add_module("as_collect", "collect1")
-    #collect1.set_generic_value("COLLECT_COUNT", 16)
+    # collect1.set_generic_value("COLLECT_COUNT", 16)
     # Writer 0
     writer0 = chain.add_module("as_memwriter", "writer0")
     writer0.set_generic("MEMORY_DATA_WIDTH", 32)
@@ -326,14 +321,14 @@ def define_diff(chain):
 
     # -------- Module connections ---------------------------
     chain.connect(camera, splitter)
-                    
+
     # original image path:
     chain.connect(splitter.get("0"), collect1)
     chain.connect(collect1, writer1)
 
     # previous image read path:
     chain.connect(reader, disperse)
-                    
+
     # sync image pixels, diff and write back the result:
     chain.connect(disperse, sync.get("0", "in"))
     chain.connect(splitter.get("1"), sync.get("1", "in"))
@@ -358,11 +353,12 @@ def define_diff(chain):
     axi_master_w1.set_generic_value("C_M_AXI_DATA_WIDTH", 32)
     axi_master_w1.set_generic_value("C_NATIVE_DATA_WIDTH", 32)
 
+
 def define_threshold_system(chain):
-    
+
     # topology:
     # CAM -> sensor -> collect_4to1 -> reorder -> disperse_1to4 -> threshold ->
-    #       -> collect_2to1 (0) -> collect_2to1 (1) -> reorder -> writer -> RAM 
+    #       -> collect_2to1 (0) -> collect_2to1 (1) -> reorder -> writer -> RAM
 
     camera = chain.add_module("as_sensor_ov7670", "camera")
     thresh = chain.add_module("as_threshold", "thres")
@@ -377,10 +373,11 @@ def define_threshold_system(chain):
     chain.connect(thresh, coll)
     chain.connect(coll, writer)
 
+
 def define_nitra(chain):
 
     # System structure:
-    # CAM -> as_sensor ----> as_nitra -> as_collect -> as_memwriter -> RAM 
+    # CAM -> as_sensor ----> as_nitra -> as_collect -> as_memwriter -> RAM
     # RAM -> as_memreader -->/ ← Config data
 
     # --------- Camera ---------
@@ -441,7 +438,6 @@ def define_myfilter(chain):
     writer1.set_generic("MEMORY_DATA_WIDTH", 32)
     writer1.set_generic("DIN_WIDTH", 32)
 
-
     camera.connect(splitter)
     splitter.get("1").connect(myfilter)
     myfilter.connect(collect1)
@@ -449,10 +445,11 @@ def define_myfilter(chain):
     splitter.get("0").connect(collect0)
     collect0.connect(writer0)
 
+
 def define_uht_ew(chain):
     camera = chain.add_module("as_sensor_ov7670")
     splitter_cam = chain.add_module("as_stream_splitter", "splitter_cam")
-    
+
     camera.connect(splitter_cam)
 
     collect_cam = chain.add_module("as_collect", "collect_cam")
@@ -512,7 +509,8 @@ def define_uht_ew(chain):
     master_w_scaled.set_generic_value("C_NATIVE_DATA_WIDTH", 64)
     master_w_uht.set_generic_value("C_M_AXI_DATA_WIDTH", 64)
     master_w_uht.set_generic_value("C_NATIVE_DATA_WIDTH", 64)
-    
+
+
 def define_simple_camera(chain):
     cam = chain.add_module("as_sensor_ov7670")
     cam.add_iic_master("XILINX_PL_IIC")
@@ -521,6 +519,7 @@ def define_simple_camera(chain):
     writer = chain.add_module("as_memwriter")
     writer.set_generic("MEMORY_DATA_WIDTH", 32)
     writer.set_generic("DIN_WIDTH", 32)
+    writer.make_port_external("interrupt_out")
     cam.connect(invert)
     invert.connect(collect)
     collect.connect(writer)
@@ -531,27 +530,39 @@ def define_simple_camera(chain):
     axi_master.set_port_fixed_value("m_axi_awcache", "open")
     axi_master.set_port_fixed_value("m_axi_arcache", "open")
 
-    chain.top.define_port("master_memwriter_0_m_axi_awcache", data_type="std_logic_vector", data_width=(3, "downto", 0), direction="out", fixed_value='"1111"')
-    chain.top.define_port("master_memwriter_0_m_axi_arcache", data_type="std_logic_vector", data_width=(3, "downto", 0), direction="out", fixed_value='"1111"')
-    #axi_slave = chain.get_module("as_main_AXI_Slave")
+    chain.top.define_port(
+        "master_memwriter_0_m_axi_awcache",
+        data_type="std_logic_vector",
+        data_width=(3, "downto", 0),
+        direction="out",
+        fixed_value='"1111"',
+    )
+    chain.top.define_port(
+        "master_memwriter_0_m_axi_arcache",
+        data_type="std_logic_vector",
+        data_width=(3, "downto", 0),
+        direction="out",
+        fixed_value='"1111"',
+    )
+    # axi_slave = chain.get_module("as_main_AXI_Slave")
 
+    # chain.top.define_port("awcache", direction="out")
+    # chain.top.port_set_value("awcache", "'1'")
+    # chain.top.define_port("flush_in")
+    # chain.top.define_signal("flush_internal")
+    # chain.top.signal_connect("flush_internal", chain.top.get_port("flush_in"))
+    # chain.top.define_port("my_clk", direction="out")
+    # chain.top.port_connect("my_clk", axi_slave.get_port("s_axi_aclk"))
+    # pass
+    # chain.auto_instantiate()
+    # chain.auto_connect()
+    # print(chain.top.get_signal("master_memwriter_0_m_axi_awcache"))
+    # axi_master = chain.get_module("as_memwriter_0_AXI_Master")
+    # axi_master.set_port_fixed_value("m_axi_awcache", '"1111"')
+    # chain.top.set_port_fixed_value("master_memwriter_0_m_axi_awcache", '"1111"')
+    # print(writer.get("flush_in"))
+    # collect.get_port("hsync_out").connect(writer.get("flush_in"))
 
-    #chain.top.define_port("awcache", direction="out")
-    #chain.top.port_set_value("awcache", "'1'")
-    #chain.top.define_port("flush_in")
-    #chain.top.define_signal("flush_internal")
-    #chain.top.signal_connect("flush_internal", chain.top.get_port("flush_in"))
-    #chain.top.define_port("my_clk", direction="out")
-    #chain.top.port_connect("my_clk", axi_slave.get_port("s_axi_aclk"))
-    #pass
-    #chain.auto_instantiate()
-    #chain.auto_connect()
-    #print(chain.top.get_signal("master_memwriter_0_m_axi_awcache"))
-    #axi_master = chain.get_module("as_memwriter_0_AXI_Master")
-    #axi_master.set_port_fixed_value("m_axi_awcache", '"1111"')
-    #chain.top.set_port_fixed_value("master_memwriter_0_m_axi_awcache", '"1111"')
-    #print(writer.get("flush_in"))
-    #collect.get_port("hsync_out").connect(writer.get("flush_in"))
 
 def define_single_2dwpmod(chain):
     cam = chain.add_module("as_sensor_ov7670")
@@ -566,64 +577,78 @@ def define_single_2dwpmod(chain):
     collect.connect(writer)
 
 
+def define_test(chain):
+    asterics.add_module_repository("demo_user_modules/")
+    filter2 = chain.add_module("as_myfilter_2")
+    filter2.get("foo", "in").print_interface(2)
+    filter2.get("foo", "out").print_interface(2)
+    filter2.get("bar", "in").print_interface(2)
+    filter2.get("bar", "out").print_interface(2)
+
+
 def run_test():
     asterics.quiet()
     comptime = time.time()
-    #asterics.set_loglevel("info", "info")
+    # asterics.set_loglevel("info", "info")
     chain = asterics.new_chain()
 
     thistime = time.time() - comptime
     print("Init: {}".format(thistime))
     comptime = time.time()
-    #asterics.set_loglevel("warning")
+    asterics.set_loglevel("info")
 
-    asterics.add_module_repository("/home/phil/EES/asterics-nonfree/modules/", "nonfree")
-    #asterics.add_module_repository("demo_user_modules/", "demo")
+    asterics.add_module_repository(
+        "/home/phil/EES/asterics-nonfree/modules/", "nonfree"
+    )
+    # asterics.add_module_repository("demo_user_modules/", "demo")
 
     thistime = time.time() - comptime
     print("Add subfolder: {}".format(thistime))
     comptime = time.time()
 
-    
-    #define_diff_image(chain)
-    #define_threshold_system(chain)
-    #define_myfilter(chain)
-    #define_diff(chain)
-    #define_nitra(chain)
-    #define_uht_ew(chain)
+    # define_diff_image(chain)
+    # define_threshold_system(chain)
+    # define_myfilter(chain)
+    # define_diff(chain)
+    # define_nitra(chain)
+    # define_uht_ew(chain)
     define_simple_camera(chain)
-    #define_single_2dwpmod(chain)
+    # define_single_2dwpmod(chain)
+    # define_test(chain)
 
     thistime = time.time() - comptime
     print("Chain definition: {}".format(thistime))
     comptime = time.time()
 
     success = chain.write_asterics_core("astertest/", use_symlinks=True, force=True)
-    #success = chain.write_ip_core_xilinx("astertest/", use_symlinks=True, force=True)
+    # success = chain.write_ip_core_xilinx("astertest/", use_symlinks=True, force=True)
     if success:
-        #asterics.vears("astertest/IPs/", force=True)
+        # asterics.vears("astertest/IPs/", force=True)
 
         thistime = time.time() - comptime
         print("Build chain: {}".format(thistime))
         comptime = time.time()
 
         chain.list_address_space()
-        asterics.write_system_graph(chain, show_toplevels=False, 
-                                    show_auto_inst=False, show_ports=False,
-                                    show_unconnected=False)
-        
+        asterics.write_system_graph(
+            chain,
+            show_toplevels=False,
+            show_auto_inst=False,
+            show_ports=False,
+            show_unconnected=False,
+        )
+
         thistime = time.time() - comptime
         print("Print graph and regs: {}".format(thistime))
         print("Done")
     else:
         print("Failed")
 
+
 if __name__ == "__main__":
     comptime = time.time()
     asterics.print_version()
-    #asterics.requires_version("0.2.003")
-    #asterics.requires_at_least_version("0.3.000")
+    # asterics.requires_version("0.2.003")
+    # asterics.requires_at_least_version("0.3.000")
     run_test()
     print("Testtime: {}".format(time.time() - comptime))
-
-

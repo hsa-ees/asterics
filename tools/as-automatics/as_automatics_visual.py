@@ -27,7 +27,7 @@ Implements various visualization methods for as_automatics.
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -61,8 +61,12 @@ graphviz_available = bool(importlib.util.find_spec("graphviz"))
 if graphviz_available:
     import graphviz as gv
 else:
-    LOG.warning(("Could not find python graphviz package on your system."
-                 " Visualization features will be unavailable."))
+    LOG.warning(
+        (
+            "Could not find python graphviz package on your system."
+            " Visualization features will be unavailable."
+        )
+    )
 
 
 class Graph:
@@ -71,43 +75,50 @@ class Graph:
     (not that I'm aware of, anyways).
     The default behaviour of the graphviz API is to automatically add nodes 
     that don't exist when adding edges - we don't want this here!"""
+
     def __init__(self, graph):
         self.graph = graph
         self.nodes = []
         self.default_form = {"style": "filled", "fillcolor": "white"}
 
-    def add_node(self, name: str, label: str="", form: dict=None):
+    def add_node(self, name: str, label: str = "", form: dict = None):
         self.nodes.append(name)
         if form is None:
             form = self.default_form
         self.graph.node(name, label, **form)
-    
+
     def has_node(self, name: str):
         return name in self.nodes
 
-    def add_edge(self, tail: str, head: str, label: str="") -> bool:
+    def add_edge(self, tail: str, head: str, label: str = "") -> bool:
         # Only draw the edge if both nodes exist
         if not (self.has_node(tail) and self.has_node(head)):
             return False
         # => Else
         self.graph.edge(tail, head, label)
         return True
-    
+
     def write_svg(self, out_file: str):
-        # Render and write the graph in SVG format 
+        # Render and write the graph in SVG format
         self.graph.format = "svg"
         self.graph.render(out_file, cleanup=True)
 
 
-
-def system_graph(chain: AsProcessingChain, out_file: str, show_ports: bool, 
-                 show_auto_inst: bool, show_unconnected: bool, 
-                 show_toplevels: bool, *, return_graph: bool=False):
+def system_graph(
+    chain: AsProcessingChain,
+    out_file: str,
+    show_ports: bool,
+    show_auto_inst: bool,
+    show_unconnected: bool,
+    show_toplevels: bool,
+    *,
+    return_graph: bool = False
+):
     # Instanciate graphviz graph
     gv_graph = gv.Digraph(name="AsModule Graph")
     # Small custom management class. Keeps track of added nodes
     graph = Graph(gv_graph)
-    
+
     # External inputs and outputs, plus node names
     ext_in_name = "External Inputs"
     ext_out_name = "External Outputs"
@@ -134,10 +145,10 @@ def system_graph(chain: AsProcessingChain, out_file: str, show_ports: bool,
                 uncon = [port.name for port in uncon]
                 label += ":\n" + "\n".join(uncon)
             graph.add_node(module.name, label)
-    
+
     # Interfaces to skip:
     # For each interface from A to B, a connection from B to A exists.
-    # If we already added A to B or B to A, we skip the connection in the 
+    # If we already added A to B or B to A, we skip the connection in the
     # reverse direction.
     skip_inters = []
 
@@ -154,8 +165,7 @@ def system_graph(chain: AsProcessingChain, out_file: str, show_ports: bool,
                 inter_label += ":\n"
                 inter_label += "\n".join([port.name for port in inter.ports])
             # For interfaces from or to external (on toplevel)
-            if (show_toplevels and inter.to_external 
-                    and (inter.parent is chain.top)):
+            if show_toplevels and inter.to_external and (inter.parent is chain.top):
                 if inter.direction == "in":
                     if not ext_in_added:  # Add an external node, if necessary
                         graph.add_node(ext_in_name, ext_in_name, ext_form)
@@ -175,19 +185,27 @@ def system_graph(chain: AsProcessingChain, out_file: str, show_ports: bool,
 
                 # Get a port of the source interface
                 p0 = inter.ports[0]
-                # Get the port it's connected to 
+                # Get the port it's connected to
                 # (we can't rely on interface connections)
-                target = p0.incoming if \
-                    p0.get_direction_normalized() == "in" \
-                    else p0.outgoing[0] if p0.outgoing else None
+                target = (
+                    p0.incoming
+                    if p0.get_direction_normalized() == "in"
+                    else p0.outgoing[0]
+                    if p0.outgoing
+                    else None
+                )
                 # Count the ports tried
                 count = 1
                 # If no connection exists for this port, try until we get one
                 while target is None:
                     p0 = inter.ports[count]
-                    target = p0.incoming if \
-                        p0.get_direction_normalized() == "in" \
-                        else p0.outgoing[0] if p0.outgoing else None
+                    target = (
+                        p0.incoming
+                        if p0.get_direction_normalized() == "in"
+                        else p0.outgoing[0]
+                        if p0.outgoing
+                        else None
+                    )
                     count += 1
                     # Stop at the last port
                     if count == len(inter.ports):
@@ -198,7 +216,7 @@ def system_graph(chain: AsProcessingChain, out_file: str, show_ports: bool,
                 # Still no connection? Skip this interface
                 if target is None:
                     continue
-                
+
                 # Get the interface of the target port,
                 head_inter = target.parent
                 # the interface' parent module
@@ -207,12 +225,14 @@ def system_graph(chain: AsProcessingChain, out_file: str, show_ports: bool,
                 if not show_auto_inst:
                     # If the tail module was auto-instantiated to the toplevel,
                     # substitute tail with as_main
-                    if ((head_module is chain.top)
-                            and (tail_module in chain.auto_instantiated)):
+                    if (head_module is chain.top) and (
+                        tail_module in chain.auto_instantiated
+                    ):
                         tail = chain.as_main.name
                     # Same treatment the other way around
-                    elif ((tail_module is chain.top) 
-                            and (head_module in chain.auto_instantiated)):
+                    elif (tail_module is chain.top) and (
+                        head_module in chain.auto_instantiated
+                    ):
                         head_module = chain.as_main
 
                 # and the interface's parent module's name
@@ -233,25 +253,37 @@ def system_graph(chain: AsProcessingChain, out_file: str, show_ports: bool,
         # Render and write graph file
         graph.write_svg(out_file)
 
+
 def add_2dpipe_subgraph(pipe: As2DWindowPipeline, graph):
     tgraph = graph
-    with tgraph.subgraph(name="cluster_pipe2d") as subg: 
+    with tgraph.subgraph(name="cluster_pipe2d") as subg:
         graph = subg
-        graph.attr(style="filled, rounded", fillcolor="lightgrey",
-                   label="2D Window Pipeline")
+        graph.attr(
+            style="filled, rounded", fillcolor="lightgrey", label="2D Window Pipeline"
+        )
         # Generate nodes
         for mod in pipe.window_modules:
             name = mod.name
             label = "Module '{}'\noffset{}".format(name, mod.offset)
             # Add the module node
-            graph.node(name=name, label=label, style="filled, bold",
-                       color="blue", fillcolor="white")
+            graph.node(
+                name=name,
+                label=label,
+                style="filled, bold",
+                color="blue",
+                fillcolor="white",
+            )
 
         for layer in pipe.layers:
             label = "Layer '{}'\noffset{}".format(layer.name, layer.offset)
-            graph.node(name=layer.name, label=label, shape="box",
-                       style="filled", fillcolor="white")
-        
+            graph.node(
+                name=layer.name,
+                label=label,
+                shape="box",
+                style="filled",
+                fillcolor="white",
+            )
+
         def make_window_edge(graph, layer, refs, end: bool = False):
             out = "Window '{}':\n".format(refs[0].port.name)
             count = 0
@@ -265,17 +297,18 @@ def add_2dpipe_subgraph(pipe: As2DWindowPipeline, graph):
             crt_ref = refs.pop(0)
             out += str(crt_ref.get_ref())
             graph.edge(layer.name, crt_ref.port.parent.parent.name, out)
-        
+
         def make_edge(graph, layer, refs, tgraph):
             crt_ref = refs.pop(0)
             # Add edges to going outside the pipeline to the top graph
             if isinstance(crt_ref.port.parent.parent, AsWindowModule):
-                graph.edge(layer.name, crt_ref.port.parent.parent.name,
-                        str(crt_ref.get_ref()))
+                graph.edge(
+                    layer.name, crt_ref.port.parent.parent.name, str(crt_ref.get_ref())
+                )
             else:
-                tgraph.edge(layer.name, crt_ref.port.parent.parent.name,
-                        str(crt_ref.get_ref()))
-
+                tgraph.edge(
+                    layer.name, crt_ref.port.parent.parent.name, str(crt_ref.get_ref())
+                )
 
         # Generate edges
         for layer in pipe.layers:
@@ -285,8 +318,7 @@ def add_2dpipe_subgraph(pipe: As2DWindowPipeline, graph):
             if isinstance(to_mod, AsWindowModule):
                 graph.edge(to_mod.name, layer.name, str(layer.offset.get_ref()))
             else:
-                tgraph.edge(to_mod.name, layer.name,
-                            str(layer.offset.get_ref()))
+                tgraph.edge(to_mod.name, layer.name, str(layer.offset.get_ref()))
             for ref in layer.output_refs:
                 if not refs:
                     refs.append(ref)
@@ -301,9 +333,11 @@ def add_2dpipe_subgraph(pipe: As2DWindowPipeline, graph):
             else:
                 make_edge(graph, layer, refs, tgraph)
 
+
 def write_graph_svg(graph, out_file: str):
     graph.format = "svg"
     graph.render(out_file, cleanup=True)
+
 
 def generate_2dpipe_graph(pipe: As2DWindowPipeline, out_file: str):
 
@@ -320,7 +354,7 @@ def generate_2dpipe_graph(pipe: As2DWindowPipeline, out_file: str):
     for layer in pipe.layers:
         label = "Layer '{}'\noffset{}".format(layer.name, layer.offset)
         graph.node(name=layer.name, label=label)
-    
+
     def make_window_edge(graph, layer, refs, end: bool = False):
         out = "Window '{}':\n".format(refs[0].port.name)
         count = 0
@@ -334,17 +368,17 @@ def generate_2dpipe_graph(pipe: As2DWindowPipeline, out_file: str):
         crt_ref = refs.pop(0)
         out += str(crt_ref.get_ref())
         graph.edge(layer.name, crt_ref.port.parent.parent.name, out)
-    
+
     def make_edge(graph, layer, refs):
         crt_ref = refs.pop(0)
-        graph.edge(layer.name, crt_ref.port.parent.parent.name,
-                   str(crt_ref.get_ref()))
+        graph.edge(layer.name, crt_ref.port.parent.parent.name, str(crt_ref.get_ref()))
 
     # Generate edges
     for layer in pipe.layers:
         refs = []
-        graph.edge(layer.input.port.parent.parent.name, layer.name,
-                   str(layer.offset.get_ref()))
+        graph.edge(
+            layer.input.port.parent.parent.name, layer.name, str(layer.offset.get_ref())
+        )
         for ref in layer.output_refs:
             if not refs:
                 refs.append(ref)
@@ -358,7 +392,6 @@ def generate_2dpipe_graph(pipe: As2DWindowPipeline, out_file: str):
             make_window_edge(graph, layer, refs, end=True)
         else:
             make_edge(graph, layer, refs)
-        
 
     graph.format = "svg"
     graph.render(out_file, cleanup=True)

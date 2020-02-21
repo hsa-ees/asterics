@@ -37,7 +37,7 @@ fsobely = pipe.add_module("as_2dpipe_sobel", "sobel_y")
 
 #                                  /-> fsobel_y -> edge_y -> fcordic -> cordic -> collect1 -> writer1
 # camera -> grey -> fgauss -> gauss -> fsobel_x -> edge_x ->/
-#                                  
+#
 
 # Pipeline inputs
 grey.connect(camera.get("out"))
@@ -82,10 +82,10 @@ pipe.__run_user_connect_calls__()
 chain.write_asterics_core("astertest2d/", force=True)
 
 print("Building done.\nGenerating graph...")
-#as_vis.generate_2dpipe_graph(pipe, "./pipe_graph.svg")
+# as_vis.generate_2dpipe_graph(pipe, "./pipe_graph.svg")
 asterics.write_system_graph(pipe, "asterics_2dwindow_graph", show_auto_inst=False)
 print("Done")
-#aft = pipe.add_module("as_filter_template")
+# aft = pipe.add_module("as_filter_template")
 # aft.list_module(3)
 
 # aft.window_interfaces[0].print_interface(1)
@@ -99,9 +99,6 @@ print("Done")
 #         - Pipeline footprint calculator
 #         - "Randbehandlung" Ausschneiden, Spiegelung?, Torus?
 #         - Module für Automatics anpassen
-
-
-
 
 
 # Attributes:

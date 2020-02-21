@@ -28,7 +28,7 @@ infrastructure required by any ASTERICS processing chain.
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -58,7 +58,7 @@ import as_automatics_vhdl_static as as_static
 LOG = as_log.get_log()
 
 
-class VHDLWriter():
+class VHDLWriter:
     """Contains methods to write simple VHDL code.
     Can write entities, signal declarations, component generic and port maps.
     Used in Automatics to write the VHDL file describing
@@ -85,8 +85,7 @@ class VHDLWriter():
         """Generate the Toplevel ASTERICS VHDL file"""
         LOG.info("Writing ASTERICS toplevel VHDL file...")
         # Generate path to the output file
-        outfile = as_help.append_to_path(folder,
-                                         as_static.AS_TOP_FILENAME, False)
+        outfile = as_help.append_to_path(folder, as_static.AS_TOP_FILENAME, False)
 
         # Generate the list of glue signals
         self.generate_glue_signal_strings(self.chain.top.signals)
@@ -104,18 +103,24 @@ class VHDLWriter():
         with open(outfile, "w") as ofile:
             # Make sure we can write to the file
             if not ofile.writable():
-                raise AsFileError(msg="File not writable",
-                                  filename=as_static.AS_TOP_FILENAME)
+                raise AsFileError(
+                    msg="File not writable", filename=as_static.AS_TOP_FILENAME
+                )
             # Write the header
-            ofile.write(as_static.HEADER
-                        .format(entity_name=as_static.AS_TOP_ENTITY,
-                                filename=as_static.AS_TOP_FILENAME,
-                                longdesc=as_static.AS_TOP_DESC,
-                                briefdesc=as_static.AS_TOP_DESC))
+            ofile.write(
+                as_static.HEADER.format(
+                    entity_name=as_static.AS_TOP_ENTITY,
+                    filename=as_static.AS_TOP_FILENAME,
+                    longdesc=as_static.AS_TOP_DESC,
+                    briefdesc=as_static.AS_TOP_DESC,
+                )
+            )
             # and the basic library 'use' declaration
-            ofile.write("\n{}{}{}\n".format(as_static.LIBS_IEEE,
-                                            as_static.LIBS_ASTERICS,
-                                            library_use_str))
+            ofile.write(
+                "\n{}{}{}\n".format(
+                    as_static.LIBS_IEEE, as_static.LIBS_ASTERICS, library_use_str
+                )
+            )
             # Generate and write the entity descritpion
             self.__write_entity__(self.chain.top, ofile)
             # Generate and write the toplevel architecture
@@ -128,8 +133,7 @@ class VHDLWriter():
         """Generate the 'as_main' intermediary VHDL file"""
         LOG.info("Writing ASTERICS module connection VHDL file...")
         # Generate path to the output file
-        outfile = as_help.append_to_path(folder,
-                                         as_static.AS_MAIN_FILENAME, False)
+        outfile = as_help.append_to_path(folder, as_static.AS_MAIN_FILENAME, False)
 
         library_use_str = ""
         lib_use_template = "use asterics.{};\n"
@@ -147,18 +151,24 @@ class VHDLWriter():
         with open(outfile, "w") as ofile:
             # Make sure we can write to the file
             if not ofile.writable():
-                raise AsFileError(msg="File not writable",
-                                  filename=as_static.AS_MAIN_FILENAME)
+                raise AsFileError(
+                    msg="File not writable", filename=as_static.AS_MAIN_FILENAME
+                )
             # Write the file header
-            ofile.write(as_static.HEADER
-                        .format(entity_name=as_static.AS_MAIN_ENTITY,
-                                filename=as_static.AS_MAIN_FILENAME,
-                                longdesc=as_static.AS_MAIN_DESC,
-                                briefdesc=as_static.AS_MAIN_DESC))
+            ofile.write(
+                as_static.HEADER.format(
+                    entity_name=as_static.AS_MAIN_ENTITY,
+                    filename=as_static.AS_MAIN_FILENAME,
+                    longdesc=as_static.AS_MAIN_DESC,
+                    briefdesc=as_static.AS_MAIN_DESC,
+                )
+            )
             # and baisc library 'use' declarations
-            ofile.write("\n{}{}{}\n".format(as_static.LIBS_IEEE,
-                                            as_static.LIBS_ASTERICS,
-                                            library_use_str))
+            ofile.write(
+                "\n{}{}{}\n".format(
+                    as_static.LIBS_IEEE, as_static.LIBS_ASTERICS, library_use_str
+                )
+            )
             # Generate and write the entity descritpion
             self.__write_entity__(self.chain.as_main, ofile)
             # Generate and write the toplevel architecture
@@ -166,8 +176,6 @@ class VHDLWriter():
             # Done writing to file
         # Reset to init state
         self.clear_lists()
-    
-    
 
     def __write_entity__(self, module: AsModule, file):
         """Generate and write the entity description of a given module
@@ -175,27 +183,22 @@ class VHDLWriter():
         # "Start" the entity description
         file.write("entity {} is\n".format(module.entity_name))
         # Generate the generic list
-        self.generic_list = self.__convert_generic_entity_list__(
-            module.generics)
+        self.generic_list = self.__convert_generic_entity_list__(module.generics)
         # Generate the port list
-        self.port_list = self.__convert_port_entity_list__(
-            module.get_full_port_list())
+        self.port_list = self.__convert_port_entity_list__(module.get_full_port_list())
         # Write both lists to the file
         # Check if there are generics
         if self.generic_list:
-            self.__write_list_to_file__(self.generic_list, file,
-                                        "  generic(\n")
+            self.__write_list_to_file__(self.generic_list, file, "  generic(\n")
         self.__write_list_to_file__(self.port_list, file, "  port(\n")
         # "End" the entity description
         file.write("end entity {};\n".format(module.entity_name))
-
 
     def __write_module_group_architecture__(self, group_module: AsModuleGroup, file):
 
         self.signal_list.extend(group_module.static_code["signals"])
         self.arch_body.extend(group_module.static_code["body"])
-        code_dict = {"signals": [],
-                     "body": []}
+        code_dict = {"signals": [], "body": []}
         if group_module.dynamic_code_generator:
             group_module.dynamic_code_generator(self.chain, code_dict)
             self.signal_list.extend(code_dict["signals"])
@@ -203,64 +206,67 @@ class VHDLWriter():
 
         self.arch_body.extend(["  \n", "  -- Port assignments:\n"])
         for port in group_module.ports:
-            if (port.port_type == "external"
-                    and port.glue_signal is not None):
+            if port.port_type == "external" and port.glue_signal is not None:
                 try:
                     target = port.glue_signal.code_name
                 except AttributeError:
                     target = port.glue_signal
                 if str(target) == port.code_name:
                     continue
-                self.arch_body.append(as_static.ASSIGNMENT_TEMPL
-                                      .format(port.code_name, target))
+                self.arch_body.append(
+                    as_static.ASSIGNMENT_TEMPL.format(port.code_name, target)
+                )
 
         # Add signal assignments to the architecture body
-        self.arch_body.extend(["  \n", "  -- Signal assignments:\n"])        
+        self.arch_body.extend(["  \n", "  -- Signal assignments:\n"])
         for signal in group_module.signals:
             if signal.port_type == "signal":
-                self.signal_list.append("  signal {} : {};\n".format(signal.code_name, as_help.get_printable_datatype(signal)))
+                self.signal_list.append(
+                    "  signal {} : {};\n".format(
+                        signal.code_name, as_help.get_printable_datatype(signal)
+                    )
+                )
                 if signal.glue_signal:
                     try:
                         target_str = signal.glue_signal.code_name
                     except AttributeError:
                         target_str = str(signal.glue_signal)
-                    self.arch_body.append(as_static.ASSIGNMENT_TEMPL
-                                          .format(signal.code_name, target_str))
+                    self.arch_body.append(
+                        as_static.ASSIGNMENT_TEMPL.format(signal.code_name, target_str)
+                    )
                     continue
                 for target in signal.outgoing:
                     try:
                         target_str = target.code_name
                     except AttributeError:
                         target_str = str(target)
-                    self.arch_body.append(as_static.ASSIGNMENT_TEMPL
-                                          .format(target_str, signal.code_name))
+                    self.arch_body.append(
+                        as_static.ASSIGNMENT_TEMPL.format(target_str, signal.code_name)
+                    )
                 for source in signal.incoming:
                     try:
                         source_str = source.code_name
                     except AttributeError:
                         source_str = str(source)
-                    self.arch_body.append(as_static.ASSIGNMENT_TEMPL
-                                          .format(signal.code_name, source_str))
-        
+                    self.arch_body.append(
+                        as_static.ASSIGNMENT_TEMPL.format(signal.code_name, source_str)
+                    )
+
         self.arch_body.extend(["  \n", "  -- Components:\n"])
 
         for mod in group_module.modules:
             # Generate VHDL instantiation
             ret = self.__instantiate_module__(mod)
             if not ret:
-                raise Exception("Problem instantiating module {}!"
-                                .format(mod.name))
+                raise Exception("Problem instantiating module {}!".format(mod.name))
             self.arch_body.extend(ret)  # And add to the architecture body
 
         # Write to the output file
-        file.write("\narchitecture RTL of {} is\n"
-                   .format(group_module.entity_name))
-        self.__write_list_to_file__(self.signal_list, file,
-                                    "  -- Glue signals:\n")
+        file.write("\narchitecture RTL of {} is\n".format(group_module.entity_name))
+        self.__write_list_to_file__(self.signal_list, file, "  -- Glue signals:\n")
         file.write("\nbegin\n")
         self.__write_list_to_file__(self.arch_body, file, "\n")
         file.write("end architecture RTL;\n")
-        
 
     @staticmethod
     def __convert_generic_entity_list__(generics: Sequence[Generic]):
@@ -271,8 +277,7 @@ class VHDLWriter():
             # Grab the default value
             gval = gen.default_value
             # Add quotes if it is a string (not boolean or numeric)
-            if not (gval == "True" or gval ==
-                    "False" or str(gval).isnumeric()):
+            if not (gval == "True" or gval == "False" or str(gval).isnumeric()):
                 gval = '"{}"'.format(gval)
             # Set the format string (last generic "closes" the generic section)
             if generics.index(gen) == len(generics) - 1:
@@ -295,8 +300,10 @@ class VHDLWriter():
             if not port.in_entity:
                 continue
             # Skip ports of excluded interfaces
-            if (port.port_type == "interface" and ((port.parent.to_external or
-                port.parent.instantiate_in_top) and port.parent.in_entity)):
+            if port.port_type == "interface" and (
+                (port.parent.to_external or port.parent.instantiate_in_top)
+                and port.parent.in_entity
+            ):
                 pass
             # inlcude only external type single ports
             elif port.port_type == "external":
@@ -311,22 +318,29 @@ class VHDLWriter():
             port_dir = port.get_direction_normalized()
             # Generate and add string for entity
             if in_entity.index(port) == len(in_entity) - 1:
-                out.append("    {} : {} {}\n  );\n"
-                           .format(port.get_print_name(), port_dir, port_data))
+                out.append(
+                    "    {} : {} {}\n  );\n".format(
+                        port.get_print_name(), port_dir, port_data
+                    )
+                )
             else:
-                out.append("    {} : {} {};\n"
-                           .format(port.get_print_name(), port_dir, port_data))
+                out.append(
+                    "    {} : {} {};\n".format(
+                        port.get_print_name(), port_dir, port_data
+                    )
+                )
         return out
 
     def __instantiate_module__(self, module: AsModule) -> Sequence[str]:
         """Generate VHDL code as a list of strings to instantiate 'module'.
         Handles generic assignment and port mapping."""
         out = [
-            "\n  -- Instantiate module {}:\n".format(
-                module.name),
+            "\n  -- Instantiate module {}:\n".format(module.name),
             "  {} : entity {}\n".format(
                 "as_main_impl" if module.name == "as_main" else module.name,
-                module.entity_name)]
+                module.entity_name,
+            ),
+        ]
         gen_str = []
         if module.generics:
             gen_str.append("  generic map(\n")
@@ -352,10 +366,9 @@ class VHDLWriter():
         for port in full_port_list:
             # Target of the port map
             target = None
-            
+
             # Determine the format for this ports port map line
-            if (full_port_list.index(port) <
-                    len(full_port_list) - 1):
+            if full_port_list.index(port) < len(full_port_list) - 1:
                 templ_str = "    {} => {},\n"
             else:
                 templ_str = "    {} => {});\n"
@@ -370,16 +383,21 @@ class VHDLWriter():
                     # Add the glue signal to the signal list
                     # Assemble vhdl signal declaration string
                     glue_signal_str = "  signal {} : {};\n".format(
-                        glue.code_name, as_help.get_printable_datatype(glue))
+                        glue.code_name, as_help.get_printable_datatype(glue)
+                    )
                     # Make sure the same glue signal is not declared twice
                     if glue_signal_str not in self.signal_list:
                         self.signal_list.append(glue_signal_str)
             else:  # If no glue signal present:
                 # Port mapping target is one of the connected ports,
                 # depending on port direction
-                target = port.incoming if \
-                    port.get_direction_normalized() == "in" \
-                    else port.outgoing[0] if port.outgoing else None
+                target = (
+                    port.incoming
+                    if port.get_direction_normalized() == "in"
+                    else port.outgoing[0]
+                    if port.outgoing
+                    else None
+                )
                 # If the target is a Port object: use the code_name as target
                 if isinstance(target, Port):
                     target = target.code_name
@@ -398,22 +416,27 @@ class VHDLWriter():
                     # And warn the user of an unconnected port
                     if port.optional:
                         LOG.debug(
-                            ("Optional port '%s' of module '%s' was "
-                             "left unconnected, automatically set to [%s]!"),
+                            (
+                                "Optional port '%s' of module '%s' was "
+                                "left unconnected, automatically set to [%s]!"
+                            ),
                             port.code_name,
                             AsModule.get_parent_module(port).name,
-                            target)
+                            target,
+                        )
                     else:
                         LOG.info(
-                            ("Port '%s' of module '%s' was left "
-                             "unconnected, automatically set to [%s]!"),
+                            (
+                                "Port '%s' of module '%s' was left "
+                                "unconnected, automatically set to [%s]!"
+                            ),
                             port.code_name,
                             AsModule.get_parent_module(port).name,
-                            target)
+                            target,
+                        )
             # Insert the values in the format string and add to the return list
             out.append(templ_str.format(port.code_name, target))
         return out
-
 
     def generate_glue_signal_strings(self, signals: Sequence[GenericSignal]):
         """Convert a list of glue signal objects to a string representation
@@ -424,7 +447,8 @@ class VHDLWriter():
                 continue
             # Insert values to format string
             glue_signal_str = "  signal {} : {};\n".format(
-                glue.code_name, as_help.get_printable_datatype(glue))
+                glue.code_name, as_help.get_printable_datatype(glue)
+            )
             # Filter duplicate signals
             if glue_signal_str not in self.signal_list:
                 self.signal_list.append(glue_signal_str)
@@ -434,8 +458,7 @@ class VHDLWriter():
         return gen.get_value()
 
     @staticmethod
-    def __write_list_to_file__(wlist: Sequence[str], file,
-                               prefix_line: str = ""):
+    def __write_list_to_file__(wlist: Sequence[str], file, prefix_line: str = ""):
         file.write(prefix_line)
         for string in wlist:
             file.write(string)

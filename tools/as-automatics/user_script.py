@@ -15,7 +15,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -35,7 +35,7 @@ import asterics
 # Optional: Include user modules from folder(s)
 # Automatics expects the passed folder to contain folders for each module,
 # structured like the module folders of included modules
-#asterics.add_module_repository("path/to/user/module/folder",
+# asterics.add_module_repository("path/to/user/module/folder",
 #                               <optional> "repository_name")
 
 # Create a new processing chain
@@ -87,7 +87,7 @@ collect.connect(writer)
 # Generate output products
 # !! Set output directory here !!
 success = chain.write_ip_core_xilinx("output/directory/")
-# Optional parameters: 
+# Optional parameters:
 #   use_symlinks : link to source files instead of copying them (default: True)
 #   force : delete contents of output directory if not empty (False)
 #   module_driver_dirs : sort ASTERICS module driver files in subfolders (False)
@@ -115,7 +115,7 @@ if success:
     asterics.write_system_graph(chain)
     # Optional: List address space used by ASTERICS
     chain.list_address_space()
-    
+
     print("Process completed successfully!")
 else:
     # If Automatics failed:

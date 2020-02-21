@@ -28,7 +28,7 @@ explore the module library and other features of Automatics.
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -54,6 +54,7 @@ if __name__ == "__main__":
     print("Importing Automatics from '{}'...".format(source_dir))
     sys.path.append(source_dir)
     import as_automatics_logging as as_log
+
     as_log.init_log(loglevel_console="WARNING", loglevel_file="INFO")
 
     # Even though not all imports are used here,
@@ -68,13 +69,12 @@ if __name__ == "__main__":
     from as_automatics_generic import Generic
     from as_automatics_templates import AsMain, AsTop
     from as_automatics_helpers import append_to_path
-    
+
     print("Success!")
     # Init Automatics and load standard modules...
     print("Getting default modules from '{}'...".format(asterics_dir))
     auto = AsAutomatics(asterics_dir)
-    auto.add_module_repository(
-            append_to_path(asterics_dir, "modules"), "default")
+    auto.add_module_repository(append_to_path(asterics_dir, "modules"), "default")
 
     # User prompt:
     print("Done.")
@@ -117,23 +117,27 @@ if __name__ == "__main__":
         """
         module = auto.library.get_module_template(name, repo_name=repo)
         if module:
-            print("Got module '{}' from repo '{}'!"
-                  .format(name, module.repository_name))
+            print(
+                "Got module '{}' from repo '{}'!".format(name, module.repository_name)
+            )
             return module
 
-        module = auto.library.get_module_template(name, repo_name=repo,
-                                                  window_module=True)
+        module = auto.library.get_module_template(
+            name, repo_name=repo, window_module=True
+        )
         if module:
-            print("Got window module '{}' from repo '{}'!"
-                  .format(name, module.repository_name))
+            print(
+                "Got window module '{}' from repo '{}'!".format(
+                    name, module.repository_name
+                )
+            )
             return module
 
         # Else ->
         if repo == "":
             print("No module '{}' found in any repository!".format(name))
         else:
-            print("No module '{}' found in repository '{}'!"
-                  .format(name, repo))
+            print("No module '{}' found in repository '{}'!".format(name, repo))
         return None
 
     def module_detail(name: str, verbosity: int = 0, repo: str = ""):
@@ -173,8 +177,7 @@ if __name__ == "__main__":
         # Else ->
         print("Parameter 'module' must be a string or module object!")
 
-    def get_interface(module, interface_name: str,
-                      direction: str = "") -> Interface:
+    def get_interface(module, interface_name: str, direction: str = "") -> Interface:
         """Returns the Interface object matching 'interface_name' in 'module'.
         The 'module' parameter may be a module object or a module name
         (string). Use parameter 'direction' to specify the interface direction.
@@ -193,4 +196,5 @@ if __name__ == "__main__":
         # Else ->
         print("Parameter 'module' must be a string or module object!")
         return None
+
     # ----------------------

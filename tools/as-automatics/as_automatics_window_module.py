@@ -28,7 +28,7 @@ Class representing an ASTERICS window module used to construct
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -49,8 +49,13 @@ from as_automatics_module import AsModule
 from as_automatics_interface import Interface
 from as_automatics_port import Port, StandardPort
 from as_automatics_exceptions import AsAssignError, AsAnalysisError
-from as_automatics_2d_infrastructure import (WindowDef, WindowRef, AsLayer,
-                                             AsLayerRef, AsConnectionRef)
+from as_automatics_2d_infrastructure import (
+    WindowDef,
+    WindowRef,
+    AsLayer,
+    AsLayerRef,
+    AsConnectionRef,
+)
 from as_automatics_vhdl_static import PIPE_WINDOW_TYPE
 from as_automatics_2d_helpers import parse_gwindow_type, data_widths_to_window
 
@@ -79,11 +84,17 @@ class AsWindowInterface(Interface):
             if ref.port in self.ports:
                 self.references.append(ref)
             else:
-                LOG.debug("Received reference of unkown port '%s' by '%s'!",
-                          ref.port.code_name, self.name)
+                LOG.debug(
+                    "Received reference of unkown port '%s' by '%s'!",
+                    ref.port.code_name,
+                    self.name,
+                )
         else:
-            LOG.debug("Duplicate reference for port '%s' received by '%s'!",
-                      ref.port.code_name, self.name)
+            LOG.debug(
+                "Duplicate reference for port '%s' received by '%s'!",
+                ref.port.code_name,
+                self.name,
+            )
 
     def sort_references(self):
         """Sort interface port references in ascending order for easier
@@ -97,10 +108,12 @@ class AsWindowInterface(Interface):
     def __str__(self):
         if self.layer:
             return "{}{}{} - Layer: '{}'".format(
-                self.name_prefix, self.name, self.name_suffix, self.layer.name)
+                self.name_prefix, self.name, self.name_suffix, self.layer.name
+            )
         else:
-            return "{}{}{} - Layer: None".format(self.name_prefix, self.name,
-                                                 self.name_suffix)
+            return "{}{}{} - Layer: None".format(
+                self.name_prefix, self.name, self.name_suffix
+            )
 
     def update_footprint(self) -> bool:
         """Update and set the footprint size for this interface based on the
@@ -128,12 +141,14 @@ class AsWindowInterface(Interface):
             if PIPE_WINDOW_TYPE in port.data_type:
                 if not isinstance(port.data_width, str):
                     continue
-                widths = parse_gwindow_type(port.data_width,
-                                            port.generics)
+                widths = parse_gwindow_type(port.data_width, port.generics)
                 if len(widths) < 3:
-                    LOG.error("Syntax error detected! In '%s' for port '%s'",
-                              self.name, port.code_name)
-                
+                    LOG.error(
+                        "Syntax error detected! In '%s' for port '%s'",
+                        self.name,
+                        port.code_name,
+                    )
+
                 # Add the auto-tag information to the window size
                 window = data_widths_to_window(widths[0], widths[1])
 
@@ -152,13 +167,20 @@ class AsWindowInterface(Interface):
                     # Add window-refs for each "pixel"
                     for x in range(window.from_x, window.to_x + 1):
                         for y in range(window.from_y, window.to_y + 1):
-                            self.add_window_ref(AsConnectionRef(
-                                WindowRef(col=x, row=y), port))
+                            self.add_window_ref(
+                                AsConnectionRef(WindowRef(col=x, row=y), port)
+                            )
                 else:
-                    LOG.info(("Could not determine window size for "
-                              "interface '%s' of module '%s'! Unresolved "
-                              "generics present in '%s'!"), self.name,
-                             self.parent.name, str(port.data_width))
+                    LOG.info(
+                        (
+                            "Could not determine window size for "
+                            "interface '%s' of module '%s'! Unresolved "
+                            "generics present in '%s'!"
+                        ),
+                        self.name,
+                        self.parent.name,
+                        str(port.data_width),
+                    )
                     parse_successful = False
             else:  # Not a window type:
                 pref = WindowRef(int(port.window_config.x), int(port.window_config.y))
@@ -173,9 +195,8 @@ class AsWindowInterface(Interface):
                 upper_row = ref.row
             elif ref.row > lower_row:
                 lower_row = ref.row
-        
-        self.footprint = WindowDef(left_col, right_col,
-                                   upper_row, lower_row)
+
+        self.footprint = WindowDef(left_col, right_col, upper_row, lower_row)
         self.sort_references()
         return parse_successful
 
@@ -189,10 +210,9 @@ class AsWindowModule(AsModule):
         StandardPort(
             "strobe",
             port_type="single",
-            extra_rules=[
-                Port.Rule(
-                    "both_present",
-                    "connect")])]
+            extra_rules=[Port.Rule("both_present", "connect")],
+        )
+    ]
     standard_port_templates.extend(AsModule.standard_port_templates)
 
     def __init__(self):
@@ -209,9 +229,7 @@ class AsWindowModule(AsModule):
         self.pipe = None  # Reference to the As2DWindowPipeline object (parent)
 
     def __str__(self) -> str:
-        return "ASTERICS Window-Module '{}' ({})" \
-            .format(self.name, self.entity_name)
-
+        return "ASTERICS Window-Module '{}' ({})".format(self.name, self.entity_name)
 
     def update_input_refs_for_offset(self, reference_layer: AsLayer):
         """'Normalize' the input references depending on the layer offsets.
@@ -230,11 +248,11 @@ class AsWindowModule(AsModule):
 
         This method should run after all connections to this module are
         registered. It MUST be run exactly and only ONCE for every module!"""
-        
+
         # Get the reference layer (with the largest offset)
         self.input_layers.sort(key=lambda layer: layer.offset, reverse=True)
         reflayer = self.input_layers[0]
-        
+
         self.input_refs.sort(key=lambda r: r.layer)
 
         crt_layer = None
@@ -253,9 +271,7 @@ class AsWindowModule(AsModule):
     def set_physical_position(self, ref_x: int, ref_y: int):
         self.user_phys_offset = WindowRef(ref_x, ref_y)
 
-
-    def connect(self, interface, layer: AsLayer,
-                offset: tuple = None) -> bool:
+    def connect(self, interface, layer: AsLayer, offset: tuple = None) -> bool:
         """Add a connection operation to the queue.
         Connect the interface <interface_name> of this module to the data layer
         <layer>. The data flow direction is determined via the data direction
@@ -267,10 +283,8 @@ class AsWindowModule(AsModule):
         else:
             inter = None
         if not inter:
-            LOG.error("Could not find interface with name '%s'!",
-                      interface)
-            raise ValueError("Interface '{}' does not exist!"
-                             .format(interface))
+            LOG.error("Could not find interface with name '%s'!", interface)
+            raise ValueError("Interface '{}' does not exist!".format(interface))
         self.pipe.connect(inter, layer, offset)
 
     def get_output_layer_offset(self) -> AsLayerRef:
@@ -286,26 +300,30 @@ class AsWindowModule(AsModule):
     def get(self, name: str, direction: str = ""):
         inter = self.get_window_interface(name, direction)
         if inter:
-            LOG.debug("Selected interface '%s' from '%s'.",
-                      inter.name, self.name)
+            LOG.debug("Selected interface '%s' from '%s'.", inter.name, self.name)
             return inter
         return super().get(name, direction)
 
-    def get_window_interface(self, interface_name: str,
-                             direction: str = "") -> AsWindowInterface:
+    def get_window_interface(
+        self, interface_name: str, direction: str = ""
+    ) -> AsWindowInterface:
         """Search for and return a specific WindowInterface of this module."""
         return next(
-            (inter for inter in self.window_interfaces if inter.name == interface_name and (
-                True if (
-                    not direction) else (
-                    inter.direction == direction))),
-            None)
+            (
+                inter
+                for inter in self.window_interfaces
+                if inter.name == interface_name
+                and (True if (not direction) else (inter.direction == direction))
+            ),
+            None,
+        )
 
     def __gen_uname_for_window_ifs__(self):
         # Generate unique name for this module's interfaces
         for inter in self.window_interfaces:
-            inter.unique_name = "{}_{}_{}_{}".format(inter.type,
-                    inter.name, inter.direction, self.name)
+            inter.unique_name = "{}_{}_{}_{}".format(
+                inter.type, inter.name, inter.direction, self.name
+            )
 
     def list_module(self, verbosity: int = 0):
         """List the configuration of this window module."""
@@ -317,8 +335,7 @@ class AsWindowModule(AsModule):
                 if verbosity > 0:
                     inter.print_interface(verbosity > 0)
                 else:
-                    print(str(inter) +
-                          (" ->" if inter.direction == "in" else " <-"))
+                    print(str(inter) + (" ->" if inter.direction == "in" else " <-"))
                 print("")
 
     def add_input(self, col: int, row: int, layer: AsLayer):
@@ -345,8 +362,9 @@ class AsWindowModule(AsModule):
            to configure this AsWindowModule object.
            Passes the call onto AsModule.discover_module() and handles
            additional tasks requried for AsWindowModules."""
-        super().discover_module(file, window_module=True,
-                    extra_function=self.__assign_window_interfaces__)
+        super().discover_module(
+            file, window_module=True, extra_function=self.__assign_window_interfaces__
+        )
         for inter in self.window_interfaces:
             inter.update_footprint()
 
@@ -367,8 +385,9 @@ class AsWindowModule(AsModule):
                 continue
             match = self.__assign_port_to_new_window__(port)
             if not match:
-                LOG.debug("Port '%s' not assigned to a window interface.",
-                          port.code_name)
+                LOG.debug(
+                    "Port '%s' not assigned to a window interface.", port.code_name
+                )
             else:
                 to_remove.append(port)
 
@@ -383,8 +402,9 @@ class AsWindowModule(AsModule):
             # Check each window interface
             for inter in self.window_interfaces:
                 # If the layer names match, we can assign the port
-                if ((port.window_config.layer == inter.layer_name) and
-                        (port.direction == inter.direction)):
+                if (port.window_config.layer == inter.layer_name) and (
+                    port.direction == inter.direction
+                ):
                     inter.add_port(port)
                     break  # Done!
             else:
@@ -393,8 +413,7 @@ class AsWindowModule(AsModule):
             LOG.debug("'%s': Got Attribute Error: '%s'", str(self), str(err))
             return False
 
-        LOG.debug("Port '%s' assigned to interface '%s'",
-                  port.code_name, str(inter))
+        LOG.debug("Port '%s' assigned to interface '%s'", port.code_name, str(inter))
         return True
 
     def __assign_port_to_new_window__(self, port: Port) -> bool:
@@ -411,17 +430,19 @@ class AsWindowModule(AsModule):
                 inter.direction = port.direction
 
                 # Register the window interface with the module
-                self.window_interfaces.append(inter) 
+                self.window_interfaces.append(inter)
             else:
                 LOG.error(
                     "Missing interface name for port '%s' of module '%s'!",
                     port.code_name,
-                    str(self))
+                    str(self),
+                )
                 return False
         except AttributeError as err:
             LOG.debug("'%s': Got Attribute Error: '%s'", str(self), str(err))
             return False
 
-        LOG.debug("Port '%s' assigned to new interface '%s'.",
-                  port.code_name, str(inter))
+        LOG.debug(
+            "Port '%s' assigned to new interface '%s'.", port.code_name, str(inter)
+        )
         return True

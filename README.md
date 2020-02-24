@@ -11,24 +11,18 @@ This repository contains the core and free components of the *ASTERICS* framewor
 ## Getting Started
 
 To get a fast introduction on how to use the ASTERICS framework, 
-we advise you to take a look at the ASTERICS manual.
+we advise you to take a look at the [ASTERICS manual](https://raw.githubusercontent.com/hsa-ees/asterics/master/doc/asterics-manual.pdf).
 
 Chapter 2 "Using ASTERICS" gives information on 
  * how to setup ASTERICS (2.1) and
  * how to get startet with the reference demo design (2.2).
 
-The manual and a snapshot of the ASTERICS framework are available at:
-http://ees.hs-augsburg.de/asterics
-
-Or on the GitHub repository at:
-https://github.com/hsa-ees/asterics
-
 
 ## Licensing and Additonal Modules
 
-This document and the mentioned download link refer to the free and publicly
-available part of ASTERICS. This part is generally licensed under the LPGL
-(see LICENSE for details).
+Files distributed with the ASTERICS (GitHub) repository generally refer to
+the free and publicly available part of ASTERICS. This part is generally
+licensed under the LPGL (see LICENSE for details).
 
 However, there are more ASTERICS modules available, which are presently not
 published under an open source license, but that can be made available

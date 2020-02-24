@@ -36,17 +36,9 @@
 #
 ############################################################################
 
-# Detect bash or zsh
-if [ -n $BASH ]; then
-  ASTERICS_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-elif [ -n  $ZSH_NAME ]; then
-  ASTERICS_HOME=`dirname ${(%):-%N}`
-fi
 
-# Get ASTERICS_HOME
-if [[ "${ASTERICS_HOME:0:1}" != "/" ]]; then
-  ASTERICS_HOME=$PWD/$ASTERICS_HOME
-fi
+# Set ASTERICS_HOME
+ASTERICS_HOME=`dirname "$(readlink -f "$0")"`
 export ASTERICS_HOME
 
 

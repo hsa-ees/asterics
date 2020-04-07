@@ -36,18 +36,12 @@
 #
 ############################################################################
 
-
 # Set ASTERICS_HOME
-ASTERICS_HOME=`dirname "$(readlink -f "$0")"`
-export ASTERICS_HOME
-
-
+export ASTERICS_HOME="$( cd "$(dirname "$BASH_SOURCE")" >/dev/null 2>&1 ; pwd -P )";
 # Add ASTERICS Automatics tools to PATH
-PATH=$PATH:${ASTERICS_HOME}/tools/as-automatics/
-
+PATH=$PATH:${ASTERICS_HOME}/tools/as-automatics/;
 # Append to PYTHONPATH, so Automatics is found by Python3
-export PYTHONPATH=$PYTHONPATH:${ASTERICS_HOME}/tools/as-automatics/
-
+export PYTHONPATH=$PYTHONPATH:${ASTERICS_HOME}/tools/as-automatics/;
 
 # The general UAS EES-Lab environment already includes following setup steps, 
 # thus they are omitted in that case:
@@ -64,5 +58,5 @@ if [ -z $EES_HOME ]; then
   else
     export EES_VIVADO_SETTINGS=$XILINX_VIVADO/settings64.sh
   fi
-
+  
 fi

@@ -1,0 +1,7 @@
+This directory contains files for the ASTERICS Streaming-Interface as_memio.
+
+The as_memio only consists of software files which provide functions for 
+enhancing the functionality of the hardware modules as_memreader and 
+as_memwriter. For this reason, there is no subdirectory hardware since 
+as_memio is based on the previously mentioned already existing hardware 
+modules.

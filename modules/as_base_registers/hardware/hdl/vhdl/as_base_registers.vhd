@@ -13,6 +13,7 @@
 --                 These provide basic information such as the ASTERICS version
 --                 number, and other internal values to reduce the amount of
 --                 manual software configuration necessary to run ASTERICS.
+--                 System-wide control from software is also implemented.
 ----------------------------------------------------------------------------------
 --  This program is free software; you can redistribute it and/or
 --  modify it under the terms of the GNU Lesser General Public
@@ -30,8 +31,21 @@
 --  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ----------------------------------------------------------------------------------
 --! @file  as_base_registers.vhd
---! @brief Provide internal configuration data to software.
+--! @brief Base registers for ASTERICS hardware implementing system-wide status and control functionality.
+--! @addtogroup asterics_modules
+--! @{
+--! @defgroup as_base_registers as_base_registers: 2D Convolution (Preset Kernels)
+--! This module implements base registers for ASTERICS systems.
+--! These provide basic information such as the ASTERICS version
+--! number, and other internal values to reduce the amount of
+--! manual software configuration necessary to run ASTERICS.
+--! System-wide control from software is also implemented.
+--! \warning Work in progress and not currently supported by Automatics!
+--! @}
 ----------------------------------------------------------------------------------
+
+--! @addtogroup as_base_registers
+--! @{
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -64,11 +78,11 @@ entity as_base_registers is
         --! Slave register configuration table.
         slv_reg_config : out slv_reg_config_table(0 to 6)
     );
-end as_invert;
+end as_base_registers;
 
 --! @}
 
-architecture RTL of as_invert is
+architecture RTL of as_base_registers is
 
 
 

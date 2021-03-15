@@ -1,7 +1,7 @@
 #! /bin/bash
 ############################################################################
 # This file is part of the ASTERICS Framework.
-# Copyright (C) Hochschule Augsburg, University of Applied Sciences
+# (C) 2019 Hochschule Augsburg, University of Applied Sciences
 ############################################################################
 #
 # Author: Michael Schaeferling <michael.schaeferling@hs-augsburg.de>
@@ -38,25 +38,35 @@
 
 # Set ASTERICS_HOME
 export ASTERICS_HOME="$( cd "$(dirname "$BASH_SOURCE")" >/dev/null 2>&1 ; pwd -P )";
-# Add ASTERICS Automatics tools to PATH
-PATH=$PATH:${ASTERICS_HOME}/tools/as-automatics/;
-# Append to PYTHONPATH, so Automatics is found by Python3
-export PYTHONPATH=$PYTHONPATH:${ASTERICS_HOME}/tools/as-automatics/;
+
+if [ -e ${ASTERICS_HOME}/tools/ ]; then
+  # Add ASTERICS Automatics tools to PATH
+  export PATH=$PATH:${ASTERICS_HOME}/tools/as-automatics/;
+  # Append to PYTHONPATH, so Automatics is found by Python3
+  export PYTHONPATH=$PYTHONPATH:${ASTERICS_HOME}/tools/as-automatics/;
+  export ASTERICS_AUTOMATICS_HOME=${ASTERICS_HOME}/tools/as-automatics
+else
+  # Add ASTERICS Automatics tools to PATH
+  export PATH=$PATH:${ASTERICS_HOME}/bin/;
+  # Append to PYTHONPATH, so Automatics is found by Python3
+  export PYTHONPATH=$PYTHONPATH:${ASTERICS_HOME}/lib/;
+  export ASTERICS_AUTOMATICS_HOME=${ASTERICS_HOME}/lib/
+fi
+
 
 # The general UAS EES-Lab environment already includes following setup steps, 
 # thus they are omitted in that case:
 if [ -z $EES_HOME ]; then
 
-  # Add EES tools to PATH
-  PATH=$PATH:${ASTERICS_HOME}/tools/ees/
-
-  if [ -z $XILINX_VIVADO ]; then
-    echo "Vivado is not sourced! Assuming it is located in /opt/Xilinx/Vivado/2017.2/ .";
-    echo "If this is not correct, either modify this file (<asterics>/settings.sh)";
-    echo "or source Vivado by setting XILINX_VIVADO.";
-    export EES_VIVADO_SETTINGS=/opt/Xilinx/Vivado/2017.2/settings64.sh
+  if [ -e ${ASTERICS_HOME}/tools/ ]; then
+    # Add EES tools to PATH
+    PATH=$PATH:${ASTERICS_HOME}/tools/ees/
   else
+    # Add EES tools to PATH
+    PATH=$PATH:${ASTERICS_HOME}/bin/ees/
+  fi
+
+  if [ "$XILINX_VIVADO" != "" ]; then
     export EES_VIVADO_SETTINGS=$XILINX_VIVADO/settings64.sh
   fi
-  
 fi

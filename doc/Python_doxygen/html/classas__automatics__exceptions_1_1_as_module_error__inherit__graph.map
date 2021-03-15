@@ -1,0 +1,6 @@
+<map id="as_automatics_exceptions.AsModuleError" name="as_automatics_exceptions.AsModuleError">
+<area shape="rect" id="node1" title="Automatics error class: AsModuleError Signifies a problem/error with an AsModule object." alt="" coords="5,259,204,300"/>
+<area shape="rect" id="node2" href="$classas__automatics__exceptions_1_1_as_text_error.html" title="Generic Automatics exception class with additional textual info." alt="" coords="5,169,204,211"/>
+<area shape="rect" id="node3" href="$classas__automatics__exceptions_1_1_as_error.html" title="Base exception class for all Automatics exceptions." alt="" coords="5,80,204,121"/>
+<area shape="rect" id="node4" title=" " alt="" coords="61,5,148,32"/>
+</map>

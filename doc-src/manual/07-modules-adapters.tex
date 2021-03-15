@@ -1,0 +1,216 @@
+
+\subsection{as\_collect}
+
+\secauthor{Julian Sarcher, Alexander Zöllner}
+
+\subsubsection{Brief Description}
+
+The collect module collects smaller data words (e.g. 8 bit wide) until a certain bit width is reached. As the desired bit width is reached, the collect module forwards the larger data word. An example usage for this module is collecting 8-bit gray scale pixels for 32 or 64 bit memory bus accesses.
+
+\subsubsection{Configuration Options}
+
+\begin{tabular}{|c|c|c|}
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Range} \\ \hline
+    
+    % First tabular line / First Generic:
+    DIN\_WIDTH & 
+    \begin{tabular}{c} Data width of DATA\_IN \end{tabular} & 
+    \begin{tabular}{c} Power of two $ \wedge $ \\ DIN\_WIDTH $<$ DOUT\_WIDTH \end{tabular}  
+    \\ \hline
+    
+    % Second line / Second Generic:
+    DOUT\_WIDTH & 
+    \begin{tabular}{c} Data width of DATA\_OUT \end{tabular} & 
+    \begin{tabular}{c} Power of two $ \wedge $ \\ DOUT\_WIDTH $<$ DIN\_WIDTH \end{tabular}  
+    \\ \hline
+\end{tabular}
+
+\subsubsection{Register Space}
+
+The module described does not contain any memory-mapped control or status registers.
+
+\subsubsection{Resource Utilization}
+
+%\begin{verbatim}
+%[[
+%
+%TBD: Resource utilization obviously depends 
+%on the generic adjusment. So far, there are no 
+%experiments made for different generic adjustments.
+%
+%]]
+%
+%\end{verbatim}
+
+\begin{tabular}{|c|c|c|c|c|}
+    \hline
+    DIN\_WIDTH & DOUT\_WIDTH & Slices & Block-RAM & DSP-Slices \\ \hline
+    8 & 64 & 26 (0.2\%) & 0 (0.0\%) & (0.0\%) \\ \hline
+\end{tabular}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% as_stream_adapter %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{as\_stream\_adapter}
+
+\secauthor{Philip Manke}
+
+\subsubsection{Brief Description}
+
+The module \texttt{as\_stream\_adapter} is capable of adjusting the bit width of an \texttt{as\_stream}'s data signal without modifying the data contents.
+Almost arbitrary combinations of bit width conversions are possible.
+The module can both collect data to implement a narrow to wide conversion and disperse data to implement a wide to narrow conversion.
+Furthermore, the bit widths converted between do not have to be multiples of each other.
+
+Valid conversions are, for example:
+\begin{itemize}
+\setlength\itemsep{-0.2em}
+\item 8 to 32 bits
+\item 32 to 8 bits
+\item 32 to 24 bits
+\item 8 to 1 bit
+\item 17 to 32 bits
+\end{itemize}
+ 
+\textit{Note:}
+The module's FPGA resource requirements scale by the least common multiple between the configured input and output bit widths.
+
+
+\subsubsection{Configuration Options / Generics}
+
+\begin{tabular}{|c|c|c|}
+    \hline
+    \textbf{Name} & \textbf{Range} & \textbf{Description} \\ \hline
+    
+    % First tabular line / First Generic:
+    DIN\_WIDTH & 
+    \begin{tabular}{c} \(]0,+\infty]\) \end{tabular} & 
+    \begin{tabular}{c} Bit width of \texttt{data\_in} \end{tabular}
+    \\ \hline
+    
+    % Second line / Second Generic:
+    DOUT\_WIDTH & 
+    \begin{tabular}{c} \(]0,+\infty]\) \end{tabular} & 
+    \begin{tabular}{c} Bit width of \texttt{data\_out} to adapt to \end{tabular}  
+    \\ \hline
+    
+    \parbox{4.5cm}{GENERATE\_STROBE\_\\COUNTERS} & 
+    \begin{tabular}{c} \texttt{true, false} \end{tabular} &
+    \begin{tabular}{c} \parbox{7cm}{\ \\ Wether to add two registers with counters for incoming and outgoing strobe signals.  \vspace{0.3em} } \end{tabular}  
+    \\ \hline
+\end{tabular}
+
+
+\subsubsection{Register Space}
+
+This module utilizes four 32 bit wide registers the contents and functionality of which are described in the following tables.
+
+\begin{longtable}[ht]{|l|c|c|l|}
+    \hline
+    \multicolumn{1}{|c|}{\textbf{Name}} & \multicolumn{1}{c|}{\textbf{Offset}} & \multicolumn{1}{c|}{\textbf{Access}} & \multicolumn{1}{c|}{\textbf{Description}}\\
+    \hline
+    
+    \texttt{state} & \texttt{0x0} & R & \parbox{8.5cm}{\ \\
+        Status bits and information.\vspace{0.3em}
+    }\\
+    \hline
+    
+    \texttt{control} & \texttt{0x1} & W & \parbox{8.5cm}{\ \\
+        Control bits for software control.\vspace{0.3em}
+    }\\
+    \hline
+    
+    \parbox{3.5cm}{\texttt{incoming strobe counter}} & \texttt{0x2} & R & \parbox{8.5cm}{\ \\
+        Contains the number of counted incoming strobes if \texttt{GENERATE\_STROBE\_COUNTERS} is set to \texttt{true}.\vspace{0.3em}
+    }\\
+    \hline
+    
+    \parbox{3.5cm}{\texttt{outgoing strobe counter}} & \texttt{0x3} & R & \parbox{8.5cm}{\ \\
+        Contains the number of counted outgoing (generated) strobes if \texttt{GENERATE\_STROBE\_COUNTERS} is set to \texttt{true}.\vspace{0.3em}
+    }\\
+    \hline
+    \caption{Register overview of the \texttt{as\_stream\_adapter} module.}
+\end{longtable}
+
+
+
+\begin{longtable}[ht]{|l|c|c|l|}
+    \hline
+    \multicolumn{1}{|c|}{\textbf{Bit Name}} & \multicolumn{1}{c|}{\textbf{Index}} & \multicolumn{1}{c|}{\textbf{Access}} & \multicolumn{1}{c|}{\textbf{Description}}\\
+    \hline
+    
+    \texttt{buffer full} & 0 & R & \parbox{8.5cm}{\ \\
+        If '1', indicates that the module's internal data buffer is full and it is sending data or waiting to send data.\vspace{0.3em}
+    }\\
+    \hline
+    
+    \texttt{buffer empty} & 1 & R & \parbox{8.5cm}{\ \\
+        If '1', indicates that no more data will be send by this module until new data is received.\vspace{0.3em}
+    }\\
+    \hline
+    
+    \texttt{unused} & 2 .. 6 & R & \parbox{8.5cm}{\ \\
+        Not used, always returns 0.\vspace{0.3em}
+    }\\
+    \hline
+    
+    \parbox{3.5cm}{ \texttt{strobe counters enabled}} & 7 & R & \parbox{8.5cm}{\ \\
+        '1' if the module is configured with strobe counters (\texttt{GENERATE\_STROBE\_COUNTERS} is set to \texttt{true}).\vspace{0.3em}
+    }\\
+    \hline
+    
+    \texttt{buffer size} & 8 .. 31 & R & \parbox{8.5cm}{\ \\
+        Set to the size of the internal data buffer in bits. Should equal the least common multiple of \texttt{DIN\_WIDTH} and \texttt{DOUT\_WIDTH}.\vspace{0.3em}
+    }\\
+    \hline
+    
+    \caption{Bit field overview of the state register of \texttt{as\_stream\_adapter}.}
+\end{longtable}
+
+
+\begin{longtable}[ht]{|l|c|c|l|}
+    \hline
+    \multicolumn{1}{|c|}{\textbf{Bit Name}} & \multicolumn{1}{c|}{\textbf{Index}} & \multicolumn{1}{c|}{\textbf{Access}} & \multicolumn{1}{c|}{\textbf{Description}}\\
+    \hline
+    
+    \texttt{reset} & 0 & W & \parbox{9cm}{\ \\
+        Resets the module's state and clears the internal data buffer when set to '1'. Must also be unset by software.\vspace{0.3em}
+    }\\
+    \hline
+    
+    \texttt{reset counters} & 1 & W & \parbox{9cm}{\ \\
+        Resets the module's strobe counters when set to '1'. Must also be unset by software.\vspace{0.3em}
+    }\\
+    \hline
+    
+    \caption{Bit field overview of the control register of \texttt{as\_stream\_adapter}.}
+\end{longtable}
+
+
+\subsubsection{Behavior}
+
+This module can operate in three different modes defined by the values of \texttt{DIN\_WIDTH} and \texttt{DOUT\_WIDTH}:
+
+\begin{itemize}
+\setlength{\itemsep}{-0.2em}
+\item \textbf{Collection mode} (\texttt{DIN\_WIDTH > DOUT\_WIDTH}): The bit width of the data signal is increased.
+\item \textbf{Dispersion mode} (\texttt{DIN\_WIDTH < DOUT\_WIDTH}): The bit width of the data signal is decreased.
+\item \textbf{Pass-through mode} (\texttt{DIN\_WIDTH = DOUT\_WIDTH}): The bit width of the data signal is not modified.
+\end{itemize}
+
+In general, this module delays the data signal by at one clock cycle.
+The data signal will be delayed more when \texttt{as\_stream\_adapter} is operating in collect mode.
+When enough data has been accumulated in the internal buffer to allow for a data word to be output, this will happen one clock cycle after the last data word was received.
+Any synchronization signals (\texttt{vsync, hsync,} etc.) received while data is collected will be output with the next data word.
+
+
+In disperse mode, the module will emit a stall signal when the internal buffer is full.
+A clock cycle before the final data word is send by the module, it will stop emitting the stall signal.
+This gives the preceding modules a relatively short notice to start sending more data.
+This may result in an underutilization of the following modules, as any delay longer than one clock cycle will result in a delay at the module's output.
+Any synchronization signals (\texttt{vsync, hsync,} etc.) received with an incoming data word are output once with the first data word that contains part of the received data word.
+
+
+Pass-through mode can make sense when used in conjunction with the strobe counter feature built-in to the module.
+Otherwise this mode does not provide any functionality, except for a one clock cycle delay.

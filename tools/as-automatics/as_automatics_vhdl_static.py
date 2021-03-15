@@ -15,7 +15,7 @@ Author:
 Philip Manke
 
 Description:
-Contains VHDL Code strings for use in as_automatics.
+Contains VHDL Code strings for use in Automatics.
 """
 # --------------------- LICENSE -----------------------------------------------
 # This program is free software; you can redistribute it and/or
@@ -36,21 +36,25 @@ Contains VHDL Code strings for use in as_automatics.
 # --------------------- DOXYGEN -----------------------------------------------
 ##
 # @file as_automatics_register.py
+# @ingroup automatics_generate
 # @author Philip Manke
-# @brief Contains VHDL Code strings for use in as_automatics.
+# @brief Contains VHDL Code strings for use in Automatics.
 # -----------------------------------------------------------------------------
 
+##
+# @addtogroup automatics_generate
+# @{
 
 HEADER = (
     "----------------------------------------------------------------------------------\n"
     "--  This file is part of the ASTERICS Framework.                                  \n"
-    "--  (C) 2019 Hochschule Augsburg, University of Applied Sciences             \n"
+    "--  (C) 2020 Hochschule Augsburg, University of Applied Sciences                  \n"
     "----------------------------------------------------------------------------------\n"
     "-- Entity:         {entity_name}                                                  \n"
     "--                                                                                \n"
     "-- Company:        Efficient Embedded Systems Group at                            \n"
     "--                 University of Applied Sciences, Augsburg, Germany              \n"
-    "-- Author:         as_automatics (automated processing chain generator)           \n"
+    "-- Author:         Automatics (ASTERICS processing chain generator)               \n"
     "--                                                                                \n"
     "-- Modified:                                                                      \n"
     "--                                                                                \n"
@@ -77,24 +81,24 @@ HEADER = (
 )
 
 LIBS_IEEE = (
-    "library ieee;\n" "use ieee.std_logic_1164.all;\n" "use ieee.numeric_std.all;\n\n"
+    "library ieee;\n"
+    "use ieee.std_logic_1164.all;\n"
+    "use ieee.numeric_std.all;\n\n"
 )
-LIBS_ASTERICS = "library asterics;\n" "use asterics.helpers.all;\n"
 
-AS_MAIN_FILENAME = "as_main.vhd"
-AS_MAIN_ENTITY = "as_main"
+LIBS_ASTERICS = "library asterics;\n"
+
 AS_MAIN_DESC = (
-    "This file instanciates and connects all AsModules of this" " processing system."
+    "This file instanciates and connects all AsModules of this"
+    " processing system."
 )
 
-AS_TOP_FILENAME = "asterics.vhd"
-AS_TOP_ENTITY = "asterics"
 AS_TOP_DESC = (
     "Toplevel VHDL file for the ASTERICS IP-Core. Instanciates "
     "AXI interfaces and as_main."
 )
 
-ASSIGNMENT_TEMPL = "  {} <= {};\n"
+ASSIGNMENT_TEMPL = "  {} <= {};"
 
 AS_MAIN_ARCH_BODY_STATIC = (
     # "  reset <= not reset_n;\n"
@@ -141,7 +145,118 @@ AS_TOP_ARCH_BODY_STATIC = (
     "  \n"
 )
 
+MODULE_INSTANTIATION_TEMPLATE = (
+    "  \n"
+    "  -- Instantiate module {module_name}\n"
+    "  {module_name} :{entity_keyword} {entity_name}\n"
+    "{generic_map}"
+    "{port_map}"
+)
+
+COMPONENT_DECLARATION_TEMPLATE = (
+    "  -- Declare {module_name}\n"
+    "  component {entity_name} is\n"
+    "  {generic_list}"
+    "  {port_list}"
+    "  end component;\n"
+)
+
+
 REGMGR_BASEADDR_VAL = "c_{}_regif_num"
+
 REGMGR_SW_DATA_OUT_TARGET = "mod_read_data_arr(c_{}_regif_num{})"
 
+REGMGR_REGISTER_CONFIG_NAMES = {
+    "none": "AS_REG_NONE",
+    "control": "AS_REG_CONTROL",
+    "status": "AS_REG_STATUS",
+    "both": "AS_REG_BOTH",
+}
+
 PIPE_WINDOW_TYPE = "t_generic_window"
+PIPE_LINE_TYPE = "t_generic_line"
+
+
+CLOCKED_PROCESS = (
+    "\n  -- Assigning window signals:\n"
+    "  assign_windows_p : process(clk) is\n"
+    "  begin\n"
+    "    if rising_edge(clk) then\n"
+    "      if reset = '1' then\n"
+    "{resets}\n"
+    "      else\n"
+    "{in_process}\n"
+    "      end if;\n"
+    "    end if;\n"
+    "  end process;\n"
+)
+
+CLOCKED_PROCESS_WITH_VARIABLES = (
+    "\n  -- Assigning window signals:\n"
+    "  assign_windows_p : process(clk) is\n"
+    "{variables}\n"
+    "  begin\n"
+    "    if rising_edge(clk) then\n"
+    "      if reset = '1' then\n"
+    "{resets}\n"
+    "      else\n"
+    "{in_process}\n"
+    "      end if;\n"
+    "    end if;\n"
+    "  end process;\n"
+)
+
+PROCESS_WITH_VARIABLES = (
+    "\n  -- Assigning window signals:\n"
+    "  assign_windows_p : process({sens}) is\n"
+    "{variables}\n"
+    "  begin\n"
+    "{in_process}\n"
+    "  end process;\n"
+)
+
+LINE_ARRAY_TO_WINDOW_FUNCTION = (
+    "  function f_line_array_{width}_{bits}_to_generic_window("
+    "constant line_array : in t_generic_line_array_{width}_{bits}) "
+    "return t_generic_window is\n"
+    "  variable gwindow_out : t_generic_window("
+    "0 to {width} - 1, line_array'range, {bits} - 1 downto 0);\n"
+    "  begin\n"
+    "    for x in gwindow_out'range(1) loop\n"
+    "      for y in gwindow_out'range(2) loop\n"
+    "        for b in gwindow_out'range(3) loop\n"
+    "          gwindow_out(x, y, b) := line_array(y)(x, b);\n"
+    "        end loop;\n"
+    "      end loop;\n"
+    "    end loop;\n"
+    "    return gwindow_out;\n"
+    "  end f_line_array_{width}_{bits}_to_generic_window;"
+)
+
+RESET_WINDOW_SIGNAL = (
+    "        {window_sig} <= (others => (others => (others => '0')));"
+)
+
+LINE_SIGNAL_TO_LINE_ARRAY = (
+    "        line_array_{window}_{width}_{bit_width}({row_idx}) := "
+    "f_cut_vectors_of_generic_line("
+    "f_get_part_of_generic_line({line_signal}, 0, {width})"
+    ", {start_bit_idx}, {bit_width});"
+)
+
+LINE_ARRAY_VARIABLE_DECLARATION = (
+    "  variable line_array_{window}_{width}_{bits} : "
+    "t_generic_line_array_{width}_{bits}(0 to {height} - 1);"
+)
+
+LINE_ARRAY_TYPE_DECLARATION = (
+    "  type t_generic_line_array_{width}_{bits} is array(natural range<>)"
+    " of t_generic_line(0 to {width} - 1, {bits} - 1 downto 0);"
+)
+
+WINDOW_FROM_LINE_ARRAY = (
+    "        {window} <= f_line_array_{width}_{bits}_to_generic_window("
+    "line_array_{window}_{width}_{bits});"
+)
+
+## @}

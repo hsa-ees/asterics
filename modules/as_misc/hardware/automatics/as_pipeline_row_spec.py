@@ -27,7 +27,7 @@ of the ASTERICS hardware support library 'as_pipeline_row'.
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -40,35 +40,27 @@ of the ASTERICS hardware support library 'as_pipeline_row'.
 # @brief Specifics for support component 'as_pipeline_row' used by as_automatics
 # -----------------------------------------------------------------------------
 
-from as_automatics_module import AsModule
+from as_automatics_2d_window_module import AsWindowModule
 
 
-def get_module_instance(module_dir: str) -> AsModule:
-    module = AsModule()
+def get_module_instance(module_dir: str) -> AsWindowModule:
+    module = AsWindowModule()
 
-    module.files = ["hardware/hdl/vhdl/pipeline/as_pipeline_row.vhd",
-                    "hardware/hdl/vhdl/pipeline/as_rec_bram_line_buffer.vhd",
-                    "hardware/hdl/vhdl/pipeline/as_shift_line.vhd",
-                    "hardware/hdl/vhdl/pipeline/as_fifo.vhd"]
+    toplevel_file = "hardware/hdl/vhdl/pipeline/as_pipeline_row.vhd"
+    module.files = [
+        "hardware/hdl/vhdl/pipeline/as_line_buffer.vhd",
+        "hardware/hdl/vhdl/pipeline/as_shift_line.vhd",
+        "hardware/hdl/vhdl/pipeline/as_fifo.vhd",
+    ]
     module.dependencies = ["as_generic_filter", "DUAL_BRAM_READ_FIRST"]
-    
-    # As this is not a typical Automatics module (no VHDL entity)
-    # we manually set the necessary attributes,
-    # so Automatics can work with it normally
-    module.module_dir = module_dir
-    module.repository_name = "default"
-    module.name = "as_pipeline_row"
-    module.entity_name = "as_pipeline_row"
-    module.generics = []
-    module.standard_ports = []
-    module.ports = []
-    module.interfaces = []
 
-    # Automatic module discovery would run into errors (no entity in 'filter_mask')
+    module.show_in_browser = False
+    module.dev_status = AsWindowModule.DevStatus.BETA
+    module.module_type = AsWindowModule.ModuleTypes.HARDWARE
+    module.module_category = "Internal Submodules"
+
     # as_automatics now automatically parses the toplevel file and discovers
     # ports, generics, existing interfaces and register interfaces
-    #module.discover_module("{mdir}/{toplevel}"
-    #                       .format(mdir=module_dir, toplevel=toplevel_file))
-
+    module.discover_module(module_dir + "/" + toplevel_file)
 
     return module

@@ -36,11 +36,17 @@ This module sets up Pythons logging module for as_automatics.
 # --------------------- DOXYGEN -----------------------------------------------
 ##
 # @file as_automatics_logging.py
+# @ingroup automatics_logging
 # @author Philip Manke
 # @brief This module sets up Pythons logging module for as_automatics.
 # -----------------------------------------------------------------------------
 
 import logging
+
+
+##
+# @addtogroup automatics_logging
+# @{
 
 
 def init_log(
@@ -49,8 +55,8 @@ def init_log(
     loglevel_console="WARNING",
     loglevel_file="INFO"
 ):
-    """Initialize logging and return the logger.
-       Should only be run once per kernel."""
+    """! @brief Initialize logging and return the logger.
+    Should only be run once per kernel."""
     # Setup logging
     logger = logging.getLogger("as_automatics")
 
@@ -70,7 +76,9 @@ def init_log(
     formatter_logfile = logging.Formatter(
         "%(asctime)s, %(module)s: %(levelname)s - %(message)s"
     )
-    formatter_console = logging.Formatter("Automatics %(levelname)s: %(message)s")
+    formatter_console = logging.Formatter(
+        "Automatics %(levelname)s: %(message)s"
+    )
 
     # Setup logfile log handler
     logfile = logging.FileHandler(logfilename)
@@ -87,7 +95,7 @@ def init_log(
 
 
 def get_log():
-    """Returns the logger, initializing it if necessary."""
+    """! @brief Returns the logger, initializing it if necessary."""
     logger = logging.getLogger("as_automatics")
     if logger.hasHandlers():
         return logger
@@ -98,9 +106,13 @@ LOGLEVELS = ("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL")
 
 
 def set_loglevel(console, logfile):
+    """! @brief Set loglevel for console and logfile outputs."""
     console = console.upper()
     logfile = logfile.upper()
     if console in LOGLEVELS and logfile in LOGLEVELS:
         init_log(loglevel_console=console, loglevel_file=logfile)
     else:
         print("Invalid loglevels! - {}, {}".format(console, logfile))
+
+
+## @}

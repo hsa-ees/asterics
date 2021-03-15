@@ -27,7 +27,7 @@ of the ASTERICS hardware support library 'as_pipeline_row'.
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -40,32 +40,23 @@ of the ASTERICS hardware support library 'as_pipeline_row'.
 # @brief Specifics for support component 'as_pipeline_row' used by as_automatics
 # -----------------------------------------------------------------------------
 
-from as_automatics_module import AsModule
+from as_automatics_2d_window_module import AsWindowModule
 
 
-def get_module_instance(module_dir: str) -> AsModule:
-    module = AsModule()
+def get_module_instance(module_dir: str) -> AsWindowModule:
+    module = AsWindowModule()
 
-    module.files = ["hardware/hdl/vhdl/pipeline/as_pipeline_flush.vhd"]
+    toplevel_file = "hardware/hdl/vhdl/pipeline/as_pipeline_flush.vhd"
+    module.files = []
     module.dependencies = ["helpers"]
-    
-    # As this is not a typical Automatics module (no VHDL entity)
-    # we manually set the necessary attributes,
-    # so Automatics can work with it normally
-    module.module_dir = module_dir
-    module.repository_name = "default"
-    module.name = "as_pipeline_flush"
-    module.entity_name = "as_pipeline_flush"
-    module.generics = []
-    module.standard_ports = []
-    module.ports = []
-    module.interfaces = []
 
-    # Automatic module discovery would run into errors (no entity in 'filter_mask')
-    # as_automatics now automatically parses the toplevel file and discovers
+    module.show_in_browser = False
+    module.dev_status = AsWindowModule.DevStatus.BETA
+    module.module_type = AsWindowModule.ModuleTypes.HARDWARE
+    module.module_category = "Internal Submodules"
+
+    # Automatics now automatically parses the toplevel file and discovers
     # ports, generics, existing interfaces and register interfaces
-    #module.discover_module("{mdir}/{toplevel}"
-    #                       .format(mdir=module_dir, toplevel=toplevel_file))
-
+    module.discover_module(module_dir + "/" + toplevel_file)
 
     return module

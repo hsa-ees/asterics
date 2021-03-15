@@ -28,7 +28,7 @@ of the ASTERICS hardware module as_mux.
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -45,20 +45,18 @@ from as_automatics_module import AsModule
 
 
 def get_module_instance(module_dir: str) -> AsModule:
-    
+
     module = AsModule()
     toplevel_file = "hardware/hdl/vhdl/as_mux.vhd"
-    
+
     module.dependencies = []
+    module.show_in_browser = True
+    module.dev_status = AsModule.DevStatus.STABLE
+    module.module_type = AsModule.ModuleTypes.HARDWARE
+    module.module_category = "As Stream Infrastructure"
 
     # as_automatics now automatically parses the toplevel file and discovers
     # ports, generics, existing interfaces and register interfaces
-    module.discover_module("{mdir}/{toplevel}"
-                           .format(mdir=module_dir, toplevel=toplevel_file))
+    module.discover_module(module_dir + "/" + toplevel_file)
 
-    sel_reg = module.get_port("sel_reg")
-    sel_reg.set_port_type("external")
-    sel_reg.add_rule("external_port", "make_external")
-    
-    
     return module

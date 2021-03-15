@@ -27,8 +27,16 @@
 --  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ----------------------------------------------------------------------------------
 --! @file  ram.vhd
---! @brief Implements BRAM for storing data.
+--! @brief Implements dual-ported BRAM.
+--! @addtogroup asterics_helpers
+--! @{
+--! @defgroup ram ram: Dual-Port BRAM
+--! Implements dual-ported BRAM
+--! @}
 ----------------------------------------------------------------------------------
+
+--! @addtogroup ram
+--! @{
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -49,9 +57,9 @@ entity ram is
        );   
 end ram;
 
-architecture RTL of ram is
+--! @}
 
-  
+architecture RTL of ram is
 begin
   process (CLK)
     constant ram_size  : natural := 2**ADDR_WIDTH;
@@ -74,4 +82,3 @@ begin
   
   
 end RTL;
-

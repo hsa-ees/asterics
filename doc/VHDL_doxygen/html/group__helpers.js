@@ -1,0 +1,36 @@
+var group__helpers =
+[
+    [ "helpers", "namespacehelpers.html", null ],
+    [ "helpers", "classhelpers.html", [
+      [ "f_1d_to_2d_index", "group__helpers.html#ga0ec89071f5374f1f75babea117d7d595", null ],
+      [ "f_greatest_common_divisor", "group__helpers.html#ga2aebdfa2a4b961523bdd395ffc873f9d", null ],
+      [ "f_least_common_multiple", "group__helpers.html#ga54fdabfdac43c636b04db8e9e1e59a6b", null ],
+      [ "log2_ceil", "group__helpers.html#ga07cb27911e748c7b9ea4082ee3c780b0", null ],
+      [ "log2_ceil_alt", "group__helpers.html#ga5501d59afa7e1112db370e4e35e9366a", null ],
+      [ "log2_ceil_max_64", "group__helpers.html#ga7cabb3a479d4cd7e7efc1c7455bcb86c", null ],
+      [ "log2_ceil_zero", "group__helpers.html#gac89e23fa7e5450674611dc93ab6948f8", null ],
+      [ "log2_ceil_zero_abs", "group__helpers.html#ga0e386ab9b0bf285d1219940386395b83", null ],
+      [ "log2_floor", "group__helpers.html#gae209b9245f66ecc10e6ffbe0799e00a4", null ],
+      [ "maximum", "group__helpers.html#ga7d5cade36a347a8ee3d26ddc65023a9d", null ],
+      [ "minimum", "group__helpers.html#gac094f795f077aaf59fab373a649e946b", null ],
+      [ "rotate_right", "group__helpers.html#gaee5128e628712da627af307782c45e96", null ],
+      [ "AS_REG_BOTH", "group__helpers.html#gacc3d7103bb96d4c77ce32b0bab7f5e71", null ],
+      [ "AS_REG_CONTROL", "group__helpers.html#ga48427c260ce418940c6834ebaccc1114", null ],
+      [ "AS_REG_NONE", "group__helpers.html#gad3f11c6de6fe7986bb3509da193b2e28", null ],
+      [ "AS_REG_STATUS", "group__helpers.html#gafd5801da12810eb8b5cb864770484993", null ],
+      [ "ieee", "group__helpers.html#ga0a6af6eef40212dbaf130d57ce711256", null ],
+      [ "numeric_std", "group__helpers.html#ga2edc34402b573437d5f25fa90ba4013e", null ],
+      [ "slv_reg_config_table", "group__helpers.html#gaef5c995650652cf0a6db7ab6a45c06d1", null ],
+      [ "slv_reg_data", "group__helpers.html#ga9d1a47c57bbf23a1bd961d019aaad227", null ],
+      [ "std_logic_1164", "group__helpers.html#gacd03516902501cd1c7296a98e22c6fcb", null ]
+    ] ],
+    [ "f_greatest_common_divisor", "group__helpers.html#ga2aebdfa2a4b961523bdd395ffc873f9d", null ],
+    [ "f_least_common_multiple", "group__helpers.html#ga54fdabfdac43c636b04db8e9e1e59a6b", null ],
+    [ "log2_ceil_alt", "group__helpers.html#ga5501d59afa7e1112db370e4e35e9366a", null ],
+    [ "log2_ceil_max_64", "group__helpers.html#ga7cabb3a479d4cd7e7efc1c7455bcb86c", null ],
+    [ "log2_ceil_zero", "group__helpers.html#gac89e23fa7e5450674611dc93ab6948f8", null ],
+    [ "log2_ceil_zero_abs", "group__helpers.html#ga0e386ab9b0bf285d1219940386395b83", null ],
+    [ "log2_floor", "group__helpers.html#gae209b9245f66ecc10e6ffbe0799e00a4", null ],
+    [ "slv_reg_config_table", "group__helpers.html#gaef5c995650652cf0a6db7ab6a45c06d1", null ],
+    [ "slv_reg_data", "group__helpers.html#ga9d1a47c57bbf23a1bd961d019aaad227", null ]
+];

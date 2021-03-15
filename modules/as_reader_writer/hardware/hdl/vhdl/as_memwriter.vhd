@@ -11,9 +11,8 @@
 -- Modified:       2017-09-12 by Alexander Zoellner: Add data unit logic
 --                 Philip Manke: Use new slaveregister system for as_automatics
 --
--- Description:    This module receives an image data stream with HSYNC and 
---                 VSYNC signals and writes e.g. to local system memory 
---                 (using burst access).
+-- Description:    This module receives an image data stream (AsStream) 
+--                 and writes e.g. to local system memory (using burst access).
 --                 
 --                 Parameters need to be set before running this module.
 ----------------------------------------------------------------------------------
@@ -32,9 +31,23 @@
 --  or write to the Free Software Foundation, Inc.,
 --  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ----------------------------------------------------------------------------------
---! @file
+--! @file as_memwriter.vhd
 --! @brief This module writes (image) data using a data bus master interface; input needs to be as_stream compatible.
+--! @addtogroup asterics_modules
+--! @{
+--! @defgroup as_reader_writer as_reader_writer AsStream <-> AXI Interfaces
+--! @}
+--! @addtogroup as_reader_writer
+--! @{
+--! @defgroup as_memwriter as_memwriter: AsStream to AXI Interface
+--! This module receives an image data stream (AsStream) 
+--! and writes e.g. to local system memory (using burst access).
+--! Parameters need to be set before running this module.
+--! @}
 ----------------------------------------------------------------------------------
+
+--! @addtogroup as_memwriter 
+--! @{
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -109,7 +122,7 @@ entity AS_MEMWRITER is
     );
 end AS_MEMWRITER;
 
-
+--! @}
 
 architecture RTL of AS_MEMWRITER is
 
@@ -326,6 +339,18 @@ architecture RTL of AS_MEMWRITER is
     -- interrupt
     signal s_duc_irq                    : std_logic;
     signal s_done_irq                   : std_logic;
+    
+    attribute DONT_TOUCH : string;
+    attribute DONT_TOUCH of s_fifo_empty: signal is "TRUE";
+    attribute DONT_TOUCH of s_fifo_full: signal is "TRUE";
+    attribute DONT_TOUCH of s_fifo_prog_empty: signal is "TRUE";
+    attribute DONT_TOUCH of r_burst_en: signal is "TRUE";
+    attribute DONT_TOUCH of s_mem_sm_flush: signal is "TRUE";
+    attribute DONT_TOUCH of s_unit_flush: signal is "TRUE";
+    attribute DONT_TOUCH of s_fifo_wr_en: signal is "TRUE";
+    attribute DONT_TOUCH of s_input_sm_trigger_enable: signal is "TRUE";
+    attribute DONT_TOUCH of s_enable: signal is "TRUE";
+    attribute DONT_TOUCH of strobe_in: signal is "TRUE";
  
 begin
     -- Assign the register configuration to the register interface.
@@ -1162,5 +1187,4 @@ begin
     end generate;
     
 end architecture;
-
 

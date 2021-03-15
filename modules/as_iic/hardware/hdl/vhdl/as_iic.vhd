@@ -32,11 +32,21 @@
 ----------------------------------------------------------------------------------
 --! @file  as_iic.vhd
 --! @brief Simple IP Core that behaves like an I2C master.
+--! @addtogroup asterics_modules
+--! @{
+--! @defgroup as_iic as_iic: IIC Master
+--! Simple IP Core that behaves like an I2C master. 
+--! Supports clock stretching and variable serial clock 
+--! speeds adjustible by software from ~10kHz to ~1MHz. 
+--! Does not support arbitration (no multi master).
+--! Only supports 7 bit addresses.
+--! @}
 ----------------------------------------------------------------------------------
 
-
---! \addtogroup as_iic
---!  @{
+--! @addtogroup as_iic
+--! @{
+--! @defgroup as_iic_tb as_iic_tb: Testbench for as_iic
+--! @note Currently out-of-date.
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;

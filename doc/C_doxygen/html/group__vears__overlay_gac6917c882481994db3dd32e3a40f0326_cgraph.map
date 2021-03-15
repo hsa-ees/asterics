@@ -1,0 +1,11 @@
+<map id="vears_draw_line" name="vears_draw_line">
+<area shape="rect" id="node1" title="Draw a line from (x0, y0) to (x1, y1)." alt="" coords="5,132,133,159"/>
+<area shape="rect" id="node2" href="$ea__draw__line_8c.html#a37607873cb8c34b78555a09e77217099" title=" " alt="" coords="217,107,325,133"/>
+<area shape="rect" id="node9" href="$vears_8c.html#a5c9f2a05f3fe62106f55e90dbcc9cf53" title=" " alt="" coords="181,157,361,184"/>
+<area shape="rect" id="node3" href="$ea__draw__line_8c.html#a0fa8eda05ff510ff4b7781763bf9c9ee" title=" " alt="" coords="469,5,515,32"/>
+<area shape="rect" id="node4" href="$ea__draw__point_8c.html#a061e9dc2b155528bc460f9c692659ed2" title=" " alt="" coords="433,56,551,83"/>
+<area shape="rect" id="node5" href="$ea__draw__quick__line__h_8c.html#a822ca7b402ab5d265e9736ef4d0d6736" title=" " alt="" coords="409,107,575,133"/>
+<area shape="rect" id="node7" href="$ea__draw__quick__line__v_8c.html#a6796003d1cfc808748bf7157c949bfda" title=" " alt="" coords="409,157,575,184"/>
+<area shape="rect" id="node8" href="$ea__draw__line_8c.html#a745efbe628f8334a6278c11bb78c819a" title=" " alt="" coords="469,208,515,235"/>
+<area shape="rect" id="node6" href="$ea__draw__quick__line__h_8c.html#a57780e02c723be87fd9cac22302de8a0" title=" " alt="" coords="623,107,709,133"/>
+</map>

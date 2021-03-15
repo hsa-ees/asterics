@@ -1,0 +1,52 @@
+<map id="as_module_reg" name="as_module_reg">
+<area shape="rect" id="node1" title=" " alt="" coords="469,1317,591,1344"/>
+<area shape="rect" id="node2" href="$group__as__crop.html#ga968c01e2f32ccc8d87bd25288ee0bdfd" title=" " alt="" coords="251,5,351,32"/>
+<area shape="rect" id="node3" href="$group__as__gensync.html#ga5746539d52622a4ab76a6814d68715f4" title=" " alt="" coords="225,56,377,83"/>
+<area shape="rect" id="node4" href="$group__as__gensync.html#ga3256f1a305daeafd58601ba3b0dc9823" title=" " alt="" coords="226,107,375,133"/>
+<area shape="rect" id="node5" href="$group__as__gensync.html#ga562d2890e05a11b212146addc4dd931d" title=" " alt="" coords="199,157,403,184"/>
+<area shape="rect" id="node7" href="$group__as__gensync.html#ga8370bdc6799c035ab16c3e79985550be" title=" " alt="" coords="217,208,384,235"/>
+<area shape="rect" id="node8" href="$group__as__invert.html#ga3c3e0caa36e278b72fab458ba28087a1" title=" " alt="" coords="234,259,367,285"/>
+<area shape="rect" id="node9" href="$group__as__picam.html#gad933d1c5700c7acef787d1a3f95384e8" title=" " alt="" coords="185,309,416,336"/>
+<area shape="rect" id="node10" href="$group__as__picam.html#gaa8192e9e074c9992f0af0584f69c1009" title=" " alt="" coords="245,360,357,387"/>
+<area shape="rect" id="node11" href="$group__as__picam.html#ga01b04fc64709419ac1d06df422efa021" title=" " alt="" coords="225,411,376,437"/>
+<area shape="rect" id="node12" href="$group__as__picam.html#ga30b57eabe3cec87f9626b1e39f244a98" title=" " alt="" coords="241,461,360,488"/>
+<area shape="rect" id="node13" href="$group__as__reader__writer.html#gaaea10b48e35a224a5870cd3322ffbec2" title="Returns the next address on which the hardware will perform a write operation." alt="" coords="221,513,380,554"/>
+<area shape="rect" id="node14" href="$group__as__reader__writer.html#ga0e0a5b7e0dd6a14cb0f4251d00a783e8" title="Checks if module is busy." alt="" coords="207,579,394,605"/>
+<area shape="rect" id="node15" href="$group__as__reader__writer.html#ga8f344f9ba6800171909327c670d9f0f0" title="Checks if module is ready for operation." alt="" coords="207,629,395,656"/>
+<area shape="rect" id="node16" href="$group__as__reader__writer.html#gab3f2465225201507d51787478ac5955a" title="Checks if another operation is queued." alt="" coords="226,681,375,722"/>
+<area shape="rect" id="node17" href="$group__as__reader__writer.html#ga89e42a53f0db5cf22c8583c8e0c8a074" title="Resets the hardware module." alt="" coords="215,747,386,773"/>
+<area shape="rect" id="node18" href="$group__as__reader__writer.html#ga38bb160b6e30eb5fce6df2e4b4894fad" title="Starts operation of hardware module." alt="" coords="210,797,391,824"/>
+<area shape="rect" id="node19" href="$group__as__reader__writer.html#gae1123634d5cf61d70bcfc7a87cda08bf" title="Sets the maximum possible burst length to be performed by the hardware module." alt="" coords="221,849,380,890"/>
+<area shape="rect" id="node20" href="$group__as__reader__writer.html#ga43d2f73d7d42dd5704160d4ddacfaa1e" title="Sets the start address of the first section to the given value." alt="" coords="221,914,380,955"/>
+<area shape="rect" id="node21" href="$group__as__reader__writer.html#ga4dd1a170b8e16005c286c0c0e7d8406f" title="Sets the number of sections." alt="" coords="221,979,380,1021"/>
+<area shape="rect" id="node22" href="$group__as__reader__writer.html#ga12f11a3d7cff5ea8bdec75dedec35bab" title="Sets the offset in bytes between the start addresses of two subsequent sections." alt="" coords="221,1045,380,1086"/>
+<area shape="rect" id="node23" href="$group__as__reader__writer.html#ga06436c5cb6a63439f2e4b7c14c71fb83" title="Sets the size of a single section in bytes." alt="" coords="221,1110,380,1151"/>
+<area shape="rect" id="node24" href="$group__as__sensor__ov7670.html#gaf89fa4859a31595f7a27f73514c109a3" title=" " alt="" coords="207,1175,395,1217"/>
+<area shape="rect" id="node25" href="$group__as__sensor__ov7670.html#ga3392b840d710dcb57d9e7ce2221210dc" title=" " alt="" coords="209,1241,392,1268"/>
+<area shape="rect" id="node26" href="$as__sensor__ov7670_8c.html#afa584132cfb864262d6910ce365472ba" title=" " alt="" coords="180,1292,421,1319"/>
+<area shape="rect" id="node27" href="$group__as__sensor__ov7670.html#ga8338b7849d9c82ef37edbdfe6e8fa632" title=" " alt="" coords="215,1343,386,1369"/>
+<area shape="rect" id="node28" href="$group__as__sensor__ov7670.html#ga13ad34ba60cebaf4c5392288b4da428c" title=" " alt="" coords="197,1393,405,1420"/>
+<area shape="rect" id="node29" href="$group__as__sensor__ov7670.html#gade1f741182323bec3bf92be7a17b3bcc" title=" " alt="" coords="212,1444,389,1471"/>
+<area shape="rect" id="node30" href="$group__as__threshold.html#gab57ae4379fa2b76f65c85e29a4235067" title=" " alt="" coords="223,1495,379,1537"/>
+<area shape="rect" id="node31" href="$group__as__threshold.html#ga821aa37f9a20d976605e06cbc17e631f" title=" " alt="" coords="223,1561,379,1602"/>
+<area shape="rect" id="node32" href="$group__as__threshold.html#gac427effb1fd260c777dc5ea58be9e77f" title=" " alt="" coords="223,1626,379,1667"/>
+<area shape="rect" id="node33" href="$group__as__threshold.html#ga9f720ebbf29d212931203c0839371be6" title=" " alt="" coords="224,1692,377,1719"/>
+<area shape="rect" id="node34" href="$group__as__threshold.html#ga4c241f45b820cc45b132f0c4f08e43a0" title=" " alt="" coords="224,1743,377,1769"/>
+<area shape="rect" id="node35" href="$group__as__threshold.html#gae62d1dc97502916e642b1f22d94907a7" title=" " alt="" coords="227,1794,374,1835"/>
+<area shape="rect" id="node36" href="$group__as__threshold.html#gaacde349094d858c0e0cb7de97b7a0b02" title=" " alt="" coords="227,1859,374,1901"/>
+<area shape="rect" id="node37" href="$group__as__threshold.html#gabe357fa631d024a9be6c410c404b51f1" title=" " alt="" coords="227,1925,374,1966"/>
+<area shape="rect" id="node38" href="$group__as__threshold.html#ga6810bb581bbb6a0ac417fdc69b171b2d" title=" " alt="" coords="225,1991,377,2017"/>
+<area shape="rect" id="node39" href="$group__as__threshold.html#gad7125c18114253bc9aabc77c982748f6" title=" " alt="" coords="225,2041,377,2068"/>
+<area shape="rect" id="node40" href="$group__as__reader__writer.html#ga3a166cc3d15dae4f4d7ba9ddc2fd1ca6" title="Returns the number of received units by the reader_writer." alt="" coords="216,2093,385,2134"/>
+<area shape="rect" id="node41" href="$group__as__reader__writer.html#ga1ed314dbb9e93fbcbab70d4db197e3b6" title="Returns the first address after the last successfully written unit." alt="" coords="203,2158,398,2199"/>
+<area shape="rect" id="node42" href="$group__as__reader__writer.html#ga40ca99b7af59a16e22779352f77a3faf" title="Checks if there is buffered data." alt="" coords="199,2224,402,2251"/>
+<area shape="rect" id="node43" href="$group__as__reader__writer.html#ga51f9bb06fb4dce80f58545f9cb080d3c" title="Checks if the module accepts data." alt="" coords="211,2275,390,2301"/>
+<area shape="rect" id="node44" href="$group__as__reader__writer.html#ga8ffa108d758f416593d508d00fdbfed6" title="Checks if module has dropped data." alt="" coords="213,2325,388,2352"/>
+<area shape="rect" id="node45" href="$group__as__reader__writer.html#ga8daf0ef0b9d732e9388ba62e69842c8d" title="Disable module input port." alt="" coords="219,2376,382,2403"/>
+<area shape="rect" id="node46" href="$group__as__reader__writer.html#ga2c3650318b12edaf3f4473fed557cc74" title="Disable module if no operation is queued." alt="" coords="219,2427,382,2469"/>
+<area shape="rect" id="node47" href="$group__as__reader__writer.html#ga1ef22dbd33d87de51113837dd9123c6f" title="Enable module input port." alt="" coords="221,2493,381,2520"/>
+<area shape="rect" id="node48" href="$group__as__reader__writer.html#ga4756adb209e0fcf64abc204b21ea8095" title="Enable module input port on data unit complete." alt="" coords="210,2545,391,2586"/>
+<area shape="rect" id="node49" href="$group__as__reader__writer.html#ga9215e95a07cc87392a5f12f73c981b1a" title="Flush data to memory." alt="" coords="227,2611,375,2637"/>
+<area shape="rect" id="node50" href="$group__as__reader__writer.html#ga98542cb8dd5f6f0ee3b1cae12a1422e2" title="Transfer single data unit to memory." alt="" coords="205,2661,396,2688"/>
+<area shape="rect" id="node6" href="$group__as__gensync.html#ga471165ace4958548c722f223f04eee07" title=" " alt="" coords="5,183,132,209"/>
+</map>

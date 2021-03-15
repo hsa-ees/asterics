@@ -1,0 +1,62 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% This file is part of the ASTERICS Framework. 
+%%
+%% Copyright (C) Hochschule Augsburg, University of Applied Sciences
+%% Efficient Embedded Systems Group
+%%
+%% Author(s): Alexander Zoellner <alexander.zoellner@hs-augsburg.de>
+%%
+%% Description: Template file for describing hardware registers for data exchange 
+%%              between hw and sw. Two tables are provided for a given register.
+%%              The first one is used for stating general information and the 
+%%              second one for describing the individual bit fields and their 
+%%              meaning. A bit field is a logically grouped number of bits.
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% Template for general information of the hardware register used by the associated
+% software driver of the module. 
+
+\begin{longtable}[ht]{ll}
+    \multicolumn{2}{c}{\textbf{Register Name (sw?)}}
+    \ \\
+    
+    Name & hw register name\\
+    
+    Relative Address & hex value\\
+    
+    Absolute Address & Implementation dependent (almost always in ASTERICS)\\
+    
+    Width & positive integer value (bit width of register; usually 32)\\
+    
+    Access Type & ro, wo, rw, mixed (sw perspective; mixed if there are read-only and write-only fields)\\
+    
+    Description & \parbox{10cm}{\ \\
+        Short description of the purpose of this register\\
+    }\\
+    \caption{register\_name register overview of the module\_name.}
+    \label{table:appropriate-label}
+    
+\end{longtable}
+
+% Template for listing the indices of available bit fields and their meaning for a 
+% certain hw register.
+
+
+\begin{longtable}[ht]{|l|l|l|l|l|}
+    \hline
+    \multicolumn{1}{|c|}{\textbf{Field Name}} & \multicolumn{1}{c|}{\textbf{Bit Index}} & \multicolumn{1}{c|}{\textbf{Type}} & \multicolumn{1}{c|}{\textbf{Reset Value}} & \multicolumn{1}{c|}{\textbf{Description}}\\
+    \hline
+    field name & positive integer value(s) & ro, wo or rw (software perspective) & hex value or undefined & \parbox{5cm}{\ \\
+        Short description of the bit field\\
+    }\\
+    \hline
+    example & 5:2 & ro & 0x0 & \parbox{5cm}{\ \\
+        Example field consisting of more than one bit, with high index left and low index right, separated by a colon.\\
+    }\\
+    \hline
+    \caption{Bit field overview of the register\_name register of the module\_name.}
+    \label{table:appropriate-label}
+\end{longtable}

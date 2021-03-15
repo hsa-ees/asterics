@@ -36,25 +36,30 @@ Module containing all interface template classes for use in as_automatics.
 # --------------------- DOXYGEN -----------------------------------------------
 ##
 # @file as_automatics_templates.py
+# @ingroup automatics_intrep
 # @author Philip Manke
 # @brief Template definitions for interfaces used in as_automatics.
 # -----------------------------------------------------------------------------
 
 from math import ceil, log2
+import itertools as ittls
 import copy
 
 from as_automatics_interface import Interface
-from as_automatics_port import Port, StandardPort, GlueSignal
+from as_automatics_port import Port, StandardPort
+from as_automatics_signal import GlueSignal, GenericSignal
 from as_automatics_generic import Generic
-from as_automatics_module import AsModule, AsModuleGroup
+from as_automatics_module import AsModule
+from as_automatics_module_group import AsModuleGroup
 
 import as_automatics_vhdl_static as as_vhdl_static
 
 
 def add_templates():
-    """This function is called when AsAutomatics initializes.
-       It is used to construct all interface templates and assign them to the
-       AsModule class for use when discovering interfaces in modules."""
+    """! @brief Add global interface templates.
+    This function is called when AsAutomatics initializes.
+    It is used to construct all interface templates and assign them to the
+    AsModule class for use when discovering interfaces in modules."""
 
     # When new interfaces are developed and added, add the interface to
     # AsAutomatics using a copy of one of the lines below.
@@ -65,12 +70,17 @@ def add_templates():
     AsModule.add_global_interface_template(SlaveRegisterInterfaceTemplate())
 
 
-# as-stream interface definition
+# as_stream interface definition
+## @ingroup automatics_intrep
 class AsStream(Interface):
-    """Template definition for ASTERICS' 'as_stream' interface."""
+    """! @brief Template definition for ASTERICS' 'as_stream' interface."""
+
+    INTERFACE_TYPE_NAME = "as_stream"
+
+    INTERFACE_TYPE_NAME = "as_stream"
 
     def __init__(self):
-        super().__init__("as_stream")
+        super().__init__(self.INTERFACE_TYPE_NAME)
         self.add_port(Port("strobe"))
         self.add_port(
             Port(
@@ -84,7 +94,9 @@ class AsStream(Interface):
         self.add_port(Port("vsync", optional=True))
         vcomplete = Port("vcomplete", optional=True)
         vcomplete.add_rule("sink_missing", "fallback_port(vsync)", False)
-        vcomplete.add_rule("sink_missing", "fallback_port(data_unit_complete)", False)
+        vcomplete.add_rule(
+            "sink_missing", "fallback_port(data_unit_complete)", False
+        )
         self.add_port(vcomplete)
         hcomplete = Port("hcomplete", optional=True)
         self.add_port(Port("hsync", optional=True))
@@ -96,30 +108,47 @@ class AsStream(Interface):
 
 
 # Slave register interface (module <-> as_regmgr)
+## @ingroup automatics_intrep
 class SlaveRegisterInterfaceTemplate(Interface):
-    """Template definition for the slave register interface used for 
+    """! @brief Template definition of the ASTERICS slave register interface.
+    Template definition for the slave register interface used for
     communication between ASTERICS Modules and the register management hardware.
     """
 
+    INTERFACE_TYPE_NAME = "slv_reg_interface"
+
     def __init__(self):
-        super().__init__("slv_reg_interface")
+        super().__init__(self.INTERFACE_TYPE_NAME)
         self.add_port(Port("slv_ctrl_reg", data_type="slv_reg_data"))
-        self.add_port(Port("slv_status_reg", direction="out", data_type="slv_reg_data"))
         self.add_port(
-            Port("slv_reg_modify", direction="out", data_type="std_logic_vector")
+            Port("slv_status_reg", direction="out", data_type="slv_reg_data")
         )
         self.add_port(
-            Port("slv_reg_config", direction="out", data_type="slv_reg_config_table")
+            Port(
+                "slv_reg_modify", direction="out", data_type="std_logic_vector"
+            )
+        )
+        self.add_port(
+            Port(
+                "slv_reg_config",
+                direction="out",
+                data_type="slv_reg_config_table",
+            )
         )
 
 
 # Camera interface definition
+## @ingroup automatics_intrep
 class CameraInputOV7670(Interface):
-    """Template definition for the Camera interface used by the OmniiVision
-       OV7670 camera sensor."""
+    """! @brief Template definition for the Camera interface used by the OmniiVision
+    OV7670 camera sensor."""
+
+    INTERFACE_TYPE_NAME = "camera_interface_ov7670"
+
+    INTERFACE_TYPE_NAME = "camera_interface_ov7670"
 
     def __init__(self):
-        super().__init__("camera_interface_ov7670")
+        super().__init__(self.INTERFACE_TYPE_NAME)
         self.add_port(Port("reset_n", direction="out"))
         self.add_port(Port("powerdown", direction="out"))
         self.add_port(Port("pixclk"))
@@ -137,12 +166,17 @@ class CameraInputOV7670(Interface):
 
 
 # AXI Master Memory interface definition:
+## @ingroup automatics_intrep
 class AXIMasterMemoryInternal(Interface):
-    """Template definition for the AXI Master Memory
-       interface used in ASTERICS."""
+    """! @brief Template definition for the AXI Master Memory
+    interface used in ASTERICS."""
+
+    INTERFACE_TYPE_NAME = "axi_master_memory_int"
+
+    INTERFACE_TYPE_NAME = "axi_master_memory_int"
 
     def __init__(self):
-        super().__init__("axi_master_memory_int")
+        super().__init__(self.INTERFACE_TYPE_NAME)
 
         # Ports for arbitration mode
         mem_req = Port("mem_req", direction="out", optional=True)
@@ -170,7 +204,9 @@ class AXIMasterMemoryInternal(Interface):
                 "mem_addr",
                 direction="out",
                 data_type="std_logic_vector",
-                data_width=Port.DataWidth("MEM_ADDRESS_BIT_WIDTH - 1", "downto", 0),
+                data_width=Port.DataWidth(
+                    "MEM_ADDRESS_BIT_WIDTH - 1", "downto", 0
+                ),
             )
         )
         self.add_port(
@@ -186,7 +222,9 @@ class AXIMasterMemoryInternal(Interface):
                 "mem_xfer_length",
                 direction="out",
                 data_type="std_logic_vector",
-                data_width=Port.DataWidth("BURST_LENGTH_BIT_WIDTH - 1", "downto", 0),
+                data_width=Port.DataWidth(
+                    "BURST_LENGTH_BIT_WIDTH - 1", "downto", 0
+                ),
             )
         )
         self.add_port(Port("mem_in_en"))
@@ -211,17 +249,24 @@ class AXIMasterMemoryInternal(Interface):
         self.instantiate_module("AXI_Master")
 
 
+## @ingroup automatics_intrep
 class AXISlaveRegisterInterface(Interface):
-    """Template definition for the AXI Slave Register
-       interface used in ASTERICS."""
+    """! @brief Template definition for the AXI Slave Register
+    interface used in ASTERICS."""
+
+    INTERFACE_TYPE_NAME = "axi_slave_register_interface"
+
+    INTERFACE_TYPE_NAME = "axi_slave_register_interface"
 
     def __init__(self):
-        super().__init__("axi_slave_register_interface")
+        super().__init__(self.INTERFACE_TYPE_NAME)
         self.add_port(
             Port(
                 "write_data",
                 data_type="std_logic_vector",
-                data_width=Port.DataWidth("C_S_AXI_DATA_WIDTH - 1", "downto", 0),
+                data_width=Port.DataWidth(
+                    "C_S_AXI_DATA_WIDTH - 1", "downto", 0
+                ),
             )
         )
         self.add_port(
@@ -229,7 +274,9 @@ class AXISlaveRegisterInterface(Interface):
                 "read_data",
                 data_type="std_logic_vector",
                 direction="out",
-                data_width=Port.DataWidth("C_S_AXI_DATA_WIDTH - 1", "downto", 0),
+                data_width=Port.DataWidth(
+                    "C_S_AXI_DATA_WIDTH - 1", "downto", 0
+                ),
             )
         )
         self.add_port(Port("write_enable"))
@@ -238,38 +285,51 @@ class AXISlaveRegisterInterface(Interface):
             Port(
                 "write_address",
                 data_type="std_logic_vector",
-                data_width=Port.DataWidth("C_S_AXI_ADDR_WIDTH - 1", "downto", 0),
+                data_width=Port.DataWidth(
+                    "C_S_AXI_ADDR_WIDTH - 1", "downto", 0
+                ),
             )
         )
         self.add_port(
             Port(
                 "read_address",
                 data_type="std_logic_vector",
-                data_width=Port.DataWidth("C_S_AXI_ADDR_WIDTH - 1", "downto", 0),
+                data_width=Port.DataWidth(
+                    "C_S_AXI_ADDR_WIDTH - 1", "downto", 0
+                ),
             )
         )
         self.add_port(
             Port(
                 "write_byte_strobe",
                 data_type="std_logic_vector",
-                data_width=Port.DataWidth("C_S_AXI_DATA_WIDTH / 8 - 1", "downto", 0),
+                data_width=Port.DataWidth(
+                    "C_S_AXI_DATA_WIDTH / 8 - 1", "downto", 0
+                ),
             )
         )
         self.set_prefix_suffix("axi_slv_reg_", "")
 
 
+## @ingroup automatics_intrep
 class AXISlaveInterface(Interface):
-    """Template definition for the AXI Slave interface used in ASTERICS."""
+    """! @brief Template definition for the AXI Slave interface used in ASTERICS."""
+
+    INTERFACE_TYPE_NAME = "axi_slave_interface"
+
+    INTERFACE_TYPE_NAME = "axi_slave_interface"
 
     def __init__(self):
-        super().__init__("axi_slave_interface")
+        super().__init__(self.INTERFACE_TYPE_NAME)
         self.add_port(Port("aclk"))
         self.add_port(Port("areset_n"))
         self.add_port(
             Port(
                 "awaddr",
                 data_type="std_logic_vector",
-                data_width=Port.DataWidth("C_S_AXI_ADDR_WIDTH - 1", "downto", 0),
+                data_width=Port.DataWidth(
+                    "C_S_AXI_ADDR_WIDTH - 1", "downto", 0
+                ),
             )
         )
         self.add_port(
@@ -285,14 +345,18 @@ class AXISlaveInterface(Interface):
             Port(
                 "wdata",
                 data_type="std_logic_vector",
-                data_width=Port.DataWidth("C_S_AXI_DATA_WIDTH - 1", "downto", 0),
+                data_width=Port.DataWidth(
+                    "C_S_AXI_DATA_WIDTH - 1", "downto", 0
+                ),
             )
         )
         self.add_port(
             Port(
                 "wstrb",
                 data_type="std_logic_vector",
-                data_width=Port.DataWidth("C_S_AXI_DATA_WIDTH / 8 - 1", "downto", 0),
+                data_width=Port.DataWidth(
+                    "C_S_AXI_DATA_WIDTH / 8 - 1", "downto", 0
+                ),
             )
         )
         self.add_port(Port("wvalid"))
@@ -310,7 +374,9 @@ class AXISlaveInterface(Interface):
             Port(
                 "araddr",
                 data_type="std_logic_vector",
-                data_width=Port.DataWidth("C_S_AXI_ADDR_WIDTH - 1", "downto", 0),
+                data_width=Port.DataWidth(
+                    "C_S_AXI_ADDR_WIDTH - 1", "downto", 0
+                ),
             )
         )
         self.add_port(
@@ -327,7 +393,9 @@ class AXISlaveInterface(Interface):
                 "rdata",
                 direction="out",
                 data_type="std_logic_vector",
-                data_width=Port.DataWidth("C_S_AXI_DATA_WIDTH - 1", "downto", 0),
+                data_width=Port.DataWidth(
+                    "C_S_AXI_DATA_WIDTH - 1", "downto", 0
+                ),
             )
         )
         self.add_port(
@@ -344,18 +412,26 @@ class AXISlaveInterface(Interface):
         self.to_external = True
 
 
+## @ingroup automatics_intrep
 class AsMain(AsModuleGroup):
+    """! @brief Template for the module group AsMain in which all AsModules are instantiated."""
+
     def __init__(self, top, chain):
         super().__init__("as_main", top, [])
-        self.entity_name = "as_main"
+        self.entity_name = "as_main_impl"
+        self.name = "as_main"
         self.chain = chain
+        self.description = as_vhdl_static.AS_MAIN_DESC
         # Setup default reset signal and port and default AXI Slave Interface
-        # self.add_standard_port(StandardPort("reset_n", port_type="external"))
+
+        # Need to remove reset port: these are non-standard for as_main
+        self.standard_ports.clear()
+
         self.define_port("reset_n")
-        self.define_signal("reset", fixed_value="not reset_n")
+        self.reset_signal = self.define_signal(
+            "reset", fixed_value="not reset_n"
+        )
         self.define_port("clk")
-        # clk = StandardPort("clk", port_type="single")
-        # self.add_standard_port(clk)
 
         axi_slave_reg_inter = AXISlaveRegisterInterface()
         axi_slave_reg_inter.instantiate_module("AXI_Slave")
@@ -371,106 +447,85 @@ class AsMain(AsModuleGroup):
 
         def as_main_dynamic_code(chain, code_dict: dict):
             # code_dict format: lists "signals" and "body"
-            def bundle_signals(bundle_list: list, bundle_type: str) -> list:
-                """Generate VHDL code to bundle the signals in the bundle list.
-                The type of bundling (and / or) is determined by 'bundle_type'.
-                Returns a list of VHDL statements."""
-                if not bundle_list:
-                    return None  # No action on empty list
-                out = []
-                crt_name = ""
-                crt_stmt = ""
-                local_list = copy.copy(bundle_list)
-
-                # While there are unprocessed ports in the bundle list
-                while local_list:
-                    # Filter by the name of the first port item
-                    crt_name = local_list[0].code_name
-                    # Initialize the statement
-                    crt_stmt = "{} <= ".format(crt_name)
-                    # Add all ports with the same name to the statement
-                    for nport in (
-                        port for port in bundle_list if port.code_name == crt_name
-                    ):
-                        # Find the connection of the current port:
-                        target = nport.glue_signal
-                        # Use the connections sink and the bundle type to append
-                        crt_stmt += "{} {} ".format(target.code_name, bundle_type)
-                        local_list.remove(nport)  # And remove them from the local list
-                    # Append the statement to the return list
-                    # The '[:-4]' removes the last superfluous bundle operand.
-                    out.append("  {};\n".format(crt_stmt[:-4].strip()))
-                return out
 
             # Generate a hexadecimal string storing the ASTERICS base address:
             # Calculate the width in hexadecimal characters of the base address
-            length = int(2 ** ceil(log2(chain.asterics_base_addr.bit_length())) / 4)
+            length = int(
+                2 ** ceil(log2(chain.asterics_base_addr.bit_length())) / 4
+            )
             base_addr_str = 'X"{addr:0{length}X}"'.format(
                 length=length, addr=chain.asterics_base_addr
             )
             # Generate some required signals and constants for register management:
             code_dict["signals"].extend(
                 [
-                    "\n  -- Register interface constants and signals:\n",
-                    "  constant c_asterics_base_addr : unsigned({} downto 0) := {};\n".format(
+                    "\n  -- Register interface constants and signals:",
+                    "  constant c_asterics_base_addr : unsigned({} downto 0) := {};".format(
                         length * 4 - 1, base_addr_str
                     ),
-                    "  constant c_slave_reg_addr_width : integer := {};\n".format(
+                    "  constant c_slave_reg_addr_width : integer := {};".format(
                         chain.mod_addr_width + chain.reg_addr_width
                     ),
-                    "  constant c_module_addr_width : integer := {};\n".format(
+                    "  constant c_module_addr_width : integer := {};".format(
                         chain.mod_addr_width
                     ),
-                    "  constant c_reg_addr_width : integer := {};\n".format(
+                    "  constant c_reg_addr_width : integer := {};".format(
                         chain.reg_addr_width
                     ),
-                    "  constant c_reg_if_count : integer := {};\n".format(
-                        sum([len(mod.register_ifs) for mod in chain.modules])
+                    "  constant c_reg_if_count : integer := {};".format(
+                        sum(
+                            [
+                                len(mod.register_ifs)
+                                for mod in ittls.chain(
+                                    chain.modules, chain.pipelines
+                                )
+                            ]
+                        )
                     ),
-                    ("  signal read_module_addr : integer;\n"),
+                    ("  signal read_module_addr : integer;"),
                     (
                         "  signal sw_address : std_logic_vector"
-                        "(c_slave_reg_addr_width - 1 downto 0);\n"
+                        "(c_slave_reg_addr_width - 1 downto 0);"
                     ),
                     (
                         "  signal mod_read_data_arr : slv_reg_data"
-                        "(0 to c_reg_if_count - 1);\n"
+                        "(0 to c_reg_if_count - 1);"
                     ),
                 ]
             )
-            code_dict["body"].extend(["  \n", "  -- Bundled signals:\n"])
-            # Generate the signal bundle logic:
-            for btype in chain.bundles:
-                # For each bundling type, call the bundle method
-                # and add the results to the architecture body
-                ret = bundle_signals(chain.bundles[btype], btype)
-                if ret:
-                    code_dict["body"].extend(ret)
-                    code_dict["body"].append("\n")
 
             # Generate the register manager instantiations:
             for addr in chain.address_space:  # For each address space
                 # Grab the register manager reference
                 regif = chain.address_space[addr]
                 code_dict["signals"].append(
-                    "  -- Module register base address: 16#{:8X}#\n".format(
+                    "  -- Module register base address: 16#{:8X}#".format(
                         regif.base_address
                     )
                 )
                 code_dict["signals"].append(
-                    "  constant c_{}_regif_num{} : integer := {};\n".format(
+                    "  constant c_{}_regif_num{} : integer := {};".format(
                         regif.parent.name, regif.name_suffix, regif.regif_num
                     )
                 )
 
-        self.dynamic_code_generator = as_main_dynamic_code
+        self.dynamic_code_generators.append(as_main_dynamic_code)
 
 
+## @ingroup automatics_intrep
 class AsTop(AsModuleGroup):
+    """! @brief Template for the ASTERICS processing chain toplevel module group.
+    The AsMain module group and AXI interfaces are instantiated here."""
+
     def __init__(self, chain):
         super().__init__("asterics", None, [])
         self.entity_name = "asterics"
         self.chain = chain
+        self.description = as_vhdl_static.AS_TOP_DESC
+
+        # Remove reset port: non-standard for asterics.vhd
+        self.standard_ports.clear()
+
         self.define_signal("clk", fixed_value="slave_s_axi_aclk")
         self.define_signal("reset_n", fixed_value="slave_s_axi_aresetn")
         self.dependencies = ["as_main"]

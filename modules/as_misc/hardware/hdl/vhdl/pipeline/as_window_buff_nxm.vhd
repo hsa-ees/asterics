@@ -29,7 +29,17 @@
 ----------------------------------------------------------------------------------
 --! @file  window_buff_nxm.vhd
 --! @brief Implements a N by M window buffer.
+--! @addtogroup asterics_helpers
+--! @{
+--! @defgroup window_buff_nxm window_buff_nxm: Standalone Window Buffer
+--! Standalone 2D Window Pipeline - style window buffer.
+--! Implements a N by M window buffer.
+--! Meant mainly for testing purposes, such as testbenches.
+--! @}
 ----------------------------------------------------------------------------------
+
+--! @addtogroup window_buff_nxm
+--! @{
 
 
 library ieee;
@@ -65,6 +75,7 @@ entity as_window_buff_nxm is
     );
 end entity;
 
+--! @}
 
 architecture RTL of as_window_buff_nxm is
     type word_array is array(0 to WINDOW_Y - 1) 
@@ -73,7 +84,7 @@ architecture RTL of as_window_buff_nxm is
             of t_generic_line(0 to WINDOW_X -  1, DATA_WIDTH - 1 downto 0);
     
     -- Array for window area (lines) 
-    signal window_line_array : t_generic_line_array(0 to WINDOW_Y - 1);
+    signal window_line_array : t_generic_line_array(0 to WINDOW_Y - 1) := (others => (others => (others => '0')));
     -- Array for connecting the window line buffer in and outputs
     signal buffer_in_array : word_array := (others => (others => '0'));
 
@@ -88,7 +99,7 @@ begin
         for Y in window_out'range(1) loop
             for X in window_out'range(2) loop
                 for N in window_out'range(3) loop
-                    window_out(Y, X, N) <= window_line_array(Y)(X, N);
+                    window_out(X, Y, N) <= window_line_array(Y)(X, N);
                 end loop;
             end loop;
         end loop;
@@ -101,14 +112,15 @@ begin
             generic map(
                 DATA_WIDTH => DATA_WIDTH,
                 WINDOW_WIDTH => WINDOW_X,
-                LINE_WIDTH => LINE_WIDTH,
+                -- Plus 1 as pipeline row expects a register between data_out and buff_in!
+                LINE_WIDTH => LINE_WIDTH + 1,
                 MINIMUM_LENGTH_FOR_BRAM => MINIMUM_LENGTH_FOR_BRAM
             )
             port map(
                 clk => clk,
                 reset => reset,
                 strobe => strobe,
-                data_in => buffer_in_array(N),
+                buff_in => buffer_in_array(N),
                 line_out => window_line_array(N),
                 data_out => buffer_in_array(N + 1)
             );

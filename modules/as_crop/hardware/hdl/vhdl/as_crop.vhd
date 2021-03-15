@@ -31,9 +31,17 @@
 --  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ----------------------------------------------------------------------------------
 --! @file  as_crop.vhd
---! @brief Crops a section defined by the points (x_left,y_top)
---         and (x_right,y_bottom) from a as_stream.
+--! @brief Crop out a section of the image data stream
+--! @addtogroup asterics_modules
+--! @{
+--! @defgroup as_crop as_crop: Crop Image Stream
+--! Crops a section defined by the points (x_left,y_top)
+--! and (x_right,y_bottom) from a as_stream.
+--! @}
 ----------------------------------------------------------------------------------
+
+--! @addtogroup as_crop
+--! @{
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -77,6 +85,7 @@ entity as_crop is
   );
 end as_crop;
 
+--! @}
 
 architecture RTL of as_crop is
 

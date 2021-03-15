@@ -1,0 +1,8 @@
+label: dos
+label-id: 0x26e9e078
+device: /dev/nbd1
+unit: sectors
+
+/dev/nbd1p1 : start=        8192, size=      409600, type=b
+/dev/nbd1p2 : start=      417792, size=    7340032, type=83
+

@@ -36,6 +36,7 @@ Capsules the entire as_automatics environment.
 # --------------------- DOXYGEN -----------------------------------------------
 ##
 # @file as_automatics_env.py
+# @ingroup automatics_mngmt
 # @author Philip Manke
 # @brief Capsules the entire as_automatics environment.
 # -----------------------------------------------------------------------------
@@ -57,19 +58,17 @@ import as_automatics_visual as as_vis
 LOG = as_log.get_log()
 
 
+## @ingroup automatics_mngmt
 class AsAutomatics:
-    """Class bundling the main user-facing functionality of Automatics.
+    """! @brief Class bundling the main user-facing functionality of Automatics.
     Should be the only thing you need to import to use Automatics."""
 
-    default_asterics_dir = "/opt/ees/share/asterics/"
-
-    def __init__(self, asterics_dir: str):
-        if not asterics_dir:
-            self.asterics_dir = self.default_asterics_dir
-        else:
-            self.asterics_dir = append_to_path(os.path.realpath(asterics_dir), "//")
-
-        self.library = AsModuleLibrary(self.asterics_dir)
+    def __init__(self, asterics_home: str, version_no: str):
+        self.asterics_home = append_to_path(
+            os.path.realpath(asterics_home), "//"
+        )
+        self.version = version_no
+        self.library = AsModuleLibrary(asterics_home)
         self.current_chain = None
         self.windowpipes = []
 
@@ -82,6 +81,10 @@ class AsAutomatics:
 
         # Construct and assign interface templates
         as_templates.add_templates()
+
+    ##
+    # @addtogroup automatics_mngmt
+    # @}
 
     def set_hardware_target_definitions(
         self, partname: str = "", design: str = "", board: str = ""
@@ -100,7 +103,7 @@ class AsAutomatics:
         self.ipcore_descr = description_text
 
     def add_module_repository(self, module_dir: str, repo_name: str) -> list:
-        """Add a repository of ASTERICS modules.
+        """! @brief Add a repository of ASTERICS modules.
         The module repository must be structured in the same way
         as the default module repository.
         For more detail, check the Automatics chapter in the ASTERICS manual.
@@ -112,8 +115,11 @@ class AsAutomatics:
         Returns a list of the names of the found modules."""
         return self.library.add_module_repository(module_dir, repo_name)
 
+    ## @}
+
+    ## @ingroup automatics_helpers
     @staticmethod
-    def __check_and_get_output_path__(path: str) -> bool:
+    def _check_and_get_output_path(path: str) -> bool:
         path = os.path.realpath(path)
         # If path doesn't exist, create the necessary folders
         if not os.path.exists(path):
@@ -121,30 +127,37 @@ class AsAutomatics:
                 os.makedirs(path, mode=0o755)
             except IOError as err:
                 LOG.error(
-                    ("Automatics: Could not create output directory! - " "'%s' - '%s'"),
+                    (
+                        "Automatics: Could not create output directory! - "
+                        "'%s' - '%s'"
+                    ),
                     path,
                     str(err),
                 )
                 return None
         return path
 
+    ##
+    # @addtogroup automatics_generate
+    # @{
+
     # Relative path constants
-    # Software driver source file path
+    ## @brief Software driver source file path
     DRIVERS_REL_PATH = "drivers/asterics_v1_0/src/"
-    # Hardware source file path
+    ## @brief Hardware source file path
     HW_SRC_REL_PATH = "hw/hdl/vhdl/"
-    # Default path for generating the ASTERICS IP Core
+    ## @brief Default path for generating the ASTERICS IP Core
     IP_CORE_REL_PATH = "vivado_cores/ASTERICS/"
-    # Path to the IP-Core template in the ASTERICS installation
+    ## @brief Path to the IP-Core template in the ASTERICS installation
     IP_CORE_TEMPLATE_PATH = "support/sys_template/vivado_cores/ASTERICS/"
-    # Path to the system template in the ASTERICS installation
+    ## @brief Path to the system template in the ASTERICS installation
     SYSTEM_TEMPLATE_PATH = "support/sys_template/"
 
-    def __write_hw__(
+    def _write_hw(
         self, path: str, use_symlinks: bool = True, allow_deletion: bool = False
     ):
         # Make sure path is good
-        opath = self.__check_and_get_output_path__(path)
+        opath = self._check_and_get_output_path(path)
         if not opath:
             raise AsFileError(path, "Could not create output folder!")
         opath = append_to_path(opath, "/")
@@ -160,34 +173,43 @@ class AsAutomatics:
             raise AsFileError(opath, "Could not write to output folder!")
         # Generate and collect hardware files
         try:
-            self.__gen_hw__(opath, use_symlinks)
+            self._gen_hw(opath, use_symlinks)
         except IOError:
             LOG.error(
-                ("Cannot write to '%s'! - " "Could not create VHDL source files!"),
+                (
+                    "Cannot write to '%s'! - "
+                    "Could not create VHDL source files!"
+                ),
                 opath,
             )
             return False
         except AsError as err:
             LOG.error(str(err))
             return False
+        return True
 
-    def __gen_hw__(self, path: str, use_symlinks: bool = True):
+    def _gen_hw(self, path: str, use_symlinks: bool = True):
         err_mgr = self.current_chain.err_mgr
         if err_mgr.has_errors():
             LOG.critical(
                 "%s errors encountered!\nGeneration aborted!",
                 str(err_mgr.get_error_count()),
             )
-            raise AsError(severity="Critical")
+            raise AsError(
+                severity="Critical",
+            )
         # Instantiate VHDL writer class
         writer = VHDLWriter(self.current_chain)
-        # Generate as_main.vhd and asterics.vhd
-        writer.write_as_main_vhd(path)
-        writer.write_asterics_vhd(path)
+        # Generate asterics.vhd
+        writer.write_module_group_vhd(path, self.current_chain.top)
+        # Generate additional files for generic module groups
+        for group in self.current_chain.module_groups:
+            writer.write_module_group_vhd(path, group)
+
         # Collect the hardware and software source files
         as_build.gather_hw_files(self.current_chain, path, use_symlinks)
 
-    def __write_sw__(
+    def _write_sw(
         self,
         path: str,
         use_symlinks: bool = True,
@@ -195,7 +217,7 @@ class AsAutomatics:
         module_driver_dirs: bool = False,
     ):
         # Make sure path is good
-        path = self.__check_and_get_output_path__(path)
+        path = self._check_and_get_output_path(path)
         if not path:
             return False
         path = append_to_path(path, "/")
@@ -211,14 +233,17 @@ class AsAutomatics:
             return False
         # Generate and collect software files
         try:
-            self.__gen_sw__(path, use_symlinks, module_driver_dirs)
+            self._gen_sw(path, use_symlinks, module_driver_dirs)
         except (IOError, AsError) as err:
             LOG.error(str(err))
             return False
         return True
 
-    def __gen_sw__(
-        self, path: str, use_symlinks: bool = True, module_driver_dirs: bool = False
+    def _gen_sw(
+        self,
+        path: str,
+        use_symlinks: bool = True,
+        module_driver_dirs: bool = True,
     ):
         err_mgr = self.current_chain.err_mgr
         if err_mgr.has_errors():
@@ -228,19 +253,20 @@ class AsAutomatics:
             )
             raise AsError(severity="Critical")
         as_build.write_asterics_h(self.current_chain, path)
-        as_build.write_config_c(path)
+        as_build.write_config_hc(self.current_chain, path)
         as_build.gather_sw_files(
             self.current_chain, path, use_symlinks, module_driver_dirs
         )
 
-    def __write_asterics_core__(
+    def _write_asterics_core(
         self,
         path: str,
         use_symlinks: bool = True,
         allow_deletion: bool = False,
         module_driver_dirs: bool = False,
     ) -> bool:
-        path = self.__check_and_get_output_path__(path)
+        err_mgr = self.current_chain.err_mgr
+        path = self._check_and_get_output_path(path)
         if not path:
             return False
         try:
@@ -253,17 +279,27 @@ class AsAutomatics:
             )
             return False
         try:
-            self.__write_hw__(
+            self._write_hw(
                 append_to_path(path, "hardware"), use_symlinks, allow_deletion
             )
-            self.__write_sw__(
+
+            if err_mgr.has_errors():
+                LOG.critical("Abort! Errors occurred during system build:")
+                err_mgr.print_errors()
+                return False
+            self._write_sw(
                 append_to_path(path, "software"),
                 use_symlinks,
                 allow_deletion,
                 module_driver_dirs,
             )
+            if err_mgr.has_errors():
+                LOG.critical("Abort! Errors occurred during system build:")
+                err_mgr.print_errors()
+                return False
         except (IOError, AsError) as err:
             LOG.error(str(err))
+            err_mgr.print_errors()
             return False
         return True
 
@@ -275,20 +311,23 @@ class AsAutomatics:
         'set description "{description}"\n'
     )
 
-    def __write_ip_core_xilinx__(
+    def _write_ip_core_xilinx(
         self,
         path: str,
         use_symlinks: bool = True,
         allow_deletion: bool = False,
         module_driver_dirs: bool = False,
     ):
+        err_mgr = self.current_chain.err_mgr
         # Make sure path is good
-        path = self.__check_and_get_output_path__(path)
+        path = self._check_and_get_output_path(path)
         if not path:
             return False
         # Clean up if not empty
         try:
-            src_path = append_to_path(self.asterics_dir, self.IP_CORE_TEMPLATE_PATH)
+            src_path = append_to_path(
+                self.asterics_home, self.IP_CORE_TEMPLATE_PATH
+            )
             as_build.prepare_output_path(src_path, path, allow_deletion)
         except IOError as err:
             LOG.error(
@@ -302,8 +341,16 @@ class AsAutomatics:
         hw_path = append_to_path(path, self.HW_SRC_REL_PATH)
         # Generate and collect source files
         try:
-            self.__gen_sw__(sw_path, use_symlinks, module_driver_dirs)
-            self.__gen_hw__(hw_path, use_symlinks)
+            self._gen_sw(sw_path, use_symlinks, module_driver_dirs)
+            if err_mgr.has_errors():
+                LOG.critical("Abort! Errors occurred during system build:")
+                err_mgr.print_errors()
+                return False
+            self._gen_hw(hw_path, use_symlinks)
+            if err_mgr.has_errors():
+                LOG.critical("Abort! Errors occurred during system build:")
+                err_mgr.print_errors()
+                return False
         except (IOError, AsError) as err:
             LOG.error(str(err))
             return False
@@ -323,7 +370,7 @@ class AsAutomatics:
             return False
         return True
 
-    def __write_system__(
+    def _write_system(
         self,
         path: str,
         use_symlinks: bool = True,
@@ -331,14 +378,17 @@ class AsAutomatics:
         module_driver_dirs: bool = False,
         add_vears: bool = False,
     ):
+        err_mgr = self.current_chain.err_mgr
         # Make sure path is good
-        path = self.__check_and_get_output_path__(path)
+        path = self._check_and_get_output_path(path)
         ip_path = append_to_path(path, self.IP_CORE_REL_PATH)
         if not path:
             return False
         # Clean up if not empty
         try:
-            src_path = append_to_path(self.asterics_dir, self.SYSTEM_TEMPLATE_PATH)
+            src_path = append_to_path(
+                self.asterics_home, self.SYSTEM_TEMPLATE_PATH
+            )
             as_build.prepare_output_path(src_path, path, allow_deletion)
         except IOError as err:
             LOG.error(
@@ -352,8 +402,16 @@ class AsAutomatics:
         hw_path = append_to_path(ip_path, self.HW_SRC_REL_PATH)
         # Generate and collect source files
         try:
-            self.__gen_sw__(sw_path, use_symlinks, module_driver_dirs)
-            self.__gen_hw__(hw_path, use_symlinks)
+            self._gen_sw(sw_path, use_symlinks, module_driver_dirs)
+            if err_mgr.has_errors():
+                LOG.critical("Abort! Errors occurred during system build:")
+                err_mgr.print_errors()
+                return False
+            self._gen_hw(hw_path, use_symlinks)
+            if err_mgr.has_errors():
+                LOG.critical("Abort! Errors occurred during system build:")
+                err_mgr.print_errors()
+                return False
         except (IOError, AsError) as err:
             LOG.error(str(err))
             return False
@@ -374,7 +432,7 @@ class AsAutomatics:
             try:
                 as_build.add_vears_core(
                     append_to_path(path, "vivado_cores"),
-                    self.asterics_dir,
+                    self.asterics_home,
                     use_symlinks,
                 )
             except (IOError, AsError) as err:
@@ -382,7 +440,7 @@ class AsAutomatics:
                 return False
         return True
 
-    def __write_system_graph__(
+    def _write_system_graph(
         self,
         system=None,
         out_file: str = "asterics_graph",
@@ -390,19 +448,23 @@ class AsAutomatics:
         show_auto_inst: bool = False,
         show_ports: bool = False,
         show_unconnected: bool = False,
+        show_line_buffers: bool = False,
     ):
-        """Generates and writes a graph representation of the ASTERICS chain
+        """! @brief Generate an SVG graph of the generated system.
+        Generates and writes a graph representation of the ASTERICS chain
         and, if present, the 2D Window Pipelines using GraphViz Dot.
-        Parameters:
-            system: Chain or pipe object to visualize
-                    (AsProcessingChain or As2DWindowPipeline).
-            out_file: Path and filename of the graph to generate.
-                    Default=[asterics_graph]
-            show_toplevels: Include the toplevel module groups. [False]
-            show_auto_inst: Include the automatically included modules. [False]
-            show_ports: Add all ports to the interface edges. [False]
-            show_unconnected: Write a list of unconnected ports into the module
-                            nodes. WARNING: Many false positives! [False]
+        This is a wrapper for as_automatics_visual::system_graph() and should be
+        called via
+        as_automatics_proc_chain::AsProcessingChain::write_system_graph().
+        @param system: Chain or pipe object to visualize
+                       (AsProcessingChain or As2DWindowPipeline).
+        @param out_file: Path and filename of the graph to generate.
+                         Default=[asterics_graph]
+        @param show_toplevels: Include the toplevel module groups. [False]
+        @param show_auto_inst: Include the automatically included modules. [False]
+        @param show_ports: Add all ports to the interface edges. [False]
+        @param show_unconnected: Write a list of unconnected ports into the module
+                                 nodes. WARNING: Many false positives! [False]
         """
         if not as_vis.graphviz_available:
             LOG.critical(
@@ -420,6 +482,7 @@ class AsAutomatics:
                 show_auto_inst,
                 show_unconnected,
                 show_toplevels,
+                show_line_buffers,
             )
         elif isinstance(system, AsProcessingChain):
             as_vis.system_graph(
@@ -429,24 +492,7 @@ class AsAutomatics:
                 show_auto_inst,
                 show_unconnected,
                 show_toplevels,
+                show_line_buffers,
             )
-        elif isinstance(system, As2DWindowPipeline):
-            graph = as_vis.system_graph(
-                system.chain,
-                "",
-                show_ports,
-                show_auto_inst,
-                show_unconnected,
-                show_toplevels,
-                return_graph=True,
-            )
-            as_vis.add_2dpipe_subgraph(system, graph)
-            as_vis.write_graph_svg(graph, out_file)
-        else:
-            LOG.error(
-                (
-                    "Could not generate system graph from the passed object!"
-                    "'asterics.write_system_graph()' expects an ASTERICS "
-                    "processing chain or 2D window pipeline object!"
-                )
-            )
+
+    ## @}

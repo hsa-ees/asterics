@@ -27,7 +27,7 @@ of the ASTERICS hardware support library 'filter_mask'.
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -46,11 +46,9 @@ from as_automatics_module import AsModule
 def get_module_instance(module_dir: str) -> AsModule:
     module = AsModule()
 
-    #                "hardware/hdl/vhdl/pkg/as_sim_ram_pkg.vhd",
-    #toplevel_file = "hardware/hdl/vhdl/pkg/filter_mask.vhd"
     module.files = ["hardware/hdl/vhdl/pkg/as_filter_mask_pkg.vhd"]
     module.dependencies = []
-    
+
     # As this is not a typical Automatics module (no VHDL entity)
     # we manually set the necessary attributes,
     # so Automatics can work with it normally
@@ -62,12 +60,9 @@ def get_module_instance(module_dir: str) -> AsModule:
     module.standard_ports = []
     module.ports = []
     module.interfaces = []
-
-    # Automatic module discovery would run into errors (no entity in 'filter_mask')
-    # as_automatics now automatically parses the toplevel file and discovers
-    # ports, generics, existing interfaces and register interfaces
-    #module.discover_module("{mdir}/{toplevel}"
-    #                       .format(mdir=module_dir, toplevel=toplevel_file))
-
+    module.show_in_browser = False
+    module.dev_status = AsModule.DevStatus.LEGACY
+    module.module_type = AsModule.ModuleTypes.LIBRARY
+    module.module_category = "Internal Libraries"
 
     return module

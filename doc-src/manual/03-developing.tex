@@ -1,0 +1,629 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% This file is part of the ASTERICS Framework. 
+%%
+%% Copyright (C) Hochschule Augsburg, University of Applied Sciences
+%% Efficient Embedded Systems Group
+%%
+%% Author(s): Gundolf Kiefer <gundolf.kiefer@hs-augsburg.de>
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%%%%%%%%%%%%%%%%%%% 3. Developing ASTERICS %%%%%%%%%%%%%%%%%%%
+
+
+\chapter{Developing \asterics} \label{ch:03-developing}
+
+\secauthor{Michael Schäferling, Alexander Zöllner, Gundolf Kiefer}
+
+\section{Organization of the GIT repositories}
+
+The \asterics Frameworks code base is organized in a set of GIT repositories.\\
+\emph{Note:} The GIT repositories mentioned here are only accessible from \emph{within the local network} of the University of Applied Sciences Augsburg.
+Visit the website \texttt{\url{http://ees.hs-augsburg.de/asterics}} for access to a snapshot of the repository or visit the GitHub page linked on the website.
+
+The \asterics GIT repository contains a subset of publicly accessible modules, systems and tools and is organized according to the source tree structure (see section \ref{ch:02-using}).
+You can view the codebase online by browsing
+
+\begin{footnotesize}
+    \begin{lstlisting}[style=shell]
+$ https://ti-srv.informatik.hs-augsburg.de/gitweb/?p=asterics.git
+    \end{lstlisting}
+\end{footnotesize}
+
+\noindent or download it by 
+
+\begin{footnotesize}
+    \begin{lstlisting}[style=shell]
+$ git clone https://ti-srv.informatik.hs-augsburg.de/repo/asterics.git
+    \end{lstlisting}
+\end{footnotesize}
+
+\ifdefined\astericsinternal
+\noindent The \asterics-nonfree GIT repositories contents are not publicly available, e.g. due to copyright or other reasons. 
+Its directory structure conforms to the source tree structure (see section \ref{ch:02-using}). 
+In order to be able to make use of the contents of the (free) \asterics GIT repository, it is included as a submodule (in 'external/asterics') with its contents being sym-linked to the \asterics-nonfree GIT repositories source tree. 
+If you are authorized, you can get the codebase by 
+
+\begin{footnotesize}
+    \begin{lstlisting}[style=shell]
+$ git clone \
+https://ti-srv.informatik.hs-augsburg.de/repo/asterics-nonfree.git
+    \end{lstlisting}
+\end{footnotesize}
+
+\noindent Additionally, the are GIT repositories for specific projects, research activities or studies, which may also include \asterics(-nonfree) GIT repositories.
+\fi
+
+\section{License and Copyright}
+
+
+This document and the mentioned download link refer to the free and publicly available part of ASTERICS. This part is generally licensed under the LPGL (see the LICENSE file in the root folder of the repository for details).
+
+However, there are more ASTERICS modules available, which are presently not published under an open source license, but that can be made available individually on a per-project basis. These include modules for:
+\begin{itemize}
+
+\item the Generalized Hough Transform and other variants of the Hough Transform \cite{kiefer_configurable_2016}, \cite{hough_object_recog}
+
+\item low latency lense distortion removal and stereo rectification (NITRA) \cite{nitra_paper0}, \cite{nitra_paper1}
+
+\item efficient, on-the-fly point feature extraction (SURF algorithm) \cite{pohl_efficient_2014}
+\end{itemize}
+
+Please contact the Efficient Embedded Systems (EES) group at the University of
+Applied Sciences Augsburg (see "authors" section on top of the file) for
+further information on using these modules and collaborating with the EES group.
+
+If you add something to the project that is licensed under a different license, please append to the LICENSE file.
+Make sure that the license you are using is compatible with the LGPL.
+
+\bigskip
+
+\textit{Acknowledgments:}\linebreak
+Parts of this work have been supported by the German Federal Ministry for
+Economic Affairs and Energy (BMWi), grant number ZF4102001KM5 (2015-2018).
+
+Parts of this work have been supported by the German Federal Ministry of
+Education and Research (BMBF), grant number 17N3709 (2009-2013).
+
+\section{The \asterics Source Tree}
+\label{sec:02-file_structure}
+The \asterics source tree consists of the following elements:
+\begin{itemize}
+  \item \texttt{doc}: Documentation directory. The output of Doxygen and the PDF of this manual are generated here
+  \item \texttt{doc-src}: Documentation source files, including this manual and Doxygen \texttt{doxyfile}s to generate full code documentation 
+  \item \texttt{ipcores}: IP-Cores which are part of the \asterics project
+  \item \texttt{modules}: Image processing, data management and supporting modules. A separate subfolder should be created for each module or groups of similar modules.\\
+  Each subfolder contains: 
+  \begin{itemize}
+  	\item \texttt{/doc}: Additional documentation for the module
+  	\item \texttt{/hardware/automatics}: Module specification scripts for the system generator Automatics 
+  	\item \texttt{/hardware/hdl}: Hardware source files of the module
+  	\item \texttt{/software}: Software driver for the module
+  \end{itemize}
+  
+  \item \texttt{support}: \asterics support files (including base for \asterics software support package 'ASP')
+  \item \texttt{systems}: Small ready-to-use systems with preconfigured core structures
+  \item \texttt{tools}: Supporting tools (e.g. Automatics)
+\end{itemize}
+
+\section{Contributing Modules to \asterics}
+
+This section provides guidance for developers who want to integrate an existing or new hardware or software module into the \asterics framework.
+
+
+\begin{enumerate}
+
+\item
+For new and existing modules alike, make sure that the VHDL entity of you module's toplevel file follows the coding rules laid out in section \ref{sec:06-02-vhdl_quirks}.
+
+\item
+If your module should be able to easily interface with other existing \asterics modules, you should make use of the existing interfaces used in the framework, presented in section \ref{ch:05-interfaces}.
+
+Optionally, you may create an interface definition for your own interface and integrate it into Automatics, as described in section \ref{sec:06-02-new_interface_template}.
+This allows Automatics to recognize the interfaces of your modules and enables it to connect them more simply using Automatics scripts.
+
+Alternatively, a separate module, converting between interfaces used by existing modules and common interfaces of \asterics modules, could also prove to be a simpler solution, than editing multiple modules to conform to \asterics interfaces.
+
+\item
+The source files, both hardware and software, should be integrated either into the \asterics source tree or into a separate module repository mimicking the folder structure of the \texttt{modules} folder of the \asterics source tree, shown in section \ref{sec:02-file_structure}.
+Separate module repositories are encouraged as it keeps the \asterics repository clean and allows for a clear distinction between \asterics native modules and external modules.
+Automatics enables the inclusion of external repositories using a single method call in Automatics scripts, see \lstapyinline{asterics.add_module_repository()} in section \ref{ssec:06-02-asterics_pymodule}.
+
+\item 
+For each module that you want to be individually configurable and accessible by Automatics, a separate specification Python script must be created.
+This process is described in section \ref{sec:06-02-new_modules}.
+
+\item
+We recommend to double-check that your module is correctly imported by Automatics using the \asterics GUI.
+If all ports, generics, interfaces and files are recognized, you can use the module in the same way as any other module in Automatics scripts.
+
+\end{enumerate}
+
+
+
+
+
+\section{Coding Conventions}
+
+\input{03-02-c-conventions.tex}
+
+
+
+\subsection{VHDL Code}
+
+\secauthor{Alexander Zöllner}
+
+
+\subsubsection{Purpose}
+
+This chapter defines rules and requirements for maintaining and developing VHDL code for the \asterics framework. The main emphasis hereby lies on layout and naming convention of VHDL source code, files and directories involved.
+Further, guidelines for VHDL modeling are covered to some extent as seen fit.
+
+The purpose of this document is to enable good comprehensibility of the developed VHDL models across various software developers and increase its general quality. Thus, reducing the initial time required for acquiring understanding of a given VHDL model and simplify its maintenance as well as accelerate integration of newly developed VHDL models into the \asterics framework.
+
+The given requirements outlined in this document are based on the VHDL-93 standard as common ground.
+
+Since VHDL is the prevalent language throughout the \asterics framework, Verilog is not explicitly covered. However, similar rules are recommended.
+
+
+\subsubsection{Conventions}
+
+This chapter uses the expressions \textit{must/has to}, \textit{strongly recommended}, \textit{should} and \textit{can} to give information about the relevance of the coding convention in question.
+Rules or sections marked as \textit{must} are binding and are to be applied without exception.
+\textit{Strongly recommended} parts are to be always applied unless there is a valid reason for this rule being circumvented.
+Sections using the expression \textit{should} are considered good practice and usually improve the quality of the code.
+However, software developers are not obliged to conform to this kind of rule but are encouraged to do so.
+The least restrictive expression used in this document is \textit{can}.
+These parts generally provide only suggestions or general guidelines which may be applied.
+Software developers are free to choose equivalent or different rules for the sections marked as \textit{can}. 
+
+\subsubsection{General Requirements}\label{VHDL-General-Requirements}
+All file names, comments, code and documentation must be written in English or have to be based on the English language.
+Further, only letters a-z, the underscore character \_ or numerals 0-9 must be used.
+
+For enabling compiler independent code, utilization of common language construct are strongly recommended.
+
+
+The line length of the code should be limited to 80 characters as much as possible.
+Longer lines tend to be more difficult to read.
+For this reason, it is strongly recommended to only use a single statement in each line.
+
+Only \textit{soft tabulators} (i.e. a sequence of single white spaces) must be used instead of \textit{hard tabulators} (i.e. tabulator key).
+The inferred space of hard tabulators are editor dependent and thus the actual indentation is likely to vary.
+A sequence of single white spaces are uniformly displayed across editors.
+It is strongly recommended to use a number of white spaces ranging from 2 to 4 for a single indentation.
+More white spaces make it easier to find blocks in the source code but increases the overall line length. 
+
+\subsubsection{Name Style Rules}\label{VHDL-Name-Style}
+
+The following table~\ref{Mandatory_Identifier} shows the requirements on identifiers used in the \asterics framework.
+Using meaningful non-cryptic identifiers are strongly recommended.
+Except for \textit{generics}, all identifiers have to be written in lower case, using the underscore character for separation to increase readability.
+Camel case must not be used. 
+
+\begin{longtable}[ht]{|c|c|c|}
+\hline 
+\textbf{Description} & \textbf{Extension} & \textbf{Example}\\
+\hline
+\hline
+\endhead
+
+\texttt{General Signal} & prefix s\_ & s\_load\_address \\
+\hline
+\texttt{Signal Inferring Register} & prefix r\_ & r\_memory\_addr \\
+\hline
+\texttt{Constants} & prefix c\_ & c\_bit\_per\_pixel \\
+\hline
+\texttt{Types} & suffix \_t & filter\_t \\
+\hline 
+\texttt{Generics} &  & DIN\_WIDTH \\
+\hline 
+\texttt{Keywords} &  & downto \\
+\hline 
+\texttt{Low Active Signal or Variable} & suffix \_n & s\_reset\_n \\
+\hline 
+\caption{Mandatory extensions used for signals, constants, ...}\label{Mandatory_Identifier}
+\end{longtable}
+
+The following table~\ref{Optional_Identifier} gives a recommendation for the naming convention of ports.
+If a given port has a counterpart with a different direction, the corresponding identifier has to be used (e.g. data\_in, data\_out). 
+
+\begin{longtable}[ht]{|c|c|c|}
+\hline 
+\textbf{Description} & \textbf{Extension} & \textbf{Example}\\
+\hline
+\hline
+\endhead
+
+\texttt{Input Port} & suffix \_in & data\_in \\
+\hline 
+\texttt{Output Port} & suffix \_out & data\_out \\
+\hline 
+\texttt{In/Out Port} & suffix \_inout & sda\_inout \\
+\hline 
+\caption{Recommended extensions used for ports}\label{Optional_Identifier}
+\end{longtable}
+
+
+The software developer is strongly encouraged to use meaningful labels for all sequential blocks, such as process or generate statements.
+Table~\ref{Blocks} shows the identifier for the corresponding labels. 
+
+\begin{longtable}[ht]{|c|c|c|}
+\hline 
+\textbf{Description} & \textbf{Extension} & \textbf{Example}\\
+\hline
+\hline
+\endhead
+
+\texttt{Process} & prefix p\_ & p\_data\_counter \\
+\hline
+\texttt{Generate} & prefix gen\_ & gen\_instantiate\_counters \\
+\hline
+\texttt{Loop} & prefix l\_ & l\_sample\_input \\
+\hline 
+
+\caption{Label prefix for process, generate, ...}\label{Blocks}
+\end{longtable}
+
+
+The entity name has to use the prefix \textit{as\_} if the corresponding module is meant to be used in an \asterics IP core. 
+
+The architecture name has to be \textit{behavior}, \textit{structure}, \textit{rtl} or \textit{testbench} according to the content of the architecture.
+It is possible for an entity to contain more than one architecture.
+In this case, the architecture name has to be extended by a meaningful identifier (e.g. rtl\_sim, rtl\_synth).
+
+All source files of a module which are related to the \asterics framework have to start with the prefix \texttt{as\_} if they are meant to be used in an \asterics \textit{IP core}.
+Further, the file name has to contain a short description of the purpose of the module.
+If the module instantiates submodules, the submodule is strongly recommended to contain the name of the module in its name.
+The following example~\ref{Code:FILE_NAMES} shows some modules with their corresponding files.
+In this case the indented names are submodules to the previous module.
+Since \texttt{as\_memreader} and \texttt{as\_memwriter} both use the same submodule, the submodule does not contain \textit{reader/writer} in its name.
+VHDL files must have the ending \textit{.vhd} or \textit{.vhdl}. 
+
+\begin{lstlisting}[style=hdl, label=Code:FILE_NAMES, caption=\asterics module file names]
+as_invert.vhd
+as_nitra.vhd
+	as_nitra_ctrl_unit.vhd
+as_memreader.vhd
+	as_mem_address_generator.vhd
+as_memwriter.vhd
+	as_mem_address_generator.vhd
+\end{lstlisting}
+
+A testbench file has to be named after the module which is tested. If more than one module is tested, the name of the top-level module has to be chosen. Testbench files have to be suffixed with \textit{\_tb}.
+
+Package files must contain the prefix \textit{as\_}, the suffix \textit{\_pkg} and the package name has to match the file name containing the package without the file type extension. 
+
+
+\subsubsection{Documentation}\label{VHDL-Documentation}
+All developed source code has to contain appropriate comments to simplify maintenance and to reduce the required time for other software developers to understand the code.
+For this reason, meaningful comments have to be written which clearly state the purpose of the following code instead of repeating the code in textual form (e.g. "This is an assignment").
+The following sections cover the parts of the software which require comments.
+Further comments can be added as seen fit.
+
+Important code sections require a doxygen compatible comment syntax, which consists of \textit{--!}. 
+
+Each source file must contain a standardized header, which contains important information about the file.
+The following code snippet~\ref{Code:HEADER} shows the structure of an exemplary file header.
+The author must provide information for each entry (shown as $\langle\ \rangle$).
+Each file has to contain information about the license for this file.
+Since \asterics is an open framework, \textit{GNU LGPLv3} is the most common license, however, a different license can be chosen.
+
+\begin{lstlisting}[style=hdl, label=Code:HEADER, caption=\asterics header file]
+---------------------------------------------------------------------
+--  This file is part of the ASTERICS Framework. 
+--  (C) <year> Hochschule Augsburg, University of Applied Sciences
+---------------------------------------------------------------------
+-- File:           <file_name>.vhd
+-- Entity:         <entity_name>
+--
+-- Company:        Efficient Embedded Systems Group
+--                 University of Applied Sciences, Augsburg, Germany
+--                 http://ees.hs-augsburg.de
+--
+-- Author:         <main_author>, [<second_author>]
+--
+-- [Modified:      <modification_author> - <date>: <description>]
+--
+-- Description:    <Detailed information about the purpose of this 
+--                 module>
+--                 
+---------------------------------------------------------------------
+--  <License text>
+---------------------------------------------------------------------
+--! @file <file_name>.vhd
+--! @brief <concise description about the purpose of this module>
+---------------------------------------------------------------------
+\end{lstlisting}
+
+The description of the entity has to be partially covered in the file header by describing the purpose of the module.
+The entity section has to contain comments for each generic and port by describing their purpose.
+If ports can be grouped to a common interface, it is sufficient to name the corresponding interface.
+The following code~\ref{Code:ENTITY} shows exemplary comments for the as\_invert module.
+
+\begin{lstlisting}[style=hdl, label=Code:ENTITY, caption=\asterics entity comments]
+entity as_invert is
+    generic (
+        -- Width of the input and output data port
+        DATA_WIDTH : integer := 8
+    );
+    port (
+        clk         : in  std_logic;
+        reset       : in  std_logic;
+        ready       : out std_logic;
+
+        -- AsStream in ports
+        vsync_in      : in  std_logic;
+        vcomplete_in  : in  std_logic;
+        hsync_in      : in  std_logic;
+        hcomplete_in  : in  std_logic;
+        strobe_in     : in  std_logic;
+        data_in       : in  std_logic_vector(DATA_WIDTH - 1 downto 0);
+        data_error_in : in  std_logic;
+        sync_error_in : in  std_logic;
+        stall_out     : out std_logic;
+
+        -- AsStream out ports
+        vsync_out      : out std_logic;
+        vcomplete_out  : out std_logic;
+        hsync_out      : out std_logic;
+        hcomplete_out  : out std_logic;
+        strobe_out     : out std_logic;
+        data_out       : out std_logic_vector(DATA_WIDTH - 1 downto 0);
+        data_error_out : out std_logic;
+        sync_error_out : out std_logic;
+        stall_in       : in  std_logic;
+
+        --! Slave register interface:
+        --! Control registers. SW -> HW data transport
+        slv_ctrl_reg   : in slv_reg_data(0 to 0);
+        --! Status registers. HW -> SW data transport
+        slv_status_reg : out slv_reg_data(0 to 0);
+        --! Aquivalent to a write enable signal
+        slv_reg_modify : out std_logic_vector(0 to 0);
+        --! Slave register configuration table.
+        slv_reg_config : out slv_reg_config_table(0 to 0)
+    );
+end as_invert;
+\end{lstlisting}
+
+Blocks, such as \textit{generate} statements, or processes must be preceded by a comment section, which gives detailed information about the purpose of the following code.
+The following code~\ref{Code:PROCESS} shows comments for a process which detects a synchronization error inside the module.
+The first three lines are optional, however, grouping logical units and precede them with a distinctive comment makes it easier to find them.
+
+\begin{lstlisting}[style=hdl, label=Code:PROCESS, caption=Exemplary comment for process]
+---------------------------------------------------------------------
+-- Process for Detecting Synchronization Error
+---------------------------------------------------------------------
+    --! A sync_error is detected when a strobe is received despite 
+    --  the fifo buffer 
+    --! being full. The error can only be lifted by resetting the 
+    --  memwriter.
+    p_sync_error : process(clk)
+    begin
+        if rising_edge(clk) then
+            if reset = '1' or s_reset_soft = '1' then
+                s_sync_error <= '0';
+            else
+                if strobe_in = '1' and s_fifo_full = '1' then
+                    s_sync_error <= '1';
+                end if;
+            end if;
+        end if;
+    end process;
+\end{lstlisting}
+
+State machines are a special type of data processing and usually comprises one or more processes.
+For this reason, each state of the state machine has to be commented individually by describing its purpose and listing the condition(s) to be met to transition to the following state.
+The following code~\ref{Code:STATE} shows the comment section for the \texttt{s\_idle} state of the \texttt{as\_memwriter} state machine. 
+
+\begin{lstlisting}[style=hdl, label=Code:STATE, caption=Exemplary comment of a state]
+        --! Default state of as_memwriter if hw module is ready 
+        --! for receiving order to conduct writing memory data.
+        --! During idle state config parameters are continuously 
+        --! copied into shadow registers to begin memory access 
+        --! right away after receiving "go" signal. The state 
+        --! machine transitions to "s_init" after receiving a 
+        --! "go" signal.
+            when s_idle =>
+                s_mem_sm_done <= '1';
+                s_mem_sm_save_config_reg <= '1';
+                if s_mem_sm_go = '1' then
+                    mem_sm_next_state <= s_init;
+                end if;
+\end{lstlisting}
+
+Adding comments for declaration of signals, variables and constants is strongly recommended to make their purpose transparent.
+Further, related declarations should be grouped together to make it easier to find them.
+The following code~\ref{Code:STATE2} shows signal declarations of the \texttt{as\_iic} module. 
+
+\begin{lstlisting}[style=hdl, label=Code:STATE2, caption=Exemplary comment for a declaration]
+  --! Used to locally store the "scl_div" signal and compare with 
+  --  "r_scl_counter"
+  signal r_scl_div_local : std_logic_vector(SCL_DIV_REGISTER_WIDTH-1 
+                                            downto 0);  
+  
+  --! A counter running with the system clock, as long as 
+  --  "enable_sclcntr" is high
+  signal r_scl_counter : std_logic_vector(SCL_DIV_REGISTER_WIDTH-1 
+                                          downto 0);
+\end{lstlisting}
+
+Assignments are strongly recommended to be accompanied by appropriate comments to indicate the purpose of the statement.
+A tolerated exception is so-called \textit{glue logic} between modules, which is used to map in and out ports between modules.
+The comments for glue logic may be omitted.
+The following code~\ref{Code:ASSIGNMENT} shows exemplary comments for signal assignments. 
+
+\begin{lstlisting}[style=hdl, label=Code:ASSIGNMENT, caption=Exemplary comment for an assignment]
+---------------------------------------------------------------------
+-- Status Information for Hardware
+---------------------------------------------------------------------
+-- Signal previous hardware module being ready for operation
+    ready           <= not s_mem_sm_busy;
+-- Signal other hardware modules that a sync error has been detected
+    sync_error_out  <= s_sync_error;
+\end{lstlisting}
+
+
+\subsubsection{Generator specific conventions}
+
+The \asterics chain generator \textit{as-automatics} is used to analyse part of the VHDL files of \asterics modules.
+To make sure that as-automatics can precisely identify the modules ports and generics, certain naming conventions should be followed:
+
+\begin{itemize}
+\item Port and generic name fragments should be delimited using underscores '\_'
+\item When implementing an interface, such as \texttt{as\_stream}, the interface port names must be used
+\item When multiples of the same interface is implemented, the port names must be differentiated using suffixes or prefixes, delimited using underscores
+\item When implementing custom ports, names matching interfaces used in \asterics should be avoided to mitigate false positives from Automatics. Alternatively, different delimiters may be used, keeping the generator from fully parsing the port name, effectively avoiding false positives.
+\end{itemize}
+
+Port name examples:
+
+\begin{itemize}
+\item \texttt{activity}: Unproblematic name for a custom port
+\item \texttt{activity\_strobe\_out}: Possible false positive, \texttt{as\_stream} uses a port named \texttt{strobe}! The name fragments are correctly delimited using underscores, which allows the generator to parse and compare the name.
+\item \texttt{activity-strobe-out}: Less problematic, the generator will not be able to extract the name fragment \texttt{strobe}, which might cause a false positive.
+\end{itemize}
+
+\subsection{Python Code}
+
+\secauthor{Philip Manke}
+
+This section briefly outlines the coding style and rules for Python code within the \asterics Framework.
+All code \textit{must} be compatible with Python version 3.5. Python 2 must not be used. 
+
+\subsection{Coding Style Guidelines}
+
+All Python code within \asterics should follow the conventions described in PEP 8 released on Python.org:
+\url{https://www.python.org/dev/peps/pep-0008/}.
+
+Where necessary or to increase the readability of short sections of code, rules described in PEP 8 may be purposefully broken.
+Specifically the line length limit may be longer than 80 characters, as long as it is consistent within a (sub-) project.
+We recommend to keep the line length within 80 characters as a general rule.
+When it helps with readability of the code, longer lines are permitted.
+Lines longer than 120 characters should always be avoided.
+Before checking code into the Git repositories, developers should run a code formatter like \texttt{autopep8}, \texttt{black} or similar.
+
+\subsection{Documentation}
+
+Python code documentation in \asterics is automatically generated using Doxygen.
+Additionally, we encourage users to make use of the built-in Python features using documentation strings (docstrings).
+
+\subsubsection*{Python Docstrings:}
+
+Developers should write docstrings for the following constructs:
+\begin{itemize}
+\item Every Python class
+\item Any method or function that is sufficiently complex that its behaviour cannot be guessed from its name alone
+\item Any highly important class variable (especially if it observes complex behaviour) 
+\end{itemize}
+
+Any method, function, class or variable which should be used by users of \asterics, for example in the case of Automatics scripts, must be especially thoroughly documented.
+
+
+\subsubsection*{Doxygen:}
+
+To allow Doxygen to generate a more helpful documentation, developers should use some additional features of Doxygen.
+We suggest to manage the code by creating groups (Doxygen modules) and adding each class, function and method to one or more classes, unless they are standard methods (such as \lstapyinline{__str__()}).
+
+The following listing shows an example of code a documented with both docstrings and Doxygen groups:
+
+\begin{lstlisting}[style=AutomaticsPython]
+##
+# @defgroup example_group Doxygen Python Examples
+# These classes and methods show how to use Doxygen with Python code!
+
+## @ingroup example_group
+class ExamplePythonClass:
+  """! @brief Class showing documentation best practices.
+  This docstring describes the class "ExamplePythonClass".
+  This class shows how we expect Python code to be documented within
+  the ASTERICS project.
+  This class does nothing functionally."""
+
+  ## This adds everything between @{ and @} to example_group
+  # @addtogroup example_group
+  # @{
+  
+  def demand_cake(self, cake_amount):
+    """! @brief Returns the amount of cake demanded.
+    @param cake_amount  The amount of cake you demand.
+    @return The demanded amount modified by 'cake_size'.
+    @note The cake is a lie."""
+  	return self.cake_size * cake_amount
+
+  def set_cake_size(self, size):
+    """! @brief Set cake_size to a new value."""
+    self.cake_size = size
+    
+  ## @} (addtogroup)
+\end{lstlisting}
+
+Doxygen commands are used in code comments.
+Only comments started with two hash-signs (\texttt{\#}) are parsed by Doxygen, including all comments in lines below until a non-comment line is reached, as shown in lines 1 to 3.
+Furthermore, Doxygen commands can also be used within docstrings, if an exclamation mark (\texttt{!}) is added to the beginning triple quotation marks, as seen in line 7.
+Doxygen commands are prefixed with an at-sign (\texttt{@}) or a backslash.
+Docstrings are included as part of the documentation generated for each class, method and function.
+However, we recommend to always use the Doxygen legible docstring format as shown in the code example above.
+This generates a more legible documentation and allows the use of the \texttt{@brief} Doxygen tag, which we highly encourage the use of.
+
+The organization of code by function into Doxygen groups provides an additional way for new contributors to the project to explore the code using the Doxygen documentation.
+Lines 1 to 3 show how a group is created.
+The text in line 3 is used as the description of the group.
+Line 5 shows the command to add a single member to a group, while lines 13 to 15 and 28 show the commands used to add multiple members to a group.
+
+Within the docstring typical Doxygen tags and commands can be used to generate a documentation that is both legible as plain text and nicely formatted in the generated Doxygen documentation.
+Lines 18 to 21 show an example for the method \texttt{demand\_cake}.
+
+A method as simple as \texttt{set\_cake\_size} in line 24 does not necessarily require documentation, though a docstring with a single \texttt{@brief}, as shown here, can help in confirming the functionality already described by the method's name.
+This establishes certainty as to the code's (intended) functionality in developers working with it. 
+
+\subsection{File Structure}
+
+Each Python file must include a standardized header, a template of which is available here, in listing \ref{lst_python_header}.
+Everything marked with pointy brackets (\texttt{< >}) must be replaced by values for the respective file.
+Parts marked in square brackets (\texttt{[ ]}) are optional and may be omitted.
+This header is somewhat redundant to provide information using both Python's built-in docstrings and Doxygen.
+
+
+\begin{lstlisting}[style=AutomaticsPython, caption={Template for the standard header of a python source file.}, label=lst_python_header]
+# --------------------------------------------------------------------
+# This file is part of the ASTERICS Framework.
+# (C) <year> Hochschule Augsburg, University of Applied Sciences
+# --------------------------------------------------------------------
+"""
+<filename>.py
+
+Company:
+Efficient Embedded Systems Group
+University of Applied Sciences, Augsburg, Germany
+http://ees.hs-augsburg.de
+
+Author:
+<author> [<year>][, <second author> <year>]
+
+[Modified:]
+[<author> - <year>: <modification>]
+
+Description:
+<description of the module/class purpose and functionality>
+"""
+# --------------------- LICENSE --------------------------------------
+#
+# <license text here>
+#
+# --------------------- DOXYGEN --------------------------------------
+##
+# @file <filename>.py
+# @author <main author[s]>
+# @brief <concise description>
+# --------------------------------------------------------------------
+\end{lstlisting}
+
+In general each Python file should only include a large class, multiple smaller classes, only class-independent functions or constant values.
+Typically, a Python file should contain less than 1000 lines of code.
+Developers should use typing hints, where applicable, for example:
+\lstapyinline{def example_function(number: int, text: str) -> bool:}

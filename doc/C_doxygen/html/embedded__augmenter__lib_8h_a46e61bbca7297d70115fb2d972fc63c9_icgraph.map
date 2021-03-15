@@ -1,0 +1,6 @@
+<map id="ea_set_clipped_area" name="ea_set_clipped_area">
+<area shape="rect" id="node1" title=" " alt="" coords="331,31,485,57"/>
+<area shape="rect" id="node2" href="$embedded__augmenter__lib_8h.html#a9bbd3aea6cfae13690dfb8986318add3" title=" " alt="" coords="178,5,245,32"/>
+<area shape="rect" id="node4" href="$group__vears__overlay.html#gacbedd463a87c151032214a354c0f7835" title="Set clipping rectangle. (x0, y0) is the upper&#45;left and (x1, y1) is the lower&#45;right corner of the clip..." alt="" coords="140,56,283,83"/>
+<area shape="rect" id="node3" href="$group__vears__driver.html#ga37c9f106f54f6984a44897e5db7674a4" title="Initialize and reset the VEARS module." alt="" coords="5,5,92,32"/>
+</map>

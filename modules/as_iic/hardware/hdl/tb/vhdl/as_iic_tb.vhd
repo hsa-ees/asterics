@@ -32,8 +32,8 @@
 ----------------------------------------------------------------------------------
 
 
---! \addtogroup as_iic_tb
---!  @{
+--! @addtogroup as_iic_tb
+--! @{
 
 library IEEE;
 use IEEE.std_logic_1164.all;
@@ -45,11 +45,12 @@ use asterics.helpers.all;
 entity as_iic_tb is
 end entity;
 
+--! @}
 
 -- Quick testbench running tests with eight preselected bytes: 
 -- A testbench run consists of: 16 write tests, 16 read tests
 -- 16 tests: 8 simple (one-byte: address & data byte) transactions with different bytes
--- 		       every test checks: start&stop bit, correct read/write, sending and receiving (n)acks
+--           every test checks: start&stop bit, correct read/write, sending and receiving (n)acks
 -- 2 tests using simulated clock stretching: very long and very short clock stretching
 -- 2 tests checking for correct behaviour of the "master ack after address" capability
 -- 4 tests using longer transactions with 3 data bytes each (also from the eight selected bytes)

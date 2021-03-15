@@ -1,0 +1,6 @@
+<map id="as_reader_writer_get_cur_hw_addr" name="as_reader_writer_get_cur_hw_addr">
+<area shape="rect" id="node1" title="Returns the next address on which the hardware will perform a write operation." alt="" coords="5,23,164,65"/>
+<area shape="rect" id="node2" href="$group__asterics__support.html#gaa7520f5b717e163da743500adb2eb0b9" title=" " alt="" coords="212,5,333,32"/>
+<area shape="rect" id="node3" href="$group__asterics__support.html#ga8e5c2bfd2e4498d10289377bd94cef07" title=" " alt="" coords="222,56,323,83"/>
+<area shape="rect" id="node4" href="$group__asterics__support.html#ga4c6d688b840a6e2edc9bc0b8ed961677" title=" " alt="" coords="381,56,515,83"/>
+</map>

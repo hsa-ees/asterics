@@ -1,0 +1,7 @@
+<map id="ea_draw_quick_line_v" name="ea_draw_quick_line_v">
+<area shape="rect" id="node1" title=" " alt="" coords="412,31,577,57"/>
+<area shape="rect" id="node2" href="$embedded__augmenter__lib_8h.html#acff31533f1e3855601782c6d7c4b44b1" title=" " alt="" coords="237,5,345,32"/>
+<area shape="rect" id="node4" href="$embedded__augmenter__lib_8h.html#a1e52ff893d4fa672d5f76efe07c95907" title=" " alt="" coords="219,56,364,83"/>
+<area shape="rect" id="node3" href="$group__vears__overlay.html#gac6917c882481994db3dd32e3a40f0326" title="Draw a line from (x0, y0) to (x1, y1)." alt="" coords="24,5,152,32"/>
+<area shape="rect" id="node5" href="$group__vears__overlay.html#ga8b400f489bc9781ef111507a9265a3cf" title="Draw a rectangle. (x0, y0) is the upper&#45;left, (x1, y1) is the lower&#45;right corner, respectively." alt="" coords="5,56,171,83"/>
+</map>

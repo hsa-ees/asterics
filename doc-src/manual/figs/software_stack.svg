@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   version="1.1"
+   id="svg4480"
+   viewBox="0 0 1052.3622 744.09448"
+   height="210mm"
+   width="297mm">
+  <defs
+     id="defs4482" />
+  <metadata
+     id="metadata4485">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     transform="translate(0,-308.26772)"
+     id="layer1">
+    <rect
+       y="493.18738"
+       x="299.82516"
+       height="339.34964"
+       width="539.34967"
+       id="rect3805"
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1.65034318;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+    <path
+       id="path3817"
+       d="m 300.41878,323.28099 0,80.16244 c 0,0 539.16244,0 539.16244,0 l 0,-80.16244 z"
+       style="fill:#ffa7a7;fill-opacity:1;stroke:#000000;stroke-width:1.83755481;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    <path
+       id="path3830"
+       d="m 439.62789,552.99572 0,79.73855 379.7386,0 c -0.002,-26.58138 0.002,-53.16276 0.006,-79.74414 -126.5815,10e-4 -253.16298,0.006 -379.74448,0.006 z"
+       style="fill:#ff6a27;fill-opacity:1;stroke:#000000;stroke-width:1.25581586;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    <path
+       id="path3801"
+       d="m 392.09194,553.24438 -0.58503,159.2156 427.61265,0.0871 -0.0977,-80.13115 -378.71548,-0.0211 -0.28176,-79.19705 z"
+       style="fill:#bbccff;fill-opacity:1;stroke:#000000;stroke-width:1.8044256;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    <rect
+       y="912.36218"
+       x="320"
+       height="90"
+       width="240"
+       id="rect5064"
+       style="fill:#ffe964;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+    <text
+       id="text5058"
+       y="951.05725"
+       x="438.7854"
+       style="font-size:25px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif"
+       xml:space="preserve"><tspan
+         style="text-align:center;text-anchor:middle"
+         y="951.05725"
+         x="438.7854"
+         id="tspan5060">FPGA-Vendor</tspan><tspan
+         style="text-align:center;text-anchor:middle"
+         id="tspan5062"
+         y="982.30725"
+         x="438.7854">Libraries</tspan></text>
+    <rect
+       y="912.36218"
+       x="580"
+       height="90"
+       width="160"
+       id="rect5066"
+       style="fill:#ffe964;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+    <text
+       id="text5068"
+       y="950.83752"
+       x="659.38965"
+       style="font-size:25px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif"
+       xml:space="preserve"><tspan
+         style="text-align:center;text-anchor:middle"
+         y="950.83752"
+         x="659.38965"
+         id="tspan5070">OS</tspan><tspan
+         style="text-align:center;text-anchor:middle"
+         id="tspan5072"
+         y="982.08752"
+         x="659.38965">Libraries</tspan></text>
+    <text
+       id="text5078"
+       y="959.03943"
+       x="137.54639"
+       style="font-size:25px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif"
+       xml:space="preserve"><tspan
+         y="959.03943"
+         x="137.54639"
+         id="tspan5080">Layer 0</tspan></text>
+    <text
+       id="text5078-7"
+       y="679.03943"
+       x="137.54639"
+       style="font-size:25px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif"
+       xml:space="preserve"><tspan
+         y="679.03943"
+         x="137.54639"
+         id="tspan5080-9">Layer 2</tspan></text>
+    <text
+       id="text5078-23"
+       y="600.03943"
+       x="137.54639"
+       style="font-style:normal;font-weight:normal;font-size:25px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       xml:space="preserve"><tspan
+         y="619.03943"
+         x="137.54639"
+         id="tspan5080-7">Layer 3</tspan></text>
+    <text
+       id="text5078-5"
+       y="368.87466"
+       x="132.67944"
+       style="font-style:normal;font-weight:normal;font-size:25px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       xml:space="preserve"><tspan
+         y="368.87466"
+         x="132.67944"
+         id="tspan5080-92">Layer 4</tspan></text>
+    <text
+       id="text5124"
+       y="370.25922"
+       x="478.14404"
+       style="font-style:normal;font-weight:normal;font-size:25px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       xml:space="preserve"><tspan
+         y="370.25922"
+         x="478.14404"
+         id="tspan5126">User Application</tspan></text>
+    <path
+       id="path5128"
+       d="m 440.00001,792.3622 0,119.99999"
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+    <path
+       id="path5130"
+       d="m 660.00001,792.3622 0,119.99999"
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+    <path
+       id="path5132"
+       d="m 660.00001,912.05319 10,-20 c 0,0 -20,0 -20,0 z"
+       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    <path
+       id="path5132-2"
+       d="m 440.00001,912.05319 10,-20 c 0,0 -20,0 -20,0 z"
+       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    <path
+       id="path5132-8"
+       d="m 580,491.86221 10,-20 c 0,0 -20,0 -20,0 z"
+       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    <path
+       id="path5155"
+       d="m 580,482.36221 0,-80"
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    <text
+       id="text3813"
+       y="530"
+       x="570.98267"
+       style="font-style:normal;font-weight:normal;font-size:25px;line-height:125%;font-family:Sans;-inkscape-font-specification:Sans;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none"
+       xml:space="preserve"><tspan
+         y="550"
+         x="570.98267"
+         id="tspan3815">ASTERICS Support Package (ASP)</tspan></text>
+    <text
+       id="text5038"
+       y="681.68225"
+       x="500"
+       style="font-style:normal;font-weight:normal;font-size:25px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       xml:space="preserve"><tspan
+         y="681.68225"
+         x="524.95605"
+         id="tspan5040">Module Drivers</tspan></text>
+    <path
+       id="path3803"
+       d="m 319.8253,553.268 0.0871,239.18183 499.17524,0 0,-80.04381 -427.31111,-0.17418 0.43545,-158.96384 z"
+       style="fill:#3bc911;fill-opacity:1;stroke:#000000;stroke-width:1.82473493;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    <text
+       id="text5054"
+       y="759.25916"
+       x="420"
+       style="font-style:normal;font-weight:normal;font-size:25px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       xml:space="preserve"><tspan
+         y="759.25916"
+         x="420.06763"
+         id="tspan5056">ASTERICS Support Library</tspan></text>
+    <text
+       id="text5078-7-5"
+       y="758.87463"
+       x="137.54639"
+       style="font-size:25px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:sans-serif"
+       xml:space="preserve"><tspan
+         y="758.87463"
+         x="137.54639"
+         id="tspan5080-9-7">Layer 1</tspan></text>
+    <text
+       id="text8114"
+       y="600"
+       x="535"
+       style="font-style:normal;font-weight:normal;font-size:25px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         y="600"
+         x="530"
+         id="tspan8116">asterics.h</tspan></text>
+  </g>
+</svg>

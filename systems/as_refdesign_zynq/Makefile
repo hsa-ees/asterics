@@ -96,6 +96,7 @@ clean:
 	rm -rf ${DIR_ASTERICS_CORE}
 	rm -rf ${DIR_VIVADO_CORES}
 	rm -f as_automatics.log
+	rm -f asterics_system_graph.svg
 	rm -f software/asterics-demo.c
 	# clean hardware:
 	cd hardware/ && \

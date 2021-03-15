@@ -1,0 +1,6 @@
+<map id="as_window_pipeline_common.h" name="as_window_pipeline_common.h">
+<area shape="rect" id="node1" title="Generic driver (header file) for window pipeline modules." alt="" coords="77,5,230,47"/>
+<area shape="rect" id="node2" href="$as__canny__pipe_8h.html" title="Driver (header file) for the canny reference systems canny pipeline." alt="" coords="5,102,136,129"/>
+<area shape="rect" id="node4" href="$as__canny__pipe_2software_2driver_2as__window__pipeline__common_8c.html" title="Common driver (source file) for as_window_pipeline modules." alt="" coords="161,95,314,136"/>
+<area shape="rect" id="node3" href="$as__canny__pipe_8c.html" title="Driver (source file) for the canny reference systems canny pipeline." alt="" coords="6,184,135,211"/>
+</map>

@@ -13,7 +13,7 @@
 --                 signals and generates VSYNC and HSYNC signals according 
 --                 to image size configuration.
 --                 
---                 Parameters need to be set before running this module.
+--                 Parameters need to be set via software before running this module.
 ----------------------------------------------------------------------------------
 --  This program is free software; you can redistribute it and/or
 --  modify it under the terms of the GNU Lesser General Public
@@ -31,8 +31,19 @@
 --  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ----------------------------------------------------------------------------------
 --! @file  as_gensync.vhd
---! @brief This module generates VSYNC and HSYNC signals for a given image data stream.
+--! @brief Generate VSYNC and HSYNC signals for a given image data stream.
+--! @addtogroup asterics_modules
+--! @{
+--! @defgroup as_gensync as_gensync: Generate Synchronization Signals
+--! This module receives an image data stream with STROBE 
+--! signals and generates VSYNC and HSYNC signals according 
+--! to image size configuration.
+--! Parameters need to be set via software before running this module.
+--! @}
 ----------------------------------------------------------------------------------
+
+--! @addtogroup as_gensync
+--! @{
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -41,30 +52,29 @@ use IEEE.NUMERIC_STD.ALL;
 library asterics;
 use asterics.helpers.all;
 
---! \addtogroup as_gensync
---!  @{
 
 entity as_gensync is
 generic(
     DATA_WIDTH              : integer := 32;
-    MEM_ADDRESS_BIT_WIDTH   : integer := 32
+    MEM_ADDRESS_BIT_WIDTH   : integer := 32;
+    PIXELS_PER_STROBE       : integer := 1
 );
 port(
-    Clk             : in std_logic;
-    Reset           : in std_logic;
+    clk   : in  std_logic;
+    reset : in  std_logic;
 
-    DATA_IN         : in std_logic_vector(DATA_WIDTH-1 downto 0);
-    STROBE_IN       : in std_logic;
-    STALL_OUT       : out std_logic;
+    data_in    : in  std_logic_vector(DATA_WIDTH-1 downto 0);
+    strobe_in  : in  std_logic;
+    stall_out  : out std_logic;
 
-    DATA_OUT        : out std_logic_vector(DATA_WIDTH-1 downto 0);
-    STROBE_OUT      : out std_logic;
-    STALL_IN        : in std_logic;
-    HSYNC_OUT       : out std_logic;
-    VSYNC_OUT       : out std_logic;
+    data_out   : out std_logic_vector(DATA_WIDTH-1 downto 0);
+    strobe_out : out std_logic;
+    stall_in   : in  std_logic;
+    hsync_out  : out std_logic;
+    vsync_out  : out std_logic;
 
     --! Slave register interface
-    slv_ctrl_reg : in slv_reg_data(0 to 2);
+    slv_ctrl_reg   : in  slv_reg_data(0 to 2);
     slv_status_reg : out slv_reg_data(0 to 2);
     slv_reg_modify : out std_logic_vector(0 to 2);
     slv_reg_config : out slv_reg_config_table(0 to 2)
@@ -74,8 +84,6 @@ end as_gensync;
 --! @}
 
 architecture RTL of as_gensync is
-
-constant MEM_NUMBER_OF_BYTES_PER_WORD   : natural := DATA_WIDTH/8;
 
 -- signal declaration
 signal reg_x_resolution_config : std_logic_vector(MEM_ADDRESS_BIT_WIDTH - 1 downto 0);
@@ -116,7 +124,7 @@ begin
     gen_enable : process(clk)
     begin
         if rising_edge(clk) then
-            if Reset = '1' then
+            if reset = '1' then
                 r_enable <= '0';
             else 
                 r_enable <= not s_stall;
@@ -130,17 +138,17 @@ begin
     vsync_gen : process(clk)
     begin
         if rising_edge(clk) then
-            if Reset = '1' then
+            if reset = '1' then
                 r_vsync <= '0';
                 r_frame_size_count <=  to_signed(0, r_frame_size_count'length);
             elsif r_enable = '1' then
                 if enable_sync_signals = '1' and STROBE_IN = '1' then
                     if r_frame_size_count - 1 < 0 then
                         r_vsync <= '1';
-                        r_frame_size_count <= signed(reg_frame_size_config) - MEM_NUMBER_OF_BYTES_PER_WORD;
+                        r_frame_size_count <= signed(reg_frame_size_config) - PIXELS_PER_STROBE;
                     else
                         r_vsync <= '0';
-                        r_frame_size_count <= r_frame_size_count - to_signed(MEM_NUMBER_OF_BYTES_PER_WORD, MEM_ADDRESS_BIT_WIDTH);
+                        r_frame_size_count <= r_frame_size_count - to_signed(PIXELS_PER_STROBE, MEM_ADDRESS_BIT_WIDTH);
                     end if;
                 else
                    r_vsync <= '0';
@@ -155,17 +163,17 @@ begin
     hsync_gen : process(clk)
     begin
         if rising_edge(clk) then
-            if Reset = '1' then
+            if reset = '1' then
                 r_hsync <= '0';
                 r_x_resolution_count <= to_signed(0, r_x_resolution_count'length);
             elsif r_enable = '1' then
                 if enable_sync_signals = '1' and STROBE_IN = '1' then
                     if r_x_resolution_count - 1 < 0 then
                         r_hsync <= '1';
-                        r_x_resolution_count <= signed(reg_x_resolution_config) - MEM_NUMBER_OF_BYTES_PER_WORD;
+                        r_x_resolution_count <= signed(reg_x_resolution_config) - PIXELS_PER_STROBE;
                     else 
                         r_hsync <= '0';
-                        r_x_resolution_count <= r_x_resolution_count - to_signed(MEM_NUMBER_OF_BYTES_PER_WORD, MEM_ADDRESS_BIT_WIDTH);
+                        r_x_resolution_count <= r_x_resolution_count - to_signed(PIXELS_PER_STROBE, MEM_ADDRESS_BIT_WIDTH);
                     end if;
                 else
                     r_hsync <= '0';
@@ -180,7 +188,7 @@ begin
     strobe_gen : process(clk)
     begin
         if rising_edge(clk) then
-            if Reset = '1' then
+            if reset = '1' then
                 r_strobe <= '0';
             elsif r_enable = '1' then
                 r_strobe <= STROBE_IN;
@@ -193,7 +201,7 @@ begin
     data : process(clk)
     begin
        if rising_edge(clk) then
-           if Reset = '1' then
+           if reset = '1' then
                r_data <= (others => '0');
            elsif r_enable = '1' then
                r_data <= DATA_IN;
@@ -213,5 +221,4 @@ begin
 --! to keep signal delay to a minimum.
     STALL_OUT   <= s_stall;
     
-
 end architecture;

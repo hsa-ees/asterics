@@ -1,0 +1,4 @@
+<map id="as_automatics_templates.AXISlaveRegisterInterface" name="as_automatics_templates.AXISlaveRegisterInterface">
+<area shape="rect" id="node1" title="Template definition for the AXI Slave Register interface used in ASTERICS." alt="" coords="5,95,200,136"/>
+<area shape="rect" id="node2" href="$classas__automatics__interface_1_1_interface.html" title="Class representing an interface comprised of VHDL ports and generics." alt="" coords="9,5,196,47"/>
+</map>

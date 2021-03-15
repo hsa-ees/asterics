@@ -1,0 +1,168 @@
+
+% Color definitions for listings
+\definecolor{lst-purple}{rgb}{0.502,0,0.502}
+\definecolor{lst-amethyst}{rgb}{0.6,0.4,0.8}
+\definecolor{lst-blue}{rgb}{0,0,0.8}
+\definecolor{lst-black}{rgb}{0,0,0}
+\definecolor{lst-gray}{gray}{0.3}
+\definecolor{lst-lightgray}{gray}{0.6}
+\definecolor{lst-backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{lst-darkgreen}{rgb}{0,0.55,0.1}
+
+
+\lstdefinestyle{hdl}{
+	language=vhdl,
+	backgroundcolor=\color{lst-backcolour},   
+	commentstyle=\color{lst-gray},
+	keywordstyle=\color{lst-purple},
+	numberstyle=\tiny\color{lst-lightgray},
+	stringstyle=\color{lst-blue},
+	basicstyle=\footnotesize\ttfamily,
+	breakatwhitespace=false,    
+	xleftmargin=\parindent, 
+	frame=L,    
+	breaklines=false,                 
+	captionpos=b,                    
+	keepspaces=true,                 
+	numbers=left,                    
+	numbersep=10pt,                  
+	showspaces=false,                
+	showstringspaces=false,
+	showtabs=false,                  
+	tabsize=2
+}
+
+\lstdefinestyle{inlinehdl}{
+	language=vhdl,
+	backgroundcolor=\color{lst-backcolour},   
+	commentstyle=\color{lst-gray},
+	keywordstyle=\color{lst-purple},
+	numberstyle=\tiny\color{lst-lightgray},
+	stringstyle=\color{lst-blue},
+	basicstyle=\footnotesize\ttfamily,
+	breakatwhitespace=false,    
+	xleftmargin=\parindent,
+	breaklines=false,                 
+	captionpos=b,               
+	numbers=left,                    
+	numbersep=10pt,                  
+	showspaces=false,                
+	showstringspaces=false,
+	showtabs=false,                  
+	tabsize=2
+}
+
+\lstdefinestyle{CStyle}{
+	language=C,
+	backgroundcolor=\color{lst-backcolour},   
+	commentstyle=\color{lst-lightgray},
+	keywordstyle=\color{lst-purple},
+	numberstyle=\tiny\color{lst-gray},
+	stringstyle=\color{lst-blue},
+	basicstyle=\footnotesize\ttfamily,
+	breakatwhitespace=false,    
+	xleftmargin=\parindent,
+	frame=L,         
+	breaklines=false,                 
+	captionpos=b,                    
+	keepspaces=true,                 
+	numbers=left,                    
+	numbersep=10pt,                  
+	showspaces=false,                
+	showstringspaces=false,
+	showtabs=false,                  
+	tabsize=2
+}
+
+\lstdefinestyle{CStyleinline}{
+	language=C,
+	backgroundcolor=\color{lst-backcolour},   
+	commentstyle=\color{lst-lightgray},
+	keywordstyle=\color{lst-purple},
+	numberstyle=\tiny\color{lst-gray},
+	stringstyle=\color{lst-blue},
+	basicstyle=\footnotesize\ttfamily,
+	breakatwhitespace=false,    
+	xleftmargin=\parindent,
+	breaklines=false,                 
+	captionpos=b,                    
+	keepspaces=true,                 
+	numbers=left,                    
+	numbersep=10pt,                  
+	showspaces=false,                
+	showstringspaces=false,
+	showtabs=false,                  
+	tabsize=2
+}
+
+\lstdefinestyle{Shell}{
+    language=bash,
+    backgroundcolor=\color{lst-backcolour},   
+    commentstyle=\color{red},
+    keywordstyle=\textbf,
+    keywords={source, cp, mkdir, cd, git, make, rm},
+    basicstyle=\footnotesize\ttfamily,
+    breakatwhitespace=false,    
+    xleftmargin=\parindent,       
+    breaklines=false,                 
+    captionpos=b,                    
+    %keepspaces=true,                                    
+    numbersep=10pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,
+    columns=fullflexible,              
+    tabsize=2
+}
+
+\lstdefinestyle{LaTeXStyle}{
+    language=TeX,
+    backgroundcolor=\color{lst-backcolour},   
+    commentstyle=\color{lst-lightgray},
+    keywordstyle=\textbf\color{lst-blue},
+    basicstyle=\footnotesize\ttfamily,
+    breakatwhitespace=false,    
+    xleftmargin=\parindent,       
+    breaklines=false,                 
+    captionpos=b,                    
+    keepspaces=true,                                    
+    numbersep=10pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,
+    columns=fullflexible,              
+    tabsize=2,
+    escapechar=§
+}
+
+\lstdefinestyle{AutomaticsPython}{
+    language=python,
+    backgroundcolor=\color{lst-backcolour},   
+    commentstyle=\color{lst-lightgray},
+    keywordstyle=\color{lst-purple},
+	numberstyle=\tiny\color{lst-lightgray},
+	stringstyle=\color{lst-darkgreen},
+    basicstyle=\footnotesize\ttfamily,
+	breakatwhitespace=false,    
+	xleftmargin=\parindent,
+	breaklines=false,                 
+	captionpos=b,                    
+	keepspaces=true,                 
+	numbers=left,                    
+	numbersep=10pt,                  
+	showspaces=false,                
+	showstringspaces=false,
+	showtabs=false,                  
+	tabsize=2,
+	emph={connect, add_module, set_generic_value, set_generic, add_iic_master, get, get_port, get_interface, set_port_fixed_value, make_port_external, make_external, make_generic_external, new_chain, new_2d_window_pipeline, add_software_driver, write_asterics_core, write_ip_core_xilinx, write_system_graph, write_system, set_main_buffer_optimization_strategy, set_reshape_long_buffers_optimization, set_similar_length_optimization, vears, add_module_repository, set_ipcore_name, define_hardware_target, set_loglevel, print_version, requires_version, requires_at_least_version, add_port, add_rule, __init__, add_global_interface_template, add_local_interface_template, discover_module, set_value, set_value_check_function, get_module_instance, get_module_template, write_hw, write_sw, set_flushing_behaviour, add_register, modify_register_type, assign_register_to_port, assign_port_to_register, define_signal, define_port, get_generic, make_interface_external, port_rule_add, port_rule_remove, port_rule_overwrite, instantiate_module, intantiate_no_module, link_to_generic, assign_from_this_vector, assign_to_this_vector, define_vector_assignment, set_port_type, remove_condition, update_ruleset, set_ruleset, print_pipeline_buffer_report, auto_instantiate, module_detail, set_asterics_base_address, list_address_space, print_pipeline_buffer_report, set_value_check, new_nn_layer, parametrize_and_build, verbose, quiet, list_errors, set_asterics_directory},
+	emphstyle=\color{lst-blue}
+}
+
+% Inline code highlighting with style AutomaticsPython
+\newcommand\lstapyinline[1]{{\lstinline[style=AutomaticsPython]!#1!}}
+
+% Inline code highlighting with inline hdl style
+\newcommand\lsthdlinline[1]{{\lstinline[style=inlinehdl]!#1!}}
+
+% Inline code highlighting with inline Cstyle style
+\newcommand\lstcinline[1]{{\lstinline[style=CStyleinline]!#1!}}

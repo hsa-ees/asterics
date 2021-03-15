@@ -1,0 +1,255 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% This file is part of the ASTERICS Framework. 
+%%
+%% Copyright (C) Hochschule Augsburg, University of Applied Sciences
+%% Efficient Embedded Systems Group
+%%
+%% Author(s): Gundolf Kiefer <gundolf.kiefer@hs-augsburg.de>
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\section{The \asterics Streaming Interface (\texttt{as\_stream}) } \label{ch:05-03-interfaces-as_stream}
+
+\secauthor{Gundolf Kiefer}
+
+\subsection{Signal Overview}
+
+An \texttt{as\_stream} bus is used to transport mostly image, but also other types of data from one \textit{source} module to one or multiple \textit{sink} modules. The bus consists of an arbitrary number of data bits and a set of control signals.
+
+The \texttt{as\_stream} bus signals are listed in Table~\ref{05-03-as_stream_signals}. Signals denoted with a right arrow ($\rightarrow$) in column "Direction" are outputs for the source module and inputs for the sink module(s). Accordingly, signals denoted with a left arrow ($\leftarrow$) are directed from the sink module to the source module. Presently, only the \texttt{STALL} signal is directed backwards (from sink to source). If an \texttt{as\_stream} bus connects to multiple sinks, an OR gate must be inserted to combine all their \texttt{STALL} outputs to feed the \texttt{STALL} input of the source module.
+
+Optional signals are marked with an asterisk (*). The column "Default" denotes the value that should be connected to the input signal of a module if the respective output is missing on the peer side.
+
+\begin{longtable}[ht]{|c|c|c|c|}
+\hline 
+\textbf{Signal} & \textbf{Direction} & \textbf{Default} & \textbf{Description} \\
+%% \small (* = optional) & \small (source <dir> sink) & \small (if optional) & \\%%
+\hline 
+\hline 
+\endhead
+
+\texttt{DATA<$n$>} & $\rightarrow$ &  &
+\parbox{7cm}{ ~ \\ User data. \\ ~ \\ \small
+The width $n$ and the data type are application-dependent, can be chosen arbitrarily with $n \geq 1$ and are not defined by the \texttt{as\_stream} specification.
+\\ ~ } \\
+
+\hline 
+
+\texttt{STROBE} & $\rightarrow$ & &
+\parbox{7cm}{ ~ \\ A new valid data item is present at the \texttt{DATA} bus.
+\\ ~ } \\
+
+\hline 
+
+\texttt{DATA\_ERROR} (*) & $\rightarrow$ & &
+\parbox{7cm}{~ \\ The present data item is invalid/unknown.
+\\ ~ } \\
+
+\hline 
+
+\texttt{STALL} (*) & $\leftarrow$ & 0 &
+\parbox{7cm}{~ \\ Request to pause sending data. \\ ~ \\ \small
+This signal allows the sink module to put back pressure on its predecessor module if it is not able to process its incoming data in time. See Section \ref{05-03-stall} for detailed explanations on the mechanism.
+\\ ~ } \\
+
+\hline 
+
+\texttt{VSYNC} (*) & $\rightarrow$ & -- &
+\parbox{7cm}{~ \\ Vertical (image) synchronization. \\ ~ \\ \small
+This signal is optional. However, if it is present on the sink side, it must also be provided by the source. A clock cycle during which this signal is set marks the beginning (first pixel) of a new 2D image. \\ ~ \\
+Note: Some modules may operate incorrectly if this signal is set while \texttt{STROBE=0}.
+%[[ TBD: Im Wiki steht, dass STROBE auch für HSYNC/VSYNC gilt. Wäre das nicht so, könnte diese Notiz entfallen. ]]
+\\ ~ } \\
+
+\hline 
+
+\texttt{VCOMPLETE} (*) & $\rightarrow$ & \texttt{=VSYNC} &
+\parbox{7cm}{~ \\ Image transfer completed. \\ ~ \\ \small
+The signal indicates that an image has just been transferred completely and serves as a hint for subsequent modules. It should ideally be set during the clock cycle immediately following the cycle during which the last data item has been transferred. \\ ~ \\
+\\ ~ } \\
+
+\hline 
+
+\texttt{HSYNC} (*) & $\rightarrow$ & -- &
+\parbox{7cm}{~ \\ Horizontal (line) synchronization. \\ ~ \\ \small
+This signal is optional. However, if it is present on the sink side, it must also be provided by the source. A clock cycle during which this signal is set marks the beginning (first pixel) of a new line. \\ ~ \\
+Note: Some modules may operate incorrectly if this signal is set while \texttt{STROBE=0}. 
+%[[ TBD: Im Wiki steht, dass STROBE auch für HSYNC/VSYNC gilt. Wäre das nicht so, könnte diese Notiz entfallen. ]]
+\\ ~ } \\
+
+\hline 
+
+\texttt{HCOMPLETE} (*) & $\rightarrow$ & \texttt{=HSYNC} &
+\parbox{7cm}{~ \\ Line transfer completed. \\ ~ \\ \small
+The signal indicates that an image has just been transferred completely and serves as a hint for subsequent modules. It should ideally be set during the clock cycle immediately following the cycle during which the last data item has been transferred.
+\\ ~ } \\
+
+\hline 
+
+\caption{Signals of an \texttt{as\_stream} bus ( (*) = optional)} \label{05-03-as_stream_signals}\\
+\end{longtable}
+
+
+
+
+\subsection{General Design Rules}
+
+\subsubsection{Registered outputs}
+
+All output signals of an \texttt{as\_stream} port have to be driven immediately by (a) a flipflop, or (b) an input signal, if there is absolutely no logic between this input and the output (not even a single gate!). Case (b) is particularly useful for the \texttt{STALL} signal to avoid long stall latencies requiring in potentially area-consuming buffers. In all other cases, it is safe and good to just always insert flipflops at the outputs.
+
+%\subsubsection{[[ TBD: weitere ]]}
+
+
+
+\subsection{Error handling} \label{ch:05-03-interfaces-as_stream-error_handling}
+
+The \texttt{DATA\_ERROR} signal indicates whether the value of a dedicated data item is incorrect or unreliable. Ideally, this information should be propagated through the whole chain up to the output, so that the application can read which parts of the data are correct and which are not.
+
+In some cases, the \texttt{DATA\_ERROR} information cannot be propagated up to the end. Examples are: 
+\begin{itemize}
+\item The chain may end with an \texttt{as\_memwriter} module, and the output data format has no fields to indicate the validity of individual pixels / data units.
+\item There are modules in the chain that do not support the \texttt{DATA\_ERROR} signal.
+\end{itemize}
+In such cases, it is recommended to add a global status register bit \texttt{GLOB\_DATA\_ERROR}, which is set to one if the last element of a chain propagating the data error information raises its \texttt{DATA\_ERROR} output and must be reset by software. This way, the application software can at least determine if some data units may be reliable between two polls of this status bit.
+
+
+
+\subsection{Stall Mechanism} \label{05-03-stall}
+
+The \texttt{STALL} signal enables modules which cannot guarantee to process a new input data word in each clock cycle to send a break signal towards their predecessor modules and slow them down just enough to let the whole chain operate correctly and at optimum speed.
+
+Unlike all other signals, which are all directed forward and together allow build well-formed, very long pipelines without encountering serious physical problems, the \texttt{STALL} signal is directed backwards. To avoid over-long signal paths, it may need to be buffered and may thus require a certain (system- or chain-dependent) number of clock cycles until it is handed over from the overloaded module to the first, data-generating module of a complex chain. This must be taken into account by the chain designer, and buffer registers or FIFOs must be inserted into the chain to avoid data loss due to data latencies.
+
+To help the chain designer in this task and to allow an automatic insertion of such buffers in the future, the following rules apply:
+
+\begin{enumerate}
+
+\item \texttt{STROBE} has precedence over \texttt{STALL}. A \texttt{STROBE} signal set to 1 strictly and unequivocally defines that there the \texttt{DATA} signal carries a new data item \textit{now}, which will never be repeated. The sink module must take the data or raise a \texttt{SYNC\_ERROR} condition, even if it has already set its \texttt{STALL} signal. In other words, \texttt{STALL} can be seen as a request or a hint, which may or may not be followed. Any module that cannot take over a new data item each clock cycle must be designed to deal with such a situation and do a correct \texttt{SYNC\_ERROR} error handling.
+
+\item An \texttt{as\_stream} \textit{source} port can be \textit{stall-absorbing} or not. Whether or not a port is \textit{stall-absorbing} should be indicated by the presence of the optional \texttt{STALL} signal, which should only be present for \textit{stall-absorbing} modules. Exceptions must clearly be identified in the module documentation.
+
+\item An \texttt{as\_stream} \textit{sink} port can be \textit{stall-generating} or not. Whether or not a port is \textit{stall-generating} should be indicated by the presence of the optional \texttt{STALL} signal, which should only be present for \textit{stall-generating} modules. Exceptions must clearly be identified in the module documentation.
+
+\item Certain filter modules which do not need to generate stalls themselves and cannot buffer much data internally may still implement the \texttt{STALL} port signals and simply propagate the \texttt{STALL} signal from their outgoing to their incoming \texttt{as\_stream} port. Such modules are referred to as \textit{stall-propagating} modules. Towards their successor, they act as a \textit{stall-absorber}. Towards their predecessor, they act as a \textit{stall-generator}.
+
+\item Any sink port must accept the last data unit during the clock cycle in which the \texttt{STALL} signal is raised without errors. \label{05-03-cond_stall_sink}
+
+\item A source port which is declared to be \textit{stall absorbing} must not set its \texttt{STROBE} signal one clock cycle after which \texttt{STALL} has been raised.
+
+\end{enumerate}
+
+In order to fullfil the condition \ref{05-03-cond_stall_sink}, modules which forward their \texttt{STALL} signal from an output to an input must do this within the same clock cycle, i.~e. by pure combinational logic without and flipflops. This may lead to overlong combinational paths during synthesis. Timing issues can be overcome by inserting dedicated \texttt{as\_stall\_buffer} modules into overlong paths, which insert a flipflop into the \texttt{STALL} line and a buffering register for all other lines.
+
+
+%\begin{verbatim}
+%[[
+%
+%TBD(alle):
+%
+%1. Werden diese Regeln so von allen Modulen eingehalten? 
+%
+%2. Gibt es irgendwo Schwierigkeiten, Module ggfs. auf diese 
+%   Regeln hin anzupassen?
+%
+%3. Gibt es das Modul 'as_stall_buffer' o.ä. schon? Wer könnte 
+%   es implementieren bzw. validieren? (Code-Skizze folgt als 
+%   TeX-Kommentar)
+%   
+%4. Ein etwas flexiblerer Ansatz, der die FFs in STALL-Leitungen 
+%   von der Pufferung der vorwärts gerichteten Signale trennen 
+%   würde und z.B. die FIFOs in MemWritern nutzen könnte, folgt 
+%   (skizziert) als TeX-Kommentar. Nach einigem Überlegen würde 
+%   ich persönlich aber eher zu dieser einfacheren Lösung stimmen.
+%   
+%]]   
+%\end{verbatim}
+
+%  entity as_stall_buffer is
+%    generic (DATA_WIDTH: integer);
+%    port (
+%		CLK, RESET: in std_logic;
+%       I_DATA : in std_logic_vector (0 to DATA_WIDTH - 1);
+%       I_STROBE: in std_logic;
+%       I_DATA_ERROR : in std_logic;
+%       I_STALL : out std_logic;
+%       I_VSYNC : in std_logic;
+%       I_HSYNC : in std_logic;
+%       I_VCOMPLETE : in std_logic;
+%       I_HCOMPLETE : in std_logic;
+%       O_DATA : out std_logic_vector (0 to DATA_WIDTH - 1);
+%       O_STROBE: out std_logic;
+%       O_DATA_ERROR : out std_logic;
+%       O_STALL : in std_logic;
+%       O_VSYNC : out std_logic;
+%       O_HSYNC : out std_logic;
+%       O_VCOMPLETE : out std_logic;
+%       O_HCOMPLETE : out std_logic;
+%    );
+%  end entity;
+%
+%
+%  architecture rtl of as_stall_buffer is
+%    signal REG_STALL: std_logic;
+%    signal REG_BUF, BUS_OUT, BUS_IN: std_logic_vector (0 to DATA_WIDTH + 4);
+%    signal REG_BUF_FULL: std_logic;
+%  begin
+%
+%    -- Split/combine all I/O signals from/to single busses...
+%    BUS_IN <= I_DATA & I_DATA_ERROR & I_VSYNC & ... & I_HCOMPLETE;
+%    O_DATA <= BUS_OUT (0 to DATA_WIDTH - 1);
+%    O_DATA_ERROR <= BUS_OUT (DATA_WIDTH);
+%    O_VSYNC <= BUS_OUT (DATA_WIDTH + 1);
+%    ...
+%    O_HCOMPLETE <= BUS_OUT (DATA_WIDTH + 4);
+%
+%
+%    -- State transition process...
+%    process (clk)
+%    begin
+%      if rising_edge (clk) then
+%        if reset = '1' then BUF_FULL <= '0';
+%        else 
+%          REG_STALL <= O_STALL;
+%          if REG_STALL = '1' and I_STROBE = '1' then
+%            assert REG_BUF_FULL = '0';
+%            REG_BUF <= I_DATA & I_DATA_ERROR & I_VSYNC & ... & I_HCOMPLETE;
+%            REG_FULL <= '1';
+%          elseif I_STROBE = '0' then
+%            REG_FULL <= '0';
+%          end if;
+%        end if;
+%      end if;
+%    end process;
+%
+%
+%    -- Output processes...
+%    BUS_OUT <= REG_BUF when REG_BUF_FULL = '1' else IN_BUF;
+%      -- Strictly speaking, this is a violation of the "registered outputs" rule.
+%      -- However, if that rule is obeyed in all other module and only violated in
+%      -- special modules like this (and there is only little logic in the path),
+%      -- we can hopefully live with it and save a big register.
+%    O_STROBE <= I_STROBE or REG_FULL;
+%
+%  end architecture;
+          
+
+%\item The documentation of each module shall contain the following pieces of information:
+%\begin{itemize}
+%\item \textit{Stall tolerance.} This is the number of data items a module is able to consume starting from the clock cycle in which it has raised its \texttt{STALL} output to 1 due to an \textit{internal} contention. If by design no internal contention can occur (i.~e. the module can process a new item in each clock cycle), this shall be indicated in the documentation by stating "Internal stall is impossible". For modules with multiple incoming \texttt{as\_stream} busses, this information must be provided for each incoming bus.
+%\item \textit{Stall output latency.} This is the maximum number of data items a module will send starting from the clock cycle in which its \texttt{STALL} input has been raised to 1 under the hypothetical assumption that the module itself does not receive any data at its input (id existing). For modules with multiple outgoing \texttt{as\_stream} busses, this information must be provided for each outgoing bus.
+%\item \textit{Stall pass-through latency.} For a module which just forwards the stall signal from its outgoing \texttt{as\_stream} bus to its incoming \texttt{as\_stream} bus, this is the number of clock cycles by which the \texttt{STALL} signal is delayed. For modules with multiple incoming and/or outgoing \texttt{as\_stream} busses, this information must be provided for each combination of incoming/outgoing busses.
+%\end{itemize}
+
+%\item Modules with internal buffers should have an option to reserve part of the buffer to increase their \textit{stall tolerance} to a configurable value $n$.
+
+%\end{enumerate}
+
+%[[ TBD(GK/alle): Examples ]]
+
+
+
+%\subsection{[[ TBD(alle): Weitere Abschnitte zu Erläuterungen ]]}

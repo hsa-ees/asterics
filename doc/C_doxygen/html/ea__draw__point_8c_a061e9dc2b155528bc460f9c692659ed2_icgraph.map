@@ -1,0 +1,10 @@
+<map id="ea_draw_point" name="ea_draw_point">
+<area shape="rect" id="node1" title=" " alt="" coords="376,107,493,133"/>
+<area shape="rect" id="node2" href="$embedded__augmenter__lib_8h.html#a7a54f616eb848471bdb163b0a510b2d1" title=" " alt="" coords="201,5,319,32"/>
+<area shape="rect" id="node4" href="$embedded__augmenter__lib_8h.html#aa0e061e7b18c3f6992341e386faff8fd" title=" " alt="" coords="205,56,315,83"/>
+<area shape="rect" id="node5" href="$embedded__augmenter__lib_8h.html#acff31533f1e3855601782c6d7c4b44b1" title=" " alt="" coords="206,107,314,133"/>
+<area shape="rect" id="node7" href="$group__vears__overlay.html#ga62fecfe47def2effb3232a01175d40f4" title="Draw an icon (sprite) which is defined in a two dimensional char array (experimental!..." alt="" coords="195,157,325,184"/>
+<area shape="rect" id="node8" href="$group__vears__overlay.html#gae246c7c9e713947ee5086eccc7d15075" title="Draw a single pixel. &#39;color&#39; is an index to the color table (0, 1, 2). A value of 3 means &quot;transparen..." alt="" coords="192,208,328,235"/>
+<area shape="rect" id="node3" href="$group__vears__overlay.html#ga15c553979a63e96c70fe61774e97e30e" title="Draw a circle of radius r around (x, y)." alt="" coords="5,5,144,32"/>
+<area shape="rect" id="node6" href="$group__vears__overlay.html#gac6917c882481994db3dd32e3a40f0326" title="Draw a line from (x0, y0) to (x1, y1)." alt="" coords="11,107,139,133"/>
+</map>

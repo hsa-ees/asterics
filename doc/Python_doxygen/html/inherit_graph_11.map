@@ -1,0 +1,10 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classas__automatics__module_1_1_as_module.html" title="Represents an ASTERICS hardware and/or software module." alt="" coords="5,79,247,106"/>
+<area shape="rect" id="node2" href="$classas__automatics__2d__window__module_1_1_as_window_module.html" title="Class representing a module for use in 2D Window Pipelines." alt="" coords="295,39,493,80"/>
+<area shape="rect" id="node3" href="$classas__automatics__module__group_1_1_as_module_group.html" title="Class representing a module containing more modules." alt="" coords="307,104,481,145"/>
+<area shape="rect" id="node4" href="$classas__automatics__2d__pipeline_1_1_as2_d_window_pipeline.html" title="Class that represents a 2D Window Pipeline of the ASTERICS Framework." alt="" coords="543,5,745,47"/>
+<area shape="rect" id="node6" href="$classas__automatics__module__wrapper_1_1_as_module_wrapper.html" title="Class encapsulating an AsModule to manage generating an out&#45;of&#45;context Vivado run for it." alt="" coords="541,71,747,112"/>
+<area shape="rect" id="node7" href="$classas__automatics__templates_1_1_as_main.html" title="Template for the module group AsMain in which all AsModules are instantiated." alt="" coords="547,136,741,177"/>
+<area shape="rect" id="node8" href="$classas__automatics__templates_1_1_as_top.html" title="Template for the ASTERICS processing chain toplevel module group." alt="" coords="547,201,741,243"/>
+<area shape="rect" id="node5" href="$classas__automatics__cnn__layer_1_1_as_n_n_layer.html" title="Class representing a CNN layer accelerator subsystem." alt="" coords="795,5,985,47"/>
+</map>

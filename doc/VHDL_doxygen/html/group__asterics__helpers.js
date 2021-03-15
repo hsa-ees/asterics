@@ -1,0 +1,26 @@
+var group__asterics__helpers =
+[
+    [ "AXI_Master: ASTERICS AXI Master Adapter", "group__AXI__Master.html", "group__AXI__Master" ],
+    [ "AXI_Slave: ASTERICS AXI Slave Adapter", "group__AXI__Slave.html", "group__AXI__Slave" ],
+    [ "fifo_fwft: First Word Fall Through FIFO", "group__fifo__fwft.html", "group__fifo__fwft" ],
+    [ "as_fifo: First In First Out Buffer", "group__as__fifo.html", "group__as__fifo" ],
+    [ "as_generic_filter: Convolution Filter", "group__as__generic__filter.html", "group__as__generic__filter" ],
+    [ "as_line_buffer: Image Row Buffer", "group__as__line__buffer.html", "group__as__line__buffer" ],
+    [ "as_pipeline_manager: 2D Window Pipeline Manager", "group__as__pipeline__manager.html", "group__as__pipeline__manager" ],
+    [ "as_pipeline_row: Image Row Buffer with Filter Window", "group__as__pipeline__row.html", "group__as__pipeline__row" ],
+    [ "as_shift_line: Register-based FIFO", "group__as__shift__line.html", "group__as__shift__line" ],
+    [ "window_buff_nxm: Standalone Window Buffer", "group__window__buff__nxm.html", "group__window__buff__nxm" ],
+    [ "as_cnn_helpers: ASTERICS Helper Package for CNN Hardware Modules", "group__as__cnn__helpers.html", "group__as__cnn__helpers" ],
+    [ "as_filter_mask: ASTERICS Helpers for Canny Pipeline", "group__as__filter__mask.html", "group__as__filter__mask" ],
+    [ "as_sim_ram_pkg: ASTERICS Helpers for Canny Pipeline", "group__as__sim__ram__pkg.html", "group__as__sim__ram__pkg" ],
+    [ "helpers: Standard ASTERICS Helper Package", "group__helpers.html", "group__helpers" ],
+    [ "BRAM_READ_FIRST: Read-first BRAM", "group__BRAM__READ__FIRST.html", "group__BRAM__READ__FIRST" ],
+    [ "BRAM_WRITE_FIRST: Write-first BRAM", "group__BRAM__WRITE__FIRST.html", "group__BRAM__WRITE__FIRST" ],
+    [ "DUAL_BRAM_READ_FIRST: Read-first Dual-Port BRAM", "group__DUAL__BRAM__READ__FIRST.html", "group__DUAL__BRAM__READ__FIRST" ],
+    [ "DUAL_BRAM_READ_WRITE: Dual-Port BRAM", "group__DUAL__BRAM__READ__WRITE.html", "group__DUAL__BRAM__READ__WRITE" ],
+    [ "ram: Dual-Port BRAM", "group__ram.html", "group__ram" ],
+    [ "as_generic_regslice: ASTERICS Slave Register", "group__as__generic__regslice.html", "group__as__generic__regslice" ],
+    [ "as_regmgr: ASTERICS Slave Register Manager", "group__as__regmgr.html", "group__as__regmgr" ],
+    [ "as_sim_image_reader: as_memreader Simulation Module", "group__as__sim__image__reader.html", "group__as__sim__image__reader" ],
+    [ "as_sim_file_writer: as_memwriter Simulation Module", "group__as__sim__file__writer.html", "group__as__sim__file__writer" ]
+];

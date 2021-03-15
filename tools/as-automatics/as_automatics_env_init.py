@@ -37,22 +37,47 @@ explore the module library and other features of Automatics.
 # --------------------- DOXYGEN -----------------------------------------------
 ##
 # @file as_automatics_port.py
+# @ingroup automatics_cli
 # @author Philip Manke
 # @brief Initialization script for a pseudo-interactive mode of Automatics
 # -----------------------------------------------------------------------------
 
 import sys
+import os
+
+##
+# @addtogroup automatics_cli
+# @{
 
 if __name__ == "__main__":
 
-    print("ASTERICS Automatics: Automatic Processing Chain generator tool")
+    print(
+        "\n - ASTERICS Automatics: Automatic Processing Chain generator tool - "
+    )
     print("Starting...")
 
-    source_dir = sys.argv[0].rsplit("/", maxsplit=1)[0]
-    asterics_dir = source_dir.rsplit("/", maxsplit=2)[0]
+    # Initialization: Get ASTERICS installation directory
+    asterics_home = None
 
-    print("Importing Automatics from '{}'...".format(source_dir))
-    sys.path.append(source_dir)
+    try:
+        asterics_home = os.environ.get("ASTERICS_HOME")
+    except KeyError:
+        print("ERROR: ASTERICS_HOME not set!")
+        print("Source the ASTERICS settings.sh file before running Automatics!")
+        print("Use: source <path/to/asterics/>settings.sh")
+        exit()
+
+    automatics_home = None
+    try:
+        automatics_home = os.environ.get("ASTERICS_AUTOMATICS_HOME")
+    except KeyError:
+        print("ERROR: ASTERICS_AUTOMATICS_HOME not set!")
+        print("Source the ASTERICS settings.sh file before running Automatics!")
+        print("Use: source <path/to/asterics/>settings.sh")
+        exit()
+
+    print("Importing Automatics from '{}'...".format(automatics_home))
+    sys.path.append(automatics_home)
     import as_automatics_logging as as_log
 
     as_log.init_log(loglevel_console="WARNING", loglevel_file="INFO")
@@ -60,6 +85,7 @@ if __name__ == "__main__":
     # Even though not all imports are used here,
     # they are included for easy access from the interactive environment.
     # Plz no remove :3 - Thank!
+    from asterics import Automatics_version
     from as_automatics_env import AsAutomatics
     from as_automatics_proc_chain import AsProcessingChain
     from as_automatics_module import AsModule
@@ -72,12 +98,16 @@ if __name__ == "__main__":
 
     print("Success!")
     # Init Automatics and load standard modules...
-    print("Getting default modules from '{}'...".format(asterics_dir))
-    auto = AsAutomatics(asterics_dir)
-    auto.add_module_repository(append_to_path(asterics_dir, "modules"), "default")
+    print("Getting default modules from '{}'...".format(asterics_home))
+    auto = AsAutomatics(asterics_home, Automatics_version)
+    auto.add_module_repository(
+        append_to_path(asterics_home, "modules"), "default"
+    )
 
     # User prompt:
-    print("Done.")
+    print(
+        "Done! Loaded {} modules!".format(len(auto.library.get_module_names()))
+    )
     print("")
     print("Automatics initialized!")
     print("Use 'as_help()' to list available functions.")
@@ -85,7 +115,7 @@ if __name__ == "__main__":
     # User functions start:
     # ----------------------
     def as_help():
-        """Print list of available functions"""
+        """! @brief Print list of available functions"""
         print("")
         print("ASTERICS Automatics: Automatic Processing Chain generator tool")
         print("")
@@ -102,7 +132,7 @@ if __name__ == "__main__":
         print("")
 
     def list_modules(verbosity: int = 0, repo: str = ""):
-        """Print a list of all modules in the library.
+        """! @brief Print a list of all modules in the library.
         Use parameter 'verbosity' [0, 1, 2, 3] to print with increasing detail.
         Use parameter 'repo' to print only modules in a specific repository.
         Modules in the default ASTERICS installation are in the repo 'default'.
@@ -110,7 +140,7 @@ if __name__ == "__main__":
         auto.library.list_modules(verbosity, repo)
 
     def get_module(name: str, repo: str = ""):
-        """Returns the module object for the module matching 'name',
+        """! @brief Returns the module object for the module matching 'name',
         from the module library.
         Use the 'repo' parameter to only search modules from a specific location
         Modules in the standard ASTERICS installation are in the repo 'default'.
@@ -118,7 +148,9 @@ if __name__ == "__main__":
         module = auto.library.get_module_template(name, repo_name=repo)
         if module:
             print(
-                "Got module '{}' from repo '{}'!".format(name, module.repository_name)
+                "Got module '{}' from repo '{}'!".format(
+                    name, module.repository_name
+                )
             )
             return module
 
@@ -141,16 +173,17 @@ if __name__ == "__main__":
         return None
 
     def module_detail(name: str, verbosity: int = 0, repo: str = ""):
-        """List details for a single module 'name'. Use parameter 'repo' to
-        specify the module repository, the standard ASTERICS modules are in repo
-        'default'. Set parameter 'verbosity' to [0, 1, 2] for increasing detail.
+        """! @brief List details for a single module 'name'.
+        Use parameter 'repo' to specify the module repository,
+        the standard ASTERICS modules are in repo 'default'.
+        Set parameter 'verbosity' to [0, 1, 2] for increasing detail.
         """
         module = get_module(name, repo)
         if module:
             module.list_module(verbosity)
 
     def scan_folder(path: str, repo: str = "user"):
-        """Let Automatics scan a folder for additional modules.
+        """! @brief Let Automatics scan a folder for additional modules.
         The paramter 'path' should point to the directory containing the
         subdirectories containing the modules.
         Use parameter 'repo' to name the repository that the modules are added
@@ -163,7 +196,7 @@ if __name__ == "__main__":
             print("Found no modules in '{}'.".format(path))
 
     def get_port(module, port_name: str) -> Port:
-        """Returns the Port object matching 'port_name' in 'module'.
+        """! @brief Returns the Port object matching 'port_name' in 'module'.
         The 'module' parameter may be a module object or a module name
         (string)."""
         if isinstance(module, AsModule):
@@ -177,8 +210,10 @@ if __name__ == "__main__":
         # Else ->
         print("Parameter 'module' must be a string or module object!")
 
-    def get_interface(module, interface_name: str, direction: str = "") -> Interface:
-        """Returns the Interface object matching 'interface_name' in 'module'.
+    def get_interface(
+        module, interface_name: str, direction: str = ""
+    ) -> Interface:
+        """! @brief Returns the Interface object matching 'interface_name' in 'module'.
         The 'module' parameter may be a module object or a module name
         (string). Use parameter 'direction' to specify the interface direction.
         If two of the same interface type are present in a module, it is valid
@@ -198,3 +233,5 @@ if __name__ == "__main__":
         return None
 
     # ----------------------
+
+## @}

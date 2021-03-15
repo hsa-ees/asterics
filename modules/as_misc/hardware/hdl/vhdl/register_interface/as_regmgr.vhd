@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
 --  This file is part of the ASTERICS Framework. 
---  Copyright (C) Hochschule Augsburg, University of Applied Sciences
+--  (C) 2019 Hochschule Augsburg, University of Applied Sciences
 ----------------------------------------------------------------------------------
 -- File:           as_regmgr.vhd
 -- Entity:         as_regmgr
@@ -32,7 +32,18 @@
 ----------------------------------------------------------------------------------
 --! @file as_regmgr.vhd
 --! @brief This module instantiates and manages a variable number of 32 bit registers.
+--! @addtogroup asterics_helpers
+--! @{
+--! @defgroup as_regmgr as_regmgr: ASTERICS Slave Register Manager
+--! This module implements the registers for any module within
+--! an ASTERICS system. It instantiates and manages a configurable
+--! number of 'as_generic_regslice' modules, each a single 32 bit
+--! register with potentially different read/write access.
+--! @}
 ----------------------------------------------------------------------------------
+
+--! @addtogroup as_regmgr
+--! @{
 
 library IEEE;
 use IEEE.std_logic_1164.ALL;
@@ -53,6 +64,8 @@ generic(
     MODULE_ADDR_WIDTH : integer := 6;
     -- Number of registers associated per manager
     REG_COUNT : integer := 32;
+    -- Enable automatic register modify bit management
+    AUTO_HW_REG_MODIFY_BIT : boolean := False;
     -- Address of this module / register manager
     MODULE_BASEADDR : integer
     );
@@ -85,6 +98,8 @@ port(
     );
 end entity as_regmgr;
 
+--! @}
+
 architecture RTL of as_regmgr is
     
     component as_generic_regslice is
@@ -116,7 +131,9 @@ architecture RTL of as_regmgr is
     -- sw_data_out <= register contents
     -- Collection of data outputs from all registers of this module
     signal arr_sw_data_out : slv_reg_data(0 to REG_COUNT - 1);
-    
+
+    signal reg_modify_arr : std_logic_vector(0 to REG_COUNT - 1);
+    signal reg_content : slv_reg_data(0 to REG_COUNT - 1);
     
 begin
     
@@ -173,11 +190,36 @@ begin
         end if;
     end process reg_address_decode;
 
+    slv_ctrl_reg <= reg_content;
+
     -- Register generator:
+
+    -- Auto modify for bidirectional registers:
+
+    -- Automatically set the hardware write enable bit when 
+    -- the value from hardware changes (ie differs from the value 
+    --   sent to hardware ^= the value stored in the register)
+    p_auto_mod_enable: process(slv_status_reg, reg_content, arr_sw_data_in_ena, slv_reg_config, slv_reg_modify) is
+    begin
+        for N in 0 to REG_COUNT - 1 loop
+            if ((AUTO_HW_REG_MODIFY_BIT = True) and (slv_reg_config(N) = AS_REG_BOTH)) then
+                if slv_status_reg(N) /= reg_content(N) then
+                    reg_modify_arr(N) <= '1';
+                elsif arr_sw_data_in_ena(N) = '1' then
+                    reg_modify_arr(N) <= '0';
+                else
+                    reg_modify_arr(N) <= '0';
+                end if;
+            else
+                reg_modify_arr(N) <= slv_reg_modify(N);
+            end if;
+        end loop;
+    end process;
+
     -- Generate the maximum register number according to the register configuration table
     -- Registers configured as "00" should be optimized out during optimization phases of synthesis
     module_registers: for N in 0 to REG_COUNT - 1 generate
-        
+
         generic_register_slice: as_generic_regslice
         generic map(
             REG_DATA_WIDTH => REG_DATA_WIDTH
@@ -191,12 +233,10 @@ begin
             sw_byte_mask => sw_byte_mask,
             sw_data_in_ena => arr_sw_data_in_ena(N),
             hw_data_in => slv_status_reg(N),
-            hw_data_out => slv_ctrl_reg(N),
-            hw_modify => slv_reg_modify(N));
+            hw_data_out => reg_content(N),
+            hw_modify => reg_modify_arr(N));
             
     end generate;
     
 end architecture RTL;
-
-
 

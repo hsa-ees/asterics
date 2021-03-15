@@ -31,9 +31,10 @@
 /** 
  * @file  as_threshold.h
  * @brief Driver (header file) for as_threshold module.
- *
- * \defgroup as_threshold Module as_threshold
- * 
+ * \addtogroup asterics_modules
+ * @{
+ * \defgroup as_threshold as_threshold: Two-Value Thresholding
+ * @}
  * This module thresholds image data by taking two threshold values into account. 
  * 
  * The lower threshold t1 and the upper threshold t2 separate the occuring image data values into 3 ranges:

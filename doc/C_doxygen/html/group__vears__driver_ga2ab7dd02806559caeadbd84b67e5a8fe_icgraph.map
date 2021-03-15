@@ -1,0 +1,4 @@
+<map id="vears_enable" name="vears_enable">
+<area shape="rect" id="node1" title="Enable the VEARS module, if it was previously disabled." alt="" coords="140,5,249,32"/>
+<area shape="rect" id="node2" href="$group__vears__driver.html#ga37c9f106f54f6984a44897e5db7674a4" title="Initialize and reset the VEARS module." alt="" coords="5,5,92,32"/>
+</map>

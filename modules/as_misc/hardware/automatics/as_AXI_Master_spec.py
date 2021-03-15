@@ -27,7 +27,7 @@ of the ASTERICS support module AXI_Master.
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -39,11 +39,27 @@ of the ASTERICS support module AXI_Master.
 # @author Philip Manke
 # @brief Specifics for AXI_Master used by as_automatics
 # -----------------------------------------------------------------------------
+import os
 
 from as_automatics_module import AsModule
 from as_automatics_interface import Interface
 from as_automatics_port import Port
 from as_automatics_generic import Generic
+from as_automatics_logging import get_log
+
+LOG = get_log()
+
+xilinx_path = None
+try:
+    xilinx_path = os.environ.get("XILINX_VIVADO")
+except KeyError:
+    LOG.warning(
+        (
+            "Xilinx Vivado is not sourced! Files required to use module "
+            "AXI_Master may not be automatically included in the project."
+        )
+    )
+
 
 class AXIMasterExternal(Interface):
     def __init__(self):
@@ -53,98 +69,190 @@ class AXIMasterExternal(Interface):
         self.add_port(Port("m_axi_aresetn"))
         self.add_port(Port("m_axi_arready"))
         self.add_port(Port("m_axi_arvalid", direction="out"))
-        self.add_port(Port("m_axi_araddr", direction="out", 
-                           data_type="std_logic_vector",
-                           data_width=Port.DataWidth(a="C_M_AXI_ADDR_WIDTH - 1",
-                                                     sep="downto", b=0)))
-        self.add_port(Port("m_axi_arlen", direction="out",
-                           data_type="std_logic_vector",
-                           data_width=Port.DataWidth(a=7, sep="downto", b=0)))
-        self.add_port(Port("m_axi_arsize", direction="out",
-                           data_type="std_logic_vector",
-                           data_width=Port.DataWidth(a=2, sep="downto", b=0)))
-        self.add_port(Port("m_axi_arburst", direction="out",
-                           data_type="std_logic_vector",
-                           data_width=Port.DataWidth(a=1, sep="downto", b=0)))
-        self.add_port(Port("m_axi_arprot", direction="out",
-                           data_type="std_logic_vector",
-                           data_width=Port.DataWidth(a=2, sep="downto", b=0)))
-        self.add_port(Port("m_axi_arcache", direction="out",
-                           data_type="std_logic_vector",
-                           data_width=Port.DataWidth(a=3, sep="downto", b=0)))
+        self.add_port(
+            Port(
+                "m_axi_araddr",
+                direction="out",
+                data_type="std_logic_vector",
+                data_width=Port.DataWidth(
+                    a="C_M_AXI_ADDR_WIDTH - 1", sep="downto", b=0
+                ),
+            )
+        )
+        self.add_port(
+            Port(
+                "m_axi_arlen",
+                direction="out",
+                data_type="std_logic_vector",
+                data_width=Port.DataWidth(a=7, sep="downto", b=0),
+            )
+        )
+        self.add_port(
+            Port(
+                "m_axi_arsize",
+                direction="out",
+                data_type="std_logic_vector",
+                data_width=Port.DataWidth(a=2, sep="downto", b=0),
+            )
+        )
+        self.add_port(
+            Port(
+                "m_axi_arburst",
+                direction="out",
+                data_type="std_logic_vector",
+                data_width=Port.DataWidth(a=1, sep="downto", b=0),
+            )
+        )
+        self.add_port(
+            Port(
+                "m_axi_arprot",
+                direction="out",
+                data_type="std_logic_vector",
+                data_width=Port.DataWidth(a=2, sep="downto", b=0),
+            )
+        )
+        self.add_port(
+            Port(
+                "m_axi_arcache",
+                direction="out",
+                data_type="std_logic_vector",
+                data_width=Port.DataWidth(a=3, sep="downto", b=0),
+            )
+        )
         self.add_port(Port("m_axi_rready", direction="out"))
         self.add_port(Port("m_axi_rvalid"))
-        self.add_port(Port("m_axi_rdata", data_type="std_logic_vector",
-                           data_width=Port.DataWidth(a="C_M_AXI_DATA_WIDTH - 1",
-                                                     sep="downto", b=0)))
-        self.add_port(Port("m_axi_rresp", data_type="std_logic_vector",
-                           data_width=Port.DataWidth(a=1, sep="downto", b=0)))
+        self.add_port(
+            Port(
+                "m_axi_rdata",
+                data_type="std_logic_vector",
+                data_width=Port.DataWidth(
+                    a="C_M_AXI_DATA_WIDTH - 1", sep="downto", b=0
+                ),
+            )
+        )
+        self.add_port(
+            Port(
+                "m_axi_rresp",
+                data_type="std_logic_vector",
+                data_width=Port.DataWidth(a=1, sep="downto", b=0),
+            )
+        )
         self.add_port(Port("m_axi_rlast"))
         self.add_port(Port("m_axi_awready"))
         self.add_port(Port("m_axi_awvalid", direction="out"))
-        self.add_port(Port("m_axi_awaddr", direction="out",
-                           data_type="std_logic_vector",
-                           data_width=Port.DataWidth(a="C_M_AXI_ADDR_WIDTH - 1",
-                                                     sep="downto", b=0)))
-        self.add_port(Port("m_axi_awlen", direction="out",
-                           data_type="std_logic_vector",
-                           data_width=Port.DataWidth(a=7, sep="downto", b=0)))
-        self.add_port(Port("m_axi_awsize", direction="out",
-                           data_type="std_logic_vector",
-                           data_width=Port.DataWidth(a=2, sep="downto", b=0)))
-        self.add_port(Port("m_axi_awburst", direction="out",
-                           data_type="std_logic_vector",
-                           data_width=Port.DataWidth(a=1, sep="downto", b=0)))
-        self.add_port(Port("m_axi_awprot", direction="out",
-                           data_type="std_logic_vector",
-                           data_width=Port.DataWidth(a=2, sep="downto", b=0)))
-        self.add_port(Port("m_axi_awcache", direction="out",
-                           data_type="std_logic_vector",
-                           data_width=Port.DataWidth(a=3, sep="downto", b=0)))
+        self.add_port(
+            Port(
+                "m_axi_awaddr",
+                direction="out",
+                data_type="std_logic_vector",
+                data_width=Port.DataWidth(
+                    a="C_M_AXI_ADDR_WIDTH - 1", sep="downto", b=0
+                ),
+            )
+        )
+        self.add_port(
+            Port(
+                "m_axi_awlen",
+                direction="out",
+                data_type="std_logic_vector",
+                data_width=Port.DataWidth(a=7, sep="downto", b=0),
+            )
+        )
+        self.add_port(
+            Port(
+                "m_axi_awsize",
+                direction="out",
+                data_type="std_logic_vector",
+                data_width=Port.DataWidth(a=2, sep="downto", b=0),
+            )
+        )
+        self.add_port(
+            Port(
+                "m_axi_awburst",
+                direction="out",
+                data_type="std_logic_vector",
+                data_width=Port.DataWidth(a=1, sep="downto", b=0),
+            )
+        )
+        self.add_port(
+            Port(
+                "m_axi_awprot",
+                direction="out",
+                data_type="std_logic_vector",
+                data_width=Port.DataWidth(a=2, sep="downto", b=0),
+            )
+        )
+        self.add_port(
+            Port(
+                "m_axi_awcache",
+                direction="out",
+                data_type="std_logic_vector",
+                data_width=Port.DataWidth(a=3, sep="downto", b=0),
+            )
+        )
         self.add_port(Port("m_axi_wready"))
         self.add_port(Port("m_axi_wvalid", direction="out"))
-        self.add_port(Port("m_axi_wdata", direction="out",
-                           data_type="std_logic_vector",
-                           data_width=Port.DataWidth(a="C_M_AXI_DATA_WIDTH - 1",
-                                                     sep="downto", b=0)))
-        self.add_port(Port("m_axi_wstrb", direction="out",
-                           data_type="std_logic_vector",
-                           data_width=Port.DataWidth(
-                               a="C_M_AXI_DATA_WIDTH / 8 - 1", sep="downto",
-                               b=0)))
+        self.add_port(
+            Port(
+                "m_axi_wdata",
+                direction="out",
+                data_type="std_logic_vector",
+                data_width=Port.DataWidth(
+                    a="C_M_AXI_DATA_WIDTH - 1", sep="downto", b=0
+                ),
+            )
+        )
+        self.add_port(
+            Port(
+                "m_axi_wstrb",
+                direction="out",
+                data_type="std_logic_vector",
+                data_width=Port.DataWidth(
+                    a="C_M_AXI_DATA_WIDTH / 8 - 1", sep="downto", b=0
+                ),
+            )
+        )
         self.add_port(Port("m_axi_wlast", direction="out"))
         self.add_port(Port("m_axi_bready", direction="out"))
         self.add_port(Port("m_axi_bvalid"))
-        self.add_port(Port("m_axi_bresp", data_type="std_logic_vector",
-                           data_width=Port.DataWidth(a=1, sep="downto", b=0)))
-        md_err = Port("md_error", direction="out", optional=True)
-        md_err.overwrite_rule("sink_missing", "set_value(open)")
+        self.add_port(
+            Port(
+                "m_axi_bresp",
+                data_type="std_logic_vector",
+                data_width=Port.DataWidth(a=1, sep="downto", b=0),
+            )
+        )
+        md_err = Port("md_error", direction="out")
         self.add_port(md_err)
 
         self.to_external = True
 
 
 def get_module_instance(module_dir: str) -> AsModule:
-    
+
     module = AsModule()
 
     module.add_local_interface_template(AXIMasterExternal())
-    
-    
+
     toplevel_file = "hardware/hdl/vhdl/AXI/AXI_Master.vhd"
     module.files = []
-    module.dependencies = ["fifo_fwft", "helpers"]
+    module.dependencies = []
+    module.show_in_browser = True
+    module.dev_status = AsModule.DevStatus.STABLE
+    module.module_type = AsModule.ModuleTypes.HARDWARE
+    module.module_category = "IO Infrastructure"
 
     # as_automatics now automatically parses the toplevel file and discovers
     # ports, generics, existing interfaces and register interfaces
-    module.discover_module("{mdir}/{toplevel}"
-                           .format(mdir=module_dir, toplevel=toplevel_file))
+    module.discover_module(module_dir + "/" + toplevel_file)
 
     internal_memory = module.get_interface("out")
     internal_memory.to_external = False
     internal_memory.instantiate_in_top = None
-    
+
     module.get_generic("C_M_AXI_DATA_WIDTH").set_value(None)
     module.get_generic("C_M_AXI_ADDR_WIDTH").set_value(None)
+
+    module.brief_description = "AXI Master interface. Usually automatically inserted by Automatics. Contains Xilinx-specific HDL code!"
 
     return module

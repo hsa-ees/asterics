@@ -1,0 +1,110 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% This file is part of the ASTERICS Framework. 
+%%
+%% (C) 2021 Hochschule Augsburg, University of Applied Sciences
+%% Efficient Embedded Systems Group
+%%
+%% Author(s): Gundolf Kiefer <gundolf.kiefer@hs-augsburg.de>
+%%            Philip Manke <philip.manke@hs-augsburg.de>
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 7. Modules %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% NOTE: Only modules from the public ASTERICS are documented here.
+%%       Please add documentation for the 'asterics-nonfree' and 
+%%       project-specific repos to '07int-modules.tex'!
+
+
+\chapter{Basic Modules} \label{ch:07-modules}
+
+The \asterics framework includes a multitude of processing and infrastructure modules.
+This chapter serves as the documentation of the functionality and user reference for the simpler \asterics modules.
+
+
+%\begin{verbatim}
+%[[
+%
+%TBD (MS/JS/alle):
+%
+%Für jedes existierende Modul ein Datenblatt 
+%- Umfang 1/2 - 1 Seite (komplexe Module + i2c nach Bedarf deutlich länger)
+%- Kurzbeschreibung (Zweck; ein Absatz)
+%- Symbolbild mit Ein- und Ausgängen
+%- Tabelle der Generics (Name, Typ, Bedeutung, sinnvolle Werte)
+%- Tabelle der Slave-Register (Name, Bitsfelder, Typ, Bedeutung, sinnvolle Werte)
+%- Besonderes Verhalten bzgl. der as_stream-Schnittstellen: 
+%optionale Leitungen, Stall-Unterstützung/-Latenz usw.
+%- Funktionalität des Modul-Treibers (Funktionsnamen, informell, dann Verweis
+%auf Doxygen-Doku).
+%
+%Die Form kann sich an der IP-Core-Beschreibungen (vgl. Xilinx EDK/Vivado) oder
+%einer CPU-Befehlssatzbeschreibung (vgl. ParaNut-Handbuch) orientieren.
+%
+%Vorschlag: Jemand (Julian? Michael?) erstellt zunächst ein Muster, das dann 
+%im zweiten Schritt für alle weiteren Module kopiert werden kann.
+%
+%]]
+%\end{verbatim}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  Memory IO %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Memory Interfaces}\label{ch:07-basic_mods-memory}
+
+\input{07-modules-memory-interfaces}
+
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Camera Modules %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Camera Interfaces}
+
+\input{07-modules-cameras}
+
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Converters and Adapters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Converters and Adapters}
+
+\input{07-modules-adapters}
+
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Image Processing %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Image Processing Modules}
+
+\input{07-modules-image-processing}
+
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Bus and Protocol Modules %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Protocol and Bus Modules}
+
+\input{07-05-modules-i2c}
+
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 2D Window Pipeline Modules %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{2D Window Modules}
+
+\input{07-modules-2d-filters}
+
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Other Modules %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Miscellaneous Modules}
+
+\input{07-modules-miscellaneous}
+
+
+
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VEARS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\input{07-modules-vears}
+

@@ -33,7 +33,15 @@
 ----------------------------------------------------------------------------------
 --! @file
 --! @brief This module calculates address and control signals for a memory requests.
+--! @addtogroup as_memwriter as_memreader
+--! @{
+--! @defgroup as_mem_address_generator Memory Address Generator
+--! This module generates addresses for memreader and memwriter modules.
+--! @}
 ----------------------------------------------------------------------------------
+
+--! @addtogroup as_mem_address_generator
+--! @{
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -69,6 +77,8 @@ port (
     burst_enable        : out std_logic                                           -- Determines if a burst is possible (single-beat otherwise)
 );
 end AS_MEM_ADDRESS_GENERATOR;
+
+--! @}
 
 architecture RTL of AS_MEM_ADDRESS_GENERATOR is
 

@@ -1,0 +1,6 @@
+<map id="as_automatics_cnn_layer.AsNNLayer" name="as_automatics_cnn_layer.AsNNLayer">
+<area shape="rect" id="node1" title="Class representing a CNN layer accelerator subsystem." alt="" coords="31,259,221,300"/>
+<area shape="rect" id="node2" href="$classas__automatics__2d__pipeline_1_1_as2_d_window_pipeline.html" title="Class that represents a 2D Window Pipeline of the ASTERICS Framework." alt="" coords="25,169,227,211"/>
+<area shape="rect" id="node3" href="$classas__automatics__module__group_1_1_as_module_group.html" title="Class representing a module containing more modules." alt="" coords="39,80,213,121"/>
+<area shape="rect" id="node4" href="$classas__automatics__module_1_1_as_module.html" title="Represents an ASTERICS hardware and/or software module." alt="" coords="5,5,247,32"/>
+</map>

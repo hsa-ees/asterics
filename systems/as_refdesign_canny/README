@@ -1,0 +1,135 @@
+  ,===========================================,
+  |                                           |
+  |  ASTERICS Framework Demonstration System  |
+  |                                           |
+  '==========================================='
+
+Authors: Michael Schaeferling <michael.schaeferling@hs-augsburg.de>
+         Philip Manke <philip.manke@hs-augsburg.de>
+Date of revision: 2021-03-15
+
+
+System Name: as_refdesign_canny
+
+
+NOTE: This system has known issues! Check the ASTERICS manual, chapter 9.2 for more information.
+
+
+Development environment: Xilinx Vivado 2019.1
+
+
+Target Boards: 
+  * Digilent ZYBO board (Zynq Z-7010, XC7Z010)
+
+  Note: Vivado Board Files must be installed!
+   Ensure you have installed the Vivado Board Files for your target
+   board. These files can be obtained from Digilent or Avnet (they call 
+   it "Board Definitions") and are placed in the Vivado installation
+   directory at '%Vivado-Dir/data/boards/board_files/'.
+
+
+Additional hardware required:
+  * OmniVision OV7670 image sensor, connected to Pmods JB and JC (Zybo)
+     -> use a "OV7670-Pmod Adapter v0.3" board for connection 
+        (see 'doc/' for information on the adapter board)
+  * a monitor, connected to the HDMI port (Zybo)
+
+
+Info on Vivado IP cores:
+  * ASTERICS: image data capture, processing and writing data to memory
+  * VEARS: for visualization (part of the ASTERICS framework)
+
+
+Software / demo system usage:
+  The demo software is located at 'software/'. See the ASTERICS 
+  reference software (should be part of the ASTERICS refernce design, 
+  located at 'asterics/') for further details.
+
+
+**************
+* Quickstart *
+**************
+  0) For proper operation of Vivado (needed to generate an ASTERICS IP 
+     core for Vivado and to build the system) make sure you source your 
+     Vivado environment:
+     > source <VIVADO-DIR>/settings64.sh
+     
+     Make sure you source the ASTERICS environment prior to any action 
+     in the project folder:
+     > source <ASTERICS-DIR>/settings.sh
+
+  1) Change to your project folder and build the ASTERICS IP core for 
+     use with Vivado (which will be integrated in the system):
+     > make asterics_vivado_cores
+
+  2) Build the whole system (hardware platform and demo software).
+     This step will take some minutes:
+     > make build_system
+
+  3) Connect your Zybo with a monitor (HDMI port) and connect to your 
+     computer. Also power on the board.
+     Then upload the hardware and software to the board:
+     > make run
+     For usage instructions of the demo software please refer to the 
+     README of the recent ASTERICS design.
+
+
+
+****************
+* Make Targets *
+****************
+
+  Following make targets help to use ASTERICS, either to use it to
+  generate a vendor independent core or to build a complete system
+  which is put to operation on the target board.
+
+  * asterics_core :         Generate a general ASTERICS core
+                            using "as_automatics", without the need for
+                            vendor tools (e.g. Vivado) or a board.
+                            Useful for vendor-indepenent evaluation of
+                            the ASTERICS framework / generator,
+                            but not needed for the system generation
+                            and board operation (for this, we use the
+                            target 'asterics_vivado_cores' instead).
+
+  * asterics_vivado_cores : Generate the ASTERICS IP core for
+                            Xilinx Vivado using "as_automatics"
+                            and populate the software reference
+                            implementation.
+
+  * build_system:           Generate and build the whole demo system
+                            (hardware + software) from sources.
+                      NOTE: run target 'asterics_vivado_cores' before!
+
+  * run:                    Run the demo on the target board.
+                      NOTE: run target 'build_system' before!
+
+  * all / build_and_run :   The lazy target: performs all needed steps
+                            automatically, no more interaction needed.
+                            This one uses following targets:
+                              1) asterics_vivado_cores
+                              2) build_system
+                              3) run
+                            Just make sure to connect the board, as it
+                            will be programmed right after hardware and
+                            software are built.
+
+
+
+Directory structure:
+ - as_refdesign_zynq/
+   |- README:         This file.
+   |- doc/:           additional documentation
+   |- Makefile:       The main Makefile to build and run the system
+   |- asterics/:      ASTERICS (reference) designs. Each design should 
+   |                  contain a hardware definition and a suitable demo 
+   |                  software.
+   |- hardware/
+   |  |- boards/:     board support files (blockdesign, constraints, ...)
+   |  |- build/:      build directory, system level (generated)
+   |  '- build.bd/:   build directory for blockdesign files (generated)
+   |- software/:      Demo software for ASTERICS image processing
+   |- vivado_cores/:  ASTERICS IP core repository, containing the
+   |                  ASTERICS IP cores for use in Vivado (generated)
+   '- asterics_core/: ASTERICS core (generated; Vivado is not needed to 
+                      build this)

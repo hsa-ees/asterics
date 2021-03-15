@@ -1,0 +1,180 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% This file is part of the ASTERICS Framework. 
+%%
+%% Copyright (C) Hochschule Augsburg, University of Applied Sciences
+%% Efficient Embedded Systems Group
+%%
+%% Author(s): Gundolf Kiefer <gundolf.kiefer@hs-augsburg.de>
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 4. Software Interface %%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\chapter{The \asterics Software Stack} \label{ch:04-software}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 4.1. Overview %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section{Overview on the \asterics Software Stack}
+
+\secauthor{Alexander Zöllner, Philip Manke, Gundolf Kiefer}
+
+\asterics offers a sophisticated software stack, which allows to conveniently interface any kind of \asterics-based hardware image processing chain. 
+The software stack is divided into layers, which gradually abstract from the actual hardware. 
+Figure~\ref{fig:software-stack} shows the layers of the \asterics software stack, ranging from implementation specifics at the bottom, up to user application software at the top. 
+\textit{Layer 0} comprises vendor and platform specific libraries of the utilized FPGA and CPU, which are included depending on the chosen settings in the \asterics configuration. 
+The \asterics configuration contains supported features available to \asterics, such as the type of operating system.
+ 
+The \asterics \textit{Support Library} (\textit{ASL}), located in \textit{Layer 1}, adopts the settings of the \asterics configuration, includes required vendor and platform libraries. 
+The \textit{ASL} performs actual accesses to the underlying hardware and thus is the only part of the \asterics software stack with external dependencies. 
+Unified interfaces are offered to the higher layers, which are unaffected by the settings of the \asterics configuration. 
+Merely their underlying implementation in the \textit{ASL} are altered. 
+
+\textit{Layer 2} contains the \asterics module drivers, which offer methods for accessing the corresponding hardware module and obtaining its status information by using the interfaces provided by the \textit{ASL}. 
+The module drivers also define descriptive aliases for address calculation and proper bit masking. 
+
+The \texttt{asterics.h} library in \textit{Layer 3} is the resulting library for the application software and includes the \asterics module drivers as well as  the \textit{ASL}.
+It also contains specific information about the hardware image processing chain implemented on the FPGA, such as absolute addresses of the hardware modules.
+
+The application software in \textit{Layer 4} is able to access the interfaces of each layer directly by including \texttt{asterics.h}.
+
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\linewidth,clip]{figs/software_stack.png}
+    \caption{Overview of the \asterics software stack}
+    \label{fig:software-stack}
+\end{figure}
+
+
+
+%%%%%%%%%%%%%%%%%%% 4.2. ASTERICS Support Library %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section{The \asterics Support Library (ASL)}
+
+\secauthor{Alexander Zöllner, Gundolf Kiefer}
+
+
+The \textit{\asterics Support Library} is the main interface between hardware and application software within the \asterics framework.
+It contains all vendor and platform dependencies for performing the actual hardware accesses.
+Towards software, the \textit{ASL} offers static register-based interfaces to the \asterics hardware modules of the hardware image processing chain and a number of utilities, such as for synchronization or memory allocation.
+The \textit{ASL} uses the appropriate implementation for the corresponding functionality, depending on the environment parameter settings within \texttt{as\_config.h}.
+Therefore, the \textit{ASL} has to be included across the \asterics software stack, whenever a piece of software indents to access the hardware or utilizing mechanics which are platform dependent.
+
+
+
+
+%%%%%%%%%%%%%%%%%%% 4.3. ASTERICS Support Package %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section{Contents of an \asterics Support Package (ASP)}
+
+\secauthor{Alexander Zöllner, Philip Manke, Gundolf Kiefer}
+
+Table~\ref{table:asp-contents} shows the contents of an \textit{\asterics Support Package}, used for describing a specific hardware image processing chain and choosing the target environment of the \textit{ASP}.
+If a given hardware image processing chain is to be utilized for several environments, a corresponding \textit{ASP} has to be provided for each one.
+Although most contents of the \asterics software stack can be copied for multiple \textit{ASPs} and processing chains, some parts have to be replaced, since they depend on the actual hardware implementation and the environment.
+The files \texttt{asterics.h} and \texttt{as\_config.mk} are the only ones which are affected.
+The former has to be updated each time the underlying hardware image processing chain is altered in regards of its modules.
+This mainly includes adding or removing hardware modules, changing their pre-synthesis parameters or their absolute start address.
+Therefore, it is recommended to update the \textit{asterics.h} header file each time one of the parameters of the hardware image processing chain is touched.
+On the other hand, the \texttt{as\_config.mk} file reflects the settings of the environment, on which the \textit{ASP} and hardware image processing chain is deployed.
+Prominent parameters are the whether an operating system is utilized or the SoC vendor, who usually provides low level software drivers for interfacing the hardware.
+Thus, it only needs to be replaced when the target environment changes (which usually occurs less frequent than changing the hardware implementation during development).
+The remaining files of the \textit{ASP} are left untouched across multiple hardware image processing chains and environments.
+
+
+\begin{longtable}[ht]{|l|l|l|}
+    \hline
+    \multicolumn{1}{|c|}{\textbf{File Name}} & \multicolumn{1}{c|}{\textbf{Includes}} & \multicolumn{1}{c|}{\textbf{Description}}\\
+    \hline 
+    \hline 
+    \endhead
+    
+    asterics.h & \parbox{5cm}{\ \\
+        as\_support.h\\
+        as\_\texttt{<}\textit{module}\texttt{>}.h\\
+    } &
+    \parbox{7cm}{\ \\
+        Library to be included by the user application software.\\
+        Inlcudes all module driver headers and defines hardware addresses.\\
+    }\\
+    \hline
+    as\_support.h & \parbox{5cm}{\ \\
+        as\_config.h\\
+        as\_kernel\_linux\_if.h(*)\\
+    } &
+    \parbox{7cm}{\ \\
+        The \textit{\asterics Support Library} for vendor abstraction and interfacing the hardware.\\
+        (*) Only included when compiled for Linux kernel or POSIX compliant operating systems.\\
+    }\\
+    \hline
+    as\_support.c & \parbox{5cm}{\ \\
+        as\_support.h\\
+    } &
+    \parbox{7cm}{\ \\
+        Contains the function definitions for the \textit{\asterics Support Library}.\\
+    }\\
+    \hline
+    as\_\texttt{<}$module$\texttt{>}.h & \parbox{5cm}{\ \\
+        as\_support.h\\
+    } &
+    \parbox{7cm}{\ \\
+        Provides macros and interface functions of the associated hardware module.\\
+        $module$ is replaced by the actual name of the hardware module.\\
+    }\\
+    \hline
+    as\_\texttt{<}module\texttt{>}.c & \parbox{5cm}{\ \\
+        as\_\texttt{<}$module$\texttt{>}.h\\
+    } &
+    \parbox{7cm}{\ \\
+        Implements the functionality of the module driver.\\
+    }\\
+    \hline
+    as\_config.h &  &
+    \parbox{7cm}{\ \\
+        Contains macros for defining the environment the \textit{ASP} is built for.\\
+        It is generated from as\_config.mk.\\
+    }\\
+    \hline
+    as\_config.c &  &
+    \parbox{7cm}{\ \\
+        Contains an identification number and build date of config.h.\\
+        It is generated from as\_config.mk or by \textit{Automatics}.\\
+    }\\
+    \hline
+    as\_config.mk &  &
+    \parbox{7cm}{\ \\
+        Sets the platform and operating system configuration of the \textit{ASP}\\
+        Makefile fragment.\\
+    }\\
+    \hline
+    
+    \caption{Contents of an \textit{\asterics Support Package (ASP)} for a specific \textit{\asterics chain}.}
+    \label{table:asp-contents}
+\end{longtable}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 4.4. as_memio %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\input{04-04-software-as_memio.tex}
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 4.5. Linux Driver %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\input{04-05-software-linux.tex}

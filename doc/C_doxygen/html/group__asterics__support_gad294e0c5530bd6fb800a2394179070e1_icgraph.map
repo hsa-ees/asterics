@@ -1,0 +1,42 @@
+<map id="as_mutex_lock" name="as_mutex_lock">
+<area shape="rect" id="node1" title=" " alt="" coords="2401,451,2521,477"/>
+<area shape="rect" id="node2" href="$group__ctrl__file__ops.html#gae869fa3bd595179fcf2a22ff931aee9c" title=" " alt="" coords="2204,273,2328,300"/>
+<area shape="rect" id="node3" href="$group__mmap__file__ops.html#gab078c489a563497f4da70a9f6115dfce" title=" " alt="" coords="2205,324,2327,351"/>
+<area shape="rect" id="node4" href="$group__asterics__support.html#ga284d9e0d170cf7cabc16ccd7e62d95bd" title=" " alt="" coords="2228,375,2304,401"/>
+<area shape="rect" id="node36" href="$group__memio__file__ops.html#gabc26947002eedee4c4557faff325074e" title=" " alt="" coords="2181,425,2351,452"/>
+<area shape="rect" id="node37" href="$group__memio__file__ops.html#gafff67fc067850f545e90c7e487f4fbce" title=" " alt="" coords="2179,476,2353,503"/>
+<area shape="rect" id="node38" href="$group__mmap__file__ops.html#ga2818d1d7a0430100ab879f5a385e849b" title=" " alt="" coords="2201,527,2331,553"/>
+<area shape="rect" id="node39" href="$group__mmap__file__ops.html#gae18f99f9774b7224e71d80209ecd0bf4" title=" " alt="" coords="2183,577,2349,604"/>
+<area shape="rect" id="node40" href="$group__mmap__file__ops.html#gaeea3980f5b633c4b83ff46b2efc2ea10" title=" " alt="" coords="2181,628,2351,655"/>
+<area shape="rect" id="node5" href="$group__asterics__support.html#ga82169f81e9d09b61493b8a6d14ac7d15" title=" " alt="" coords="2020,349,2131,376"/>
+<area shape="rect" id="node6" href="$group__asterics__support.html#gab803703ab5b845023ca31b7b2664419c" title=" " alt="" coords="2036,400,2115,427"/>
+<area shape="rect" id="node7" href="$group__as__iic__wait.html#gad3cfec26b8a73166e060108cf1444a2b" title=" " alt="" coords="1815,291,1972,333"/>
+<area shape="rect" id="node12" href="$group__as__iic__user.html#ga812d9e16a61b39777a5fbffc7eccbc8d" title=" " alt="" coords="717,144,840,171"/>
+<area shape="rect" id="node21" href="$group__as__iic__user.html#ga987a7c89e5d900225a42f04583e0cfe7" title=" " alt="" coords="713,349,844,376"/>
+<area shape="rect" id="node30" href="$group__as__iic__helpers.html#gaa8ce9ac10b8c2ca9b614110ca5cbeff5" title=" " alt="" coords="1293,349,1504,376"/>
+<area shape="rect" id="node31" href="$group__as__iic__helpers.html#ga67cc002a1b20c75dc26f7b328ca5ddc9" title=" " alt="" coords="1552,197,1767,224"/>
+<area shape="rect" id="node32" href="$group__as__iic__wait.html#ga15d70ebfd78cef86f9b0e28d2c78adad" title=" " alt="" coords="1815,553,1972,594"/>
+<area shape="rect" id="node33" href="$group__as__iic__wait.html#ga0bc5aad64893b674c42943fb64d17676" title=" " alt="" coords="1563,400,1755,427"/>
+<area shape="rect" id="node8" href="$group__as__iic__user.html#ga77245afd24eadd52f5845e23d82e777a" title=" " alt="" coords="1616,299,1703,325"/>
+<area shape="rect" id="node9" href="$group__as__iic__helpers.html#ga53e6050a2c66be89ac23084fd9de9c23" title=" " alt="" coords="1311,248,1487,275"/>
+<area shape="rect" id="node10" href="$group__as__iic__user.html#ga30385c0c387c1629188745edf9c824c1" title=" " alt="" coords="1081,299,1239,325"/>
+<area shape="rect" id="node20" href="$group__as__iic__user.html#ga76b6915b73f14abb8a200df4eefde6f3" title=" " alt="" coords="1095,400,1225,427"/>
+<area shape="rect" id="node22" href="$group__as__iic__user.html#ga5c5233652491e648a88292ae73b49ace" title=" " alt="" coords="1080,96,1240,123"/>
+<area shape="rect" id="node23" href="$group__as__iic__user.html#ga08fcff0dba9d6b4898291746d2206408" title=" " alt="" coords="1075,147,1245,173"/>
+<area shape="rect" id="node25" href="$group__as__iic__user.html#ga2a4e5ee19e84cc95de665e29b92ccda1" title=" " alt="" coords="1089,197,1231,224"/>
+<area shape="rect" id="node11" href="$group__as__iic__user.html#gacf3e3b915e1f15ed8bdc60ab4c129996" title=" " alt="" coords="898,299,1021,325"/>
+<area shape="rect" id="node13" href="$as__sensor__ov7670_8c.html#acb25afaea3e81940c50e327c45921f08" title=" " alt="" coords="517,132,665,159"/>
+<area shape="rect" id="node14" href="$group__as__sensor__ov7670.html#ga55b52e2499f96009197bfe90af6c7a41" title=" " alt="" coords="224,208,469,235"/>
+<area shape="rect" id="node16" href="$group__as__sensor__ov7670.html#gae1b977db2733432317fee8f0497eb67a" title=" " alt="" coords="228,56,465,83"/>
+<area shape="rect" id="node17" href="$group__as__sensor__ov7670.html#gadd11863e70497418c9d31c922945cbec" title=" " alt="" coords="240,157,453,184"/>
+<area shape="rect" id="node18" href="$group__as__sensor__ov7670.html#ga75ee4d998c858b26adae16b8140e8637" title=" " alt="" coords="244,5,449,32"/>
+<area shape="rect" id="node19" href="$as__sensor__ov7670_8c.html#ab5de18dc5dd74817505126a51487b8b1" title=" " alt="" coords="247,107,446,133"/>
+<area shape="rect" id="node15" href="$group__as__sensor__ov7670.html#ga419a3339eac0f6abb8eafe24e468ae49" title=" " alt="" coords="5,157,176,184"/>
+<area shape="rect" id="node24" href="$group__as__iic__user.html#ga35cd65c29b1f4abd1ca87ca51605e5cc" title=" " alt="" coords="892,147,1027,173"/>
+<area shape="rect" id="node26" href="$group__as__iic__user.html#ga5ae8936ee892843eda5df7b9a418bd52" title=" " alt="" coords="896,197,1023,224"/>
+<area shape="rect" id="node27" href="$as__sensor__ov7670_8c.html#ad5b49e677d2124f73482764e3270bb42" title=" " alt="" coords="518,208,665,235"/>
+<area shape="rect" id="node28" href="$group__as__sensor__ov7670.html#ga673b948f323ea0a23896c7dc4b0e05e3" title=" " alt="" coords="229,259,465,285"/>
+<area shape="rect" id="node29" href="$group__as__sensor__ov7670.html#ga45e866e9958d1c7d8e0b0dd206f01a9e" title=" " alt="" coords="245,309,449,336"/>
+<area shape="rect" id="node34" href="$group__as__iic__helpers.html#ga1662a1a0b29536bf7d74ede3f73598be" title=" " alt="" coords="1311,400,1486,427"/>
+<area shape="rect" id="node35" href="$group__as__iic__helpers.html#gad5e0aa9a71f8f0f65e1fbded8134b11f" title=" " alt="" coords="1309,299,1488,325"/>
+</map>

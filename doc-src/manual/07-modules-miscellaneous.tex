@@ -1,0 +1,15 @@
+
+\subsection{as\_global\_processing}
+
+\secauthor{Alexander Zöllner}
+
+\infobox{The module \texttt{as\_global\_processing} is currently not supported by the system generator Automatics and will likely be replaced by \texttt{as\_base\_registers} in the future.}
+
+\subsubsection{Brief Description}
+The \texttt{as\_global\_processing} is the software driver for the \texttt{asterics\_state/control} register for requesting the state of the \asterics-chain as well as for performing a reset on it.
+Access functions are provided by this software driver for accessing the aforementioned register correctly without having to remember the actual bit fields of the hardware mapping.
+It is expected that the status and control fields of the hardware modules within the \asterics-chain are mapped correctly to the fields of the \texttt{asterics\_state/control} register.
+
+
+\subsubsection{Register Interface}
+The register space is part of the \textit{Common Control and Status Registers} described in Chapter~\ref{ch:05-01-interfaces-general-common}.

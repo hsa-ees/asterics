@@ -1,0 +1,21 @@
+<map id="as_iic_get_control_reg" name="as_iic_get_control_reg">
+<area shape="rect" id="node1" title=" " alt="" coords="1535,208,1701,235"/>
+<area shape="rect" id="node2" href="$group__as__iic__bitchecks.html#ga2ef7a1f9767986f2033697f584cd4feb" title=" " alt="" coords="1322,81,1469,108"/>
+<area shape="rect" id="node15" href="$as__iic_8c.html#afea64b05722568dd3faeb338cfa059bc" title=" " alt="" coords="1319,132,1471,159"/>
+<area shape="rect" id="node16" href="$group__as__iic__user.html#ga01d635936dc80ddaa19a8d189603ead3" title=" " alt="" coords="1312,183,1479,209"/>
+<area shape="rect" id="node17" href="$group__as__iic__bitsetters.html#ga0fa3aeeb6d2854f9b27c344047bd820e" title=" " alt="" coords="1318,233,1473,260"/>
+<area shape="rect" id="node18" href="$group__as__iic__bitsetters.html#gaa51d06d83796c60001b40bff2dc35b68" title=" " alt="" coords="1321,285,1469,326"/>
+<area shape="rect" id="node19" href="$group__as__iic__bitsetters.html#ga3e0050e31ef365ba7813edd7fbcfa724" title=" " alt="" coords="1304,351,1487,377"/>
+<area shape="rect" id="node3" href="$group__as__iic__helpers.html#ga1662a1a0b29536bf7d74ede3f73598be" title=" " alt="" coords="1079,56,1254,83"/>
+<area shape="rect" id="node6" href="$group__as__iic__helpers.html#gad5e0aa9a71f8f0f65e1fbded8134b11f" title=" " alt="" coords="1077,107,1256,133"/>
+<area shape="rect" id="node4" href="$group__as__iic__user.html#ga76b6915b73f14abb8a200df4eefde6f3" title=" " alt="" coords="893,5,1023,32"/>
+<area shape="rect" id="node5" href="$group__as__iic__user.html#ga987a7c89e5d900225a42f04583e0cfe7" title=" " alt="" coords="893,56,1023,83"/>
+<area shape="rect" id="node7" href="$group__as__iic__user.html#ga2a4e5ee19e84cc95de665e29b92ccda1" title=" " alt="" coords="887,107,1029,133"/>
+<area shape="rect" id="node8" href="$group__as__iic__user.html#ga5ae8936ee892843eda5df7b9a418bd52" title=" " alt="" coords="712,107,839,133"/>
+<area shape="rect" id="node9" href="$as__sensor__ov7670_8c.html#ad5b49e677d2124f73482764e3270bb42" title=" " alt="" coords="517,107,664,133"/>
+<area shape="rect" id="node10" href="$group__as__sensor__ov7670.html#ga55b52e2499f96009197bfe90af6c7a41" title=" " alt="" coords="224,31,469,57"/>
+<area shape="rect" id="node12" href="$group__as__sensor__ov7670.html#ga673b948f323ea0a23896c7dc4b0e05e3" title=" " alt="" coords="229,81,465,108"/>
+<area shape="rect" id="node13" href="$group__as__sensor__ov7670.html#gadd11863e70497418c9d31c922945cbec" title=" " alt="" coords="240,132,453,159"/>
+<area shape="rect" id="node14" href="$group__as__sensor__ov7670.html#ga45e866e9958d1c7d8e0b0dd206f01a9e" title=" " alt="" coords="245,183,449,209"/>
+<area shape="rect" id="node11" href="$group__as__sensor__ov7670.html#ga419a3339eac0f6abb8eafe24e468ae49" title=" " alt="" coords="5,81,176,108"/>
+</map>

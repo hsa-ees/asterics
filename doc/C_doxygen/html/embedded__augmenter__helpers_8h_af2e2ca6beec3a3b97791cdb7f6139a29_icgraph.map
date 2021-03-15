@@ -1,0 +1,12 @@
+<map id="get_mask" name="get_mask">
+<area shape="rect" id="node1" title=" " alt="" coords="705,81,792,108"/>
+<area shape="rect" id="node2" href="$embedded__augmenter__helpers_8h.html#ad482a15ce1612031bfbfa46872e07fc8" title=" " alt="" coords="492,81,657,108"/>
+<area shape="rect" id="node3" href="$embedded__augmenter__lib_8h.html#a8293632e46c200ee9eb4e2546ef2c7a5" title=" " alt="" coords="272,5,431,32"/>
+<area shape="rect" id="node5" href="$embedded__augmenter__lib_8h.html#acff0686844917b78ce1855f5637ac805" title=" " alt="" coords="259,56,444,83"/>
+<area shape="rect" id="node7" href="$embedded__augmenter__lib_8h.html#acff31533f1e3855601782c6d7c4b44b1" title=" " alt="" coords="297,107,405,133"/>
+<area shape="rect" id="node9" href="$embedded__augmenter__lib_8h.html#a1e52ff893d4fa672d5f76efe07c95907" title=" " alt="" coords="279,157,424,184"/>
+<area shape="rect" id="node4" href="$group__vears__overlay.html#ga9ae919e4ba1dbc284c2c950956d90f77" title="Draw a filled circle of radius r around (x, y)." alt="" coords="19,5,197,32"/>
+<area shape="rect" id="node6" href="$group__vears__overlay.html#ga54e4da81a207af560f9c93aa38d2b5e2" title="Draw a filled rectangle. (x0, y0) is the upper&#45;left, (x1, y1) is the lower&#45;right corner,..." alt="" coords="5,56,211,83"/>
+<area shape="rect" id="node8" href="$group__vears__overlay.html#gac6917c882481994db3dd32e3a40f0326" title="Draw a line from (x0, y0) to (x1, y1)." alt="" coords="44,107,172,133"/>
+<area shape="rect" id="node10" href="$group__vears__overlay.html#ga8b400f489bc9781ef111507a9265a3cf" title="Draw a rectangle. (x0, y0) is the upper&#45;left, (x1, y1) is the lower&#45;right corner, respectively." alt="" coords="25,157,191,184"/>
+</map>

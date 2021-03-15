@@ -46,9 +46,6 @@ chain = asterics.new_chain()
 camera = chain.add_module("as_sensor_ov7670")
 camera.add_iic_master("XILINX_PL_IIC")
 
-# Splitter
-splitter = chain.add_module("as_stream_splitter")
-
 # Reader
 reader = chain.add_module("as_memreader")
 
@@ -78,22 +75,19 @@ writer1.set_generic_value("DIN_WIDTH", 32)
 
 # -------- Module connections ---------------------------
 
-chain.connect(camera, splitter)
-
-# original image path:
-chain.connect(splitter.get("0"), collect1)
-chain.connect(collect1, writer1)
+camera.connect(collect1)
+collect1.connect(writer1)
 
 # previous image read path:
-chain.connect(reader, disperse)
+reader.connect(disperse)
 
 # sync image pixels, diff and write back the result:
-chain.connect(disperse, sync.get("0", "in"))
-chain.connect(splitter.get("1"), sync.get("1", "in"))
-chain.connect(sync.get("0", "out"), diff.get("0", "in"))
-chain.connect(sync.get("1", "out"), diff.get("1", "in"))
-chain.connect(diff, collect0)
-chain.connect(collect0, writer0)
+disperse.connect(sync.get("0", "in"))
+camera.connect(sync.get("1", "in"))
+sync.get("0", "out").connect(diff.get("0", "in"))
+sync.get("1", "out").connect(diff.get("1", "in"))
+diff.connect(collect0)
+collect0.connect(writer0)
 
 
 ############### ↑ Difference System description ↑ ###############
@@ -137,4 +131,3 @@ if success:
 else:
     print("Automatics encountered errors:")
     asterics.list_errors()
-

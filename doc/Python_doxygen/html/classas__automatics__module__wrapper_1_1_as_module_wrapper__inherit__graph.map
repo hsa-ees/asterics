@@ -1,0 +1,5 @@
+<map id="as_automatics_module_wrapper.AsModuleWrapper" name="as_automatics_module_wrapper.AsModuleWrapper">
+<area shape="rect" id="node1" title="Class encapsulating an AsModule to manage generating an out&#45;of&#45;context Vivado run for it." alt="" coords="23,169,229,211"/>
+<area shape="rect" id="node2" href="$classas__automatics__module__group_1_1_as_module_group.html" title="Class representing a module containing more modules." alt="" coords="39,80,213,121"/>
+<area shape="rect" id="node3" href="$classas__automatics__module_1_1_as_module.html" title="Represents an ASTERICS hardware and/or software module." alt="" coords="5,5,247,32"/>
+</map>

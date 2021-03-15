@@ -1,0 +1,8 @@
+<map id="vears_draw_rectangle" name="vears_draw_rectangle">
+<area shape="rect" id="node1" title="Draw a rectangle. (x0, y0) is the upper&#45;left, (x1, y1) is the lower&#45;right corner, respectively." alt="" coords="5,56,171,83"/>
+<area shape="rect" id="node2" href="$ea__draw__rectangle_8c.html#a8c4f12439a3a968effe230d39f8c900f" title=" " alt="" coords="236,31,381,57"/>
+<area shape="rect" id="node6" href="$vears_8c.html#a5c9f2a05f3fe62106f55e90dbcc9cf53" title=" " alt="" coords="219,81,399,108"/>
+<area shape="rect" id="node3" href="$ea__draw__quick__line__h_8c.html#a822ca7b402ab5d265e9736ef4d0d6736" title=" " alt="" coords="447,5,612,32"/>
+<area shape="rect" id="node5" href="$ea__draw__quick__line__v_8c.html#a6796003d1cfc808748bf7157c949bfda" title=" " alt="" coords="447,56,612,83"/>
+<area shape="rect" id="node4" href="$ea__draw__quick__line__h_8c.html#a57780e02c723be87fd9cac22302de8a0" title=" " alt="" coords="660,5,747,32"/>
+</map>

@@ -1,0 +1,57 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% This file is part of the ASTERICS Framework. 
+%%
+%% Copyright (C) Hochschule Augsburg, University of Applied Sciences
+%% Efficient Embedded Systems Group
+%%
+%% Author(s): Gundolf Kiefer <gundolf.kiefer@hs-augsburg.de>
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\section{The \asterics 2D Window Filter Interface (\texttt{as\_window})} \label{ch:05-03-interfaces-as_window}
+
+\secauthor{Philip Manke}
+
+\subsection{Signal Overview}
+
+The \texttt{as\_window} interface is used for modules requiring access to multiple pixels simultaneously from the image stream.
+This is the case with filter modules, such as blurring, sharpening and edge detection filters and for operations such as non-maximum-suppression.
+This interface provides the module with a rectangular window of pixels from the image stream, within the architecture of the 2D Window Pipeline, which is based on \cite{pohl_efficient_2014}.
+
+The \texttt{as\_window} interface signals are listed in Table~\ref{05-04-as_2d_window_filter_signals}. Signals denoted with a right arrow ($\rightarrow$) in column "Direction" are outputs of the filter module. Accordingly, signals denoted with a left arrow ($\leftarrow$) are inputs for the filter module.
+Optional signals are marked with an asterisk (*).
+
+\begin{longtable}[ht]{|c|c|c|c|}
+\hline 
+\textbf{Signal} & \textbf{Direction} & \textbf{Data type} & \textbf{Description} \\
+%% \small (* = optional) & \small (source <dir> sink) & \small (if optional) & \\%%
+\hline 
+\hline 
+\endhead
+
+\texttt{WINDOW<$x$><$y$><$b$>} & $\rightarrow$ & \texttt{t\_generic\_window} &  
+\parbox{5,25cm}{ ~ \\ Data from 2D-sliding window buffer. \\ ~ \\ \small
+The data type \texttt{t\_generic\_window} must be used for this interface and is defined in the \asterics VHDL library in the package \texttt{generic\_filter}.
+The dimensions $x$ and $y$ describe the window width and height in pixels and $b$ describes the bit-width of the pixels.
+A filter module may have more than one \texttt{window\_in} port, though they must both be differentiated using suffixes and/or prefixes.
+\\ ~ } \\
+
+\hline 
+
+\texttt{STROBE} & $\rightarrow$ & \texttt{std\_logic} &
+\parbox{5,25cm}{ ~ \\ A new valid data item is present at the \texttt{WINDOW} port. \\ ~ \\ \small
+\\ ~ } \\
+
+\hline 
+
+\texttt{STALL (*)} & $\leftarrow$ & \texttt{std\_logic} &
+\parbox{5,25cm}{ ~ \\ Request to pause sending data. For details, see Section \ref{05-03-stall}.
+\\ ~ } \\
+
+\hline
+
+\caption{Signals of a \texttt{2D window filter} interface} \label{05-04-as_2d_window_filter_signals}\\
+\end{longtable}

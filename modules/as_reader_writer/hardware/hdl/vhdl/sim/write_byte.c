@@ -48,12 +48,12 @@ int write_byte(int addr, int data) {
 
     temp_file = fopen("temp.file","r");
     if (temp_file == NULL) {
-        perror("Error: Can not find 'temp.file', which should contain a filename.");
+        perror("Error in write_byte.c: Can not find 'temp.file', which should contain a filename.");
         return 1;
     }
     
     if ( fgets(file_name, FILE_NAME_SIZE-1, temp_file) == NULL ) {
-        perror("Error: 'temp.file' is empty. 'temp.file' should hold the filename to be read.\n");
+        perror("Error in write_byte.c: 'temp.file' is empty. 'temp.file' should hold the filename to be read.\n");
         return 1;
     }
     fclose(temp_file);
@@ -72,7 +72,7 @@ int write_byte(int addr, int data) {
         pFile = fopen(file_name,"a+b");
     }
     if (pFile==NULL) {
-        perror("Error: write_byte.c: fopen() failed.\n");
+        perror("Error in write_byte.c: fopen() failed.\n");
         return 1;
     }
 

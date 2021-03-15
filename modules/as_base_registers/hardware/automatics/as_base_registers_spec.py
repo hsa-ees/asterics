@@ -23,12 +23,12 @@ of the ASTERICS hardware module as_base_registers.
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation; either
 # version 3 of the License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -45,15 +45,18 @@ from as_automatics_module import AsModule
 
 
 def get_module_instance(module_dir):
-    
+
     module = AsModule()
     toplevel_file = "hardware/hdl/vhdl/as_base_registers.vhd"
 
     module.dependencies = ["as_regmgr"]
+    module.show_in_browser = False
+    module.dev_status = AsModule.DevStatus.WORK_IN_PROGRESS
+    module.module_type = AsModule.ModuleTypes.HARDWARE_SW_CTRL
+    module.module_category = "ASTERICS Infrastructure"
 
     # as_automatics now automatically parses the toplevel file and discovers
     # ports, generics, existing interfaces and register interfaces
-    module.discover_module("{mdir}/{toplevel}"
-                           .format(mdir=module_dir, toplevel=toplevel_file))
+    module.discover_module(module_dir + "/" + toplevel_file)
 
     return module

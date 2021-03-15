@@ -1,0 +1,54 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% This file is part of the ASTERICS Framework. 
+%%
+%% Copyright (C) Hochschule Augsburg, University of Applied Sciences
+%% Efficient Embedded Systems Group
+%%
+%% Author(s): Gundolf Kiefer <gundolf.kiefer@hs-augsburg.de>
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\section{Transferring Data between Hardware and Software}\label{ch:04-software-data-trans}
+
+\secauthor{Alexander Zöllner, Gundolf Kiefer}
+
+\subsection{Brief Description}
+
+The main purpose of the \asterics framework is enhancing image processing tasks using codesigns of hardware and software.
+This requires transferring data between both subsystems in a convenient and efficient manner.
+For accomplishing this task, the memory modules of \asterics are used for performing the actual data transfer. 
+Since setting up data transfers has to be managed by the software stack, respective methods are provided.
+These methods vary in their complexity and required overhead expected from the user.
+The appropriate method can be chosen depending on the requirements of the application.
+
+\subsection{Manual Data Transfer Management}
+This method is the most direct way for transferring data by interfacing the corresponding memory module, using their module driver (see Chapter~\ref{ch:07-basic-mods-in_out}).
+Here, a sufficient physically concurrent memory area has to be provided to the corresponding memory module, which is referred to as \textit{buffer} for (intermediately) storing data.
+The user is supposed to manage the contents of the \textit{buffer} manually, to prevent its under- or overflows as well as inadvertently overwriting data.
+Further, the status of the memory module has to be read from its hardware registers in order to determine whether a data transfer has been finished (\textit{state/control} register) or which parts of the \textit{buffer} have already been processed (\textit{current hw addr} register).
+The double buffering scheme of the memory modules for queuing data transfers may be used for utilizing more than one \textit{buffer}.
+
+Managing the data transfers directly gives the user exclusive control, allowing to also implement customized data transfer strategies.
+However, preventing data loss has to be taken care of explicitly.
+
+
+\subsection{POSIX-like Data Transfer Management}
+For transferring data in a more convenient manner, the \asterics framework offers POSIX-like interfaces to the user, which are part of the software module \texttt{as\_memio} (memory input/output).
+This module includes implementations for \textit{open}, \textit{read}, \textit{write} and \textit{close}, respectively.
+Instead of having the user manage the data transfers and organizing the \textit{buffer(s)} for the memory module manually, these tasks are carried out by \textit{as\_memio}.
+The user has to simply call \textit{open}, where the actual memory module is referenced.
+The \texttt{as\_memio} module handles the internal specifics required for setting up data transfers.
+These can be requested by calling either \textit{write} for transferring data to the hardware, using an \texttt{as\_memreader} module, or \textit{read} for obtaining data from the hardware processing chain, using an \texttt{as\_memwriter}.
+Here, an opaque structure is provided to \texttt{as\_memio} (which is obtained by \textit{open}), along with the desired amount of data and a \textit{user buffer}.
+This \textit{user buffer} is used for providing the data to be transferred or receiving data from \texttt{as\_memio}.
+Once the request from the user has been served, the actual number of transferred bytes are returned to the user, which may be equal or less than the requested number.
+Further, the \textit{user} buffer contains the amount of data, which has been served by the \texttt{as\_memio} module for \textit{read} calls.
+For \textit{write} calls, the \textit{user buffer} is left untouched and may be used immediately by the user again after the function returns.
+The \texttt{as\_memio} module internally manages the data for either direction and interfaces the associated memory module accordingly for transferring the data.
+Provided the hardware processing chain supports the \texttt{STALL} mechanic (see Chapter~\ref{ch:05-03-interfaces-as_stream}), the \texttt{as\_memio} module can guarantee that no data is lost.
+
+
+

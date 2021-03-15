@@ -1,0 +1,124 @@
+%%%%%%% Begin of document %%%%%%%
+
+
+\subsection{C Code}
+
+\secauthor{Michel Zink}
+
+\subsubsection{Introduction}\label{C-Introduction}
+
+This chapter defines rules and requirements for maintaining and developing C source code for the \asterics framework. The main emphasis hereby lies on the style and coding conventions of C source code itself, files- and directory-naming included.
+
+The purpose of this section is to enable good comprehensibility of the developed C source code across various software developers and increase its general quality.
+Thus, reducing the initial time required for acquiring understanding of a given source code and simplify its maintenance as well as accelerate the integration of new newly developed functionalities into the \asterics framework.
+
+The given requirements outlined in this document are based on the C99 standard as common ground.
+
+This chapter uses the expressions \textit{must/has to}, \textit{strongly recommended}, \textit{should} and \textit{can} to give information about the relevance of the coding convention in question.
+Rules or sections marked as \textit{must} are binding and are to be applied without exception.
+\textit{Strongly recommended} parts are to be always applied unless there is a valid reason for this rule being circumvented.
+Sections using the expression \textit{should} are considered good practice and usually improve the quality of the code.
+However, software developers are not obliged to conform to this kind of rule but are encouraged to do so.
+The least restrictive expression used in this document is \textit{can}.
+These parts generally provide only suggestions or general guidelines which may be applied.
+Software developers are free to choose equivalent or different rules for the sections marked as \textit{can}. 
+
+
+\subsubsection{General Requirements}\label{C-General-Requirements}
+
+All file names, comments, code and documentation must be written in English or have to be based on the English language. Further, only letters a-z, the underscore character \_ or numerals 0-9 must be used.
+
+For enabling compiler independent code, utilization of common language construct are strongly recommended.
+
+The line length of the code should be limited to 80 characters as much as possible. Longer lines tend to be more difficult to read. For this reason, it is strongly recommended to only use a single statement in each line.
+
+Only \textit{soft tabulators} (i.e. a sequence of single white spaces) must be used instead of \textit{hard tabulators} (i.e. tabulator key).
+The inferred space of hard tabulators are editor dependent and thus the actual indentation is likely to vary.
+A sequence of single white spaces are uniformly displayed across editors.
+It is strongly recommended to use a number of white spaces ranging from 2 to 4 for a single indentation.
+More white spaces make it easier to find blocks in the source code but increases the overall line length.
+
+
+\subsubsection{File Naming Convention}
+
+File names are made up of a base name, and an optional period and suffix. The first character of the name should be a letter and all characters (except the period) should be lower-case letters and numbers. The base name should be eight or fewer characters and the suffix should be three or fewer characters (four, if you include the period). These rules apply to both program files and default files used and produced by the program (e.g., "foobar.sav").
+
+In addition, it is conventional to use Makefile (not makefile) for the control file for make (for systems that support it) and "README" for a summary of the contents of the directory or directory tree.
+
+
+\subsubsection{Documentation}\label{C-Documentation}
+
+\paragraph{General:}
+All developed source code has to contain appropriate comments to simplify maintenance and to reduce the required time for other software developers to understand the code. For this reason, meaningful comments have to be written which clearly state the purpose of the following code instead of repeating the code in textual form (e.g. This is an assignment). The following sections cover the parts of the software which require comments. Further comments can be added as seen fit.
+
+\paragraph{Doxygen:}
+Variables and function prototypes should be commented with a doxygen compatible comment syntax to easily create a class documentation for the project. The syntax looks like:
+\begin{verbatim}
+/// Brief description.
+/** Detailed description. */
+\end{verbatim} 
+
+\paragraph{Standard Top Comment:}
+Each source file must contain a standardized comment at the start of the file, which contains important information. \ref{CHEADER} shows the structure of an exemplary header comment. The author must provide information for each entry (marked with \textless\textgreater). The \textit{Modified} entry has to be updated each time something has been changed on the current version of the module. Each file has to contain information about the license for this file. Since \asterics is an open framework, \textit{GNU GPL} is the most common license, however, a different license can be chosen.
+
+\begin{lstlisting}[style=CStyle, label=CHEADER, caption=\asterics C source file header]
+/**
+----------------------------------------------------------------------
+--  This file is part of the ASTERICS Framework. 
+--  (C) <year> Hochschule Augsburg, University of Applied Sciences
+----------------------------------------------------------------------
+-- File:           <file_name>.c/h
+--
+-- Company:        Efficient Embedded Systems Group 
+--                 University of Applied Sciences, Augsburg, Germany
+--                 http://ees.hs-augsburg.de
+--
+-- Author:         <main_author> [<year>], [<second_author> <year>]
+--
+-- [Modified:       <modification_author> - <year>: <description>]
+--
+-- Description:    <Detailed information about the purpose of this 
+--                 module>
+--                 
+----------------------------------------------------------------------
+--  <License text>
+----------------------------------------------------------------------
+--! @file <file_name>.c/h
+--! @brief <concise description about the purpose of this module>
+----------------------------------------------------------------------
+*/
+\end{lstlisting}
+
+
+\subsubsection{Naming Conventions}
+
+\paragraph{Pointer Declarations:}
+The pointer qualifier "*" should be written at the variable name, instead of the type.
+This prevents misreading when multiple variables are declared in one line like:
+\begin{verbatim}
+CORRECT:    char *s, *d, *o;  // All variables are pointers
+WRONG:      char* s, d, o;    // Only s is a pointer
+\end{verbatim}
+This also affects function parameters.
+
+
+\paragraph{Typedefs and Structs:}
+
+Typedefs are an easy way of creating a synonym for data types and change them later if needed.
+To identify typedefs easily, they have to be named with a \textit{"\_t"} suffix.
+When using a typedef on a struct a suffix \textit{"\_s"} has to be appended to the typedef name to differentiate it from typedefs of simple data types.
+Struct names without typedefs do not require the suffix, as they have to be explicitly referenced using the \textit{struct} keyword, though it is recommended to keep a consistent coding style.
+
+
+\paragraph{Constants, Enumerations and Macros:}
+
+Constants have to be added with the \textit{\#define} feature of the C preprocessor.
+Symbolic constants make the code easier to read.
+Defining the value in one place also makes it easier to administer large programs since the constant value can be changed uniformly by changing only the define.
+The enumeration data type is a better way to declare variables that take on only a discrete set of values, since additional type checking is often available. 
+
+Constants, Enumerations and Macros must be named with capital letters.
+When the name has more than one word, the words should be separated with underscores to guarantee the readability.
+
+\paragraph{Functions:} Words in function names have to be in written in lowercase and separated with underscores. 
+

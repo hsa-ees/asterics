@@ -27,7 +27,7 @@ of the ASTERICS hardware support library 'generic_filter'.
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -35,9 +35,9 @@ of the ASTERICS hardware support library 'generic_filter'.
 #
 # --------------------- DOXYGEN -----------------------------------------------
 ##
-# @file as_filter_mask_spec.py
+# @file as_generic_filter_spec.py
 # @author Philip Manke
-# @brief Specifics for support library 'filter_mask' used by as_automatics
+# @brief Specifics for support library 'generic_filter' used by as_automatics
 # -----------------------------------------------------------------------------
 
 from as_automatics_module import AsModule
@@ -48,7 +48,7 @@ def get_module_instance(module_dir: str) -> AsModule:
 
     module.files = ["hardware/hdl/vhdl/pkg/as_generic_filter_pkg.vhd"]
     module.dependencies = []
-    
+
     # As this is not a typical Automatics module (no VHDL entity)
     # we manually set the necessary attributes,
     # so Automatics can work with it normally
@@ -60,12 +60,9 @@ def get_module_instance(module_dir: str) -> AsModule:
     module.standard_ports = []
     module.ports = []
     module.interfaces = []
-
-    # Automatic module discovery would run into errors (no entity in 'as_generic_filter_pkg')
-    # as_automatics now automatically parses the toplevel file and discovers
-    # ports, generics, existing interfaces and register interfaces
-    #module.discover_module("{mdir}/{toplevel}"
-    #                       .format(mdir=module_dir, toplevel=toplevel_file))
-
+    module.show_in_browser = False
+    module.dev_status = AsModule.DevStatus.BETA
+    module.module_type = AsModule.ModuleTypes.LIBRARY
+    module.module_category = "Internal Libraries"
 
     return module

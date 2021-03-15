@@ -37,6 +37,7 @@ of Automatics.
 # --------------------- DOXYGEN -----------------------------------------------
 ##
 # @file as_automatics_gui.py
+# @ingroup automatics_gui_legacy
 # @author Philip Manke
 # @brief GUI module (PyQT5) for the interactive mode of Automatics.
 # -----------------------------------------------------------------------------
@@ -52,11 +53,28 @@ import copy
 
 if __name__ == "__main__":
 
-    source_dir = sys.argv[0].rsplit("/", maxsplit=1)[0]
-    asterics_dir = source_dir.rsplit("/", maxsplit=2)[0]
+    # Initialization: Get ASTERICS installation directory
+    asterics_home = None
+
+    try:
+        asterics_home = os.environ.get("ASTERICS_HOME")
+    except KeyError:
+        print("ERROR: ASTERICS_HOME not set!")
+        print("Source the ASTERICS settings.sh file before running Automatics!")
+        print("Use: source <path/to/asterics/>settings.sh")
+        exit()
+
+    automatics_home = None
+    try:
+        automatics_home = os.environ.get("ASTERICS_AUTOMATICS_HOME")
+    except KeyError:
+        print("ERROR: ASTERICS_AUTOMATICS_HOME not set!")
+        print("Source the ASTERICS settings.sh file before running Automatics!")
+        print("Use: source <path/to/asterics/>settings.sh")
+        exit()
 
     # print("Importing Automatics from '{}'...".format(source_dir))
-    sys.path.append(source_dir)
+    sys.path.append(automatics_home)
 
     # Import Automatics
 
@@ -64,6 +82,7 @@ if __name__ == "__main__":
 
     as_log.init_log(loglevel_console="WARNING", loglevel_file="INFO")
     import as_automatics_exceptions as as_err
+    from asterics import Automatics_version
     from as_automatics_env import AsAutomatics
     from as_automatics_proc_chain import AsProcessingChain
     from as_automatics_module import AsModule
@@ -71,7 +90,7 @@ if __name__ == "__main__":
     from as_automatics_interface import Interface
     from as_automatics_module_lib import AsModuleLibrary
     from as_automatics_generic import Generic
-    from as_automatics_window_module import AsWindowModule
+    from as_automatics_2d_window_module import AsWindowModule
     from as_automatics_register import SlaveRegisterInterface
 
     class OutLog:
@@ -99,6 +118,7 @@ if __name__ == "__main__":
             if self.out:
                 self.out.flush()
 
+    ## @ingroup automatics_gui_legacy
     class GUI(qtw.QMainWindow):
         MODULE_VIEW = "mod"
         INTERFACE_VIEW = "inter"
@@ -121,12 +141,16 @@ if __name__ == "__main__":
             # Add repo button
             add_repo_button = qtw.QAction("Add Repository", self)
             add_repo_button.setShortcut("Ctrl+N")
-            add_repo_button.setStatusTip("Select a Folder to Scan for ASTERICS Modules")
+            add_repo_button.setStatusTip(
+                "Select a Folder to Scan for ASTERICS Modules"
+            )
             add_repo_button.triggered.connect(self.add_repo_action)
             file_menu.addAction(add_repo_button)
 
             # Text fixed font
-            fixedfont = qtg.QFontDatabase.systemFont(qtg.QFontDatabase.FixedFont)
+            fixedfont = qtg.QFontDatabase.systemFont(
+                qtg.QFontDatabase.FixedFont
+            )
             fixedfont.setPointSize(12)
 
             # Main vertical layout
@@ -200,8 +224,12 @@ if __name__ == "__main__":
             self.interlist.setHorizontalHeaderLabels(
                 ("Name", "Type", "Direction / Value")
             )
-            self.interlist.setSelectionBehavior(qtw.QAbstractItemView.SelectItems)
-            self.interlist.setSelectionMode(qtw.QAbstractItemView.SingleSelection)
+            self.interlist.setSelectionBehavior(
+                qtw.QAbstractItemView.SelectItems
+            )
+            self.interlist.setSelectionMode(
+                qtw.QAbstractItemView.SingleSelection
+            )
             self.interlist.doubleClicked.connect(self.detailed_view_action)
             self.interlist.clicked.connect(self.inter_clicked)
             self.table_layout.addWidget(self.interlist)
@@ -212,9 +240,15 @@ if __name__ == "__main__":
             self.portlist.setMinimumSize(10, 10)
             self.portlist.setEditTriggers(qtw.QAbstractItemView.NoEditTriggers)
             self.portlist.setColumnCount(3)
-            self.portlist.setHorizontalHeaderLabels(("Name", "Type", "Direction"))
-            self.portlist.setSelectionBehavior(qtw.QAbstractItemView.SelectItems)
-            self.portlist.setSelectionMode(qtw.QAbstractItemView.SingleSelection)
+            self.portlist.setHorizontalHeaderLabels(
+                ("Name", "Type", "Direction")
+            )
+            self.portlist.setSelectionBehavior(
+                qtw.QAbstractItemView.SelectItems
+            )
+            self.portlist.setSelectionMode(
+                qtw.QAbstractItemView.SingleSelection
+            )
             self.portlist.doubleClicked.connect(self.detailed_view_action)
             self.portlist.clicked.connect(self.port_clicked)
             self.table_layout.addWidget(self.portlist)
@@ -304,16 +338,18 @@ if __name__ == "__main__":
             """Add all modules in the module library to the module list."""
             library = self.auto.library
             modules = library.get_module_names()
-            for modname in modules:
+            for modname in sorted(modules):
                 self.add_module(modname)
             self.fit_table_to_contents(self.modlist)
             print("Loaded {} modules!".format(self.modlist.rowCount()))
 
         def module_clicked(self):
-            """Print brief description and select the module clicked in the 
+            """Print brief description and select the module clicked in the
             QTableWidget - module list"""
             modname, _, modrepo = self.get_selected_item(self.modlist)
-            if (self.crt_module is None) or (modname != self.crt_module.entity_name):
+            if (self.crt_module is None) or (
+                modname != self.crt_module.entity_name
+            ):
                 # print("Looking up {} in {}...".format(modname, modrepo))
                 module = self.auto.library.get_module_template(modname, modrepo)
                 print(str(module))
@@ -329,29 +365,44 @@ if __name__ == "__main__":
                     print("No info for module '{}'.".format(modname))
 
         def inter_clicked(self):
-            """Print brief description and select the interface clicked in the 
+            """Print brief description and select the interface clicked in the
             QTableWidget - interface list"""
-            intername, intertype, direction = self.get_selected_item(self.interlist)
+            intername, intertype, direction = self.get_selected_item(
+                self.interlist
+            )
             if intertype in ("Port", "StandardPort"):
                 self.port_clicked((intername, intertype, direction))
             elif intertype == "Generic":
                 self.generic_clicked((intername, intertype, direction))
             else:
-                if isinstance(self.crt_interface, SlaveRegisterInterface):
-                    inter = self.crt_module.get_slave_register_interface(intername)
-                inter = self.crt_module.get_interface(intername, direction, intertype)
+                inter = None
+                if intertype == "slv_reg_interface":
+                    inter = self.crt_module.get_slave_register_interface(
+                        intername
+                    )
+                elif intertype == "as_window":
+                    inter = self.crt_module.get_window_interface(intername)
+                else:
+                    inter = self.crt_module.get_interface(
+                        intername, direction, intertype
+                    )
                 if inter:
                     self.crt_interface = inter
                     self.crt_port = None
                     self.crt_generic = None
-                    select_text = "Selected interface '{}' of module '{}'".format(
-                        intername, self.crt_module.entity_name
+                    select_text = (
+                        "Selected interface '{}' of module '{}'".format(
+                            intername, self.crt_module.entity_name
+                        )
                     )
                     self.status.setText(select_text)
                     print(str(inter))
                     self.infobox.setText(
                         "Interface '{}' ({}) with direction '{}' of:\n{}".format(
-                            intername, intertype, direction, str(self.crt_module)
+                            intername,
+                            intertype,
+                            direction,
+                            str(self.crt_module),
                         )
                     )
                 else:
@@ -362,8 +413,12 @@ if __name__ == "__main__":
                 portname, porttype, direction = from_interlist
                 port = self.crt_module.get_port(portname, suppress_error=True)
             else:
-                portname, porttype, direction = self.get_selected_item(self.portlist)
-                port = self.crt_interface.get_port(portname, suppress_error=True)
+                portname, porttype, direction = self.get_selected_item(
+                    self.portlist
+                )
+                port = self.crt_interface.get_port(
+                    portname, suppress_error=True
+                )
             if port:
                 self.crt_port = port
                 self.crt_generic = None
@@ -384,13 +439,19 @@ if __name__ == "__main__":
                     select_text = (
                         "Port '{}' ({}) with direction '{}' of " "module '{}'"
                     ).format(
-                        portname, port.code_name, direction, self.crt_module.entity_name
+                        portname,
+                        port.code_name,
+                        direction,
+                        self.crt_module.entity_name,
                     )
                 self.status.setText(select_text)
                 print(str(port))
                 self.infobox.setText(
                     "Port '{}' ({}) with direction '{}' of:\n{}".format(
-                        portname, port.code_name, direction, str(self.crt_module)
+                        portname,
+                        port.code_name,
+                        direction,
+                        str(self.crt_module),
                     )
                 )
             else:
@@ -404,9 +465,13 @@ if __name__ == "__main__":
                 self.crt_port = None
                 self.crt_interface = None
                 select_text = (
-                    "Generic '{}' ({}) with default value [{}] of " "module '{}'"
+                    "Generic '{}' ({}) with default value [{}] of "
+                    "module '{}'"
                 ).format(
-                    genericname, gen.data_type, defaultval, self.crt_module.entity_name
+                    genericname,
+                    gen.data_type,
+                    defaultval,
+                    self.crt_module.entity_name,
                 )
                 print(str(gen))
                 self.status.setText(select_text)
@@ -424,7 +489,9 @@ if __name__ == "__main__":
             self.modlist.insertRow(y)
             tablerow = [
                 mod.entity_name,
-                "AsWindowModule" if isinstance(mod, AsWindowModule) else "AsModule",
+                "AsWindowModule"
+                if isinstance(mod, AsWindowModule)
+                else "AsModule",
                 mod.repository_name,
             ]
 
@@ -453,11 +520,17 @@ if __name__ == "__main__":
             for inter in intercol:
                 if isinstance(inter, Port):
                     port_type = (
-                        "StandardPort" if isinstance(inter, StandardPort) else "Port"
+                        "StandardPort"
+                        if isinstance(inter, StandardPort)
+                        else "Port"
                     )
                     tablerow = [inter.name, port_type, inter.direction]
                 elif isinstance(inter, Generic):
-                    tablerow = [inter.code_name, "Generic", str(inter.default_value)]
+                    tablerow = [
+                        inter.code_name,
+                        "Generic",
+                        str(inter.default_value),
+                    ]
                 elif isinstance(inter, SlaveRegisterInterface):
                     tablerow = [str(inter), inter.type, inter.direction]
                 else:
@@ -488,7 +561,9 @@ if __name__ == "__main__":
                 self.modlist.hide()
                 self.interlist.show()
                 self.view = self.INTERFACE_VIEW
-                self.modlist_label.setText("Interfaces of {}:".format(self.crt_module))
+                self.modlist_label.setText(
+                    "Interfaces of {}:".format(self.crt_module)
+                )
                 self.details_button.hide()
                 self.overview_button.show()
             else:
@@ -517,7 +592,11 @@ if __name__ == "__main__":
         def list_details_action(self):
             self.infobox.setText("")
             if self.view is self.PORT_VIEW:
-                print("Listing details of port '{}'".format(self.crt_port.code_name))
+                print(
+                    "Listing details of port '{}'".format(
+                        self.crt_port.code_name
+                    )
+                )
                 sys.stdout = self.infobox_out_stream
                 print("\n", self.crt_port)
                 print("\nDefault port rules:")
@@ -536,16 +615,20 @@ if __name__ == "__main__":
                     # Switch stdout to infobox:
                     sys.stdout = self.infobox_out_stream
                     mod.list_module(2)
-
-                    print("\nToplevel file: {}".format(mod.files[-1]))
-                    if len(mod.files) > 1:
-                        print("\nHDL files:")
-                        for filename in mod.files[:-1]:
-                            print("  - {}".format(filename))
+                    if mod.files:
+                        print("\nToplevel file: {}".format(mod.files[-1]))
+                        if len(mod.files) > 1:
+                            print("\nHDL files:")
+                            for filename in mod.files[:-1]:
+                                print("  - {}".format(filename))
                     if mod.dependencies:
                         print("\nDependencies:")
                         for dep in mod.dependencies:
                             print("  - {}".format(dep))
+                    if mod.driver_files:
+                        print("\nSoftware driver files:")
+                        for filename in mod.driver_files:
+                            print(" - " + filename)
             else:
                 if self.crt_generic:
                     print(
@@ -559,7 +642,9 @@ if __name__ == "__main__":
                     print(self.crt_module)
                 elif self.crt_port:
                     print(
-                        "Listing details of port '{}'".format(self.crt_port.code_name)
+                        "Listing details of port '{}'".format(
+                            self.crt_port.code_name
+                        )
                     )
                     sys.stdout = self.infobox_out_stream
                     print(self.crt_port)
@@ -571,7 +656,9 @@ if __name__ == "__main__":
                     intername = self.crt_interface.name
                     if not intername:
                         intername = self.crt_interface.type
-                    print("Listing details for interface '{}'".format(intername))
+                    print(
+                        "Listing details for interface '{}'".format(intername)
+                    )
                     sys.stdout = self.infobox_out_stream
                     self.crt_interface.print_interface(True)
                     print("\nOf module:")
@@ -595,7 +682,11 @@ if __name__ == "__main__":
                     for modname in mods:
                         self.add_module(modname, "user")
                     self.fit_table_to_contents(self.modlist)
-                    print("Added {} modules to repository 'user'!".format(len(mods)))
+                    print(
+                        "Added {} modules to repository 'user'!".format(
+                            len(mods)
+                        )
+                    )
                 else:
                     print("No modules found in '{}'.".format(folder))
 
@@ -618,22 +709,18 @@ if __name__ == "__main__":
 
         # TODO:
         # Functionality:
-        # buttons detailed view and overview view:
-        #   populate and switch between interface and port tablewidgets
-        # Add standard and lone ports to "interface" list
         # Add switches when selecting those ports.
         # Make list_detail work in all views
         # Make brief info (single click) work in all views
 
-    def start_gui():
+    ## @ingroup automatics_gui_legacy
+    def start_gui(asterics_path):
         app = qtw.QApplication([])
-        app.setApplicationName("Automatics Module Explorer")
-        auto = AsAutomatics(os.environ.get("ASTERICS_HOME"))
-        auto.add_module_repository(auto.asterics_dir + "modules", "default")
-        # auto.add_module_repository(
-        #   "/home/phil/EES/asterics-nonfree/modules/", "nonfree")  # DEBUG
+        app.setApplicationName("Automatics Module Explorer (Legacy)")
+        auto = AsAutomatics(asterics_path, Automatics_version)
+        auto.add_module_repository(asterics_path + "/modules", "default")
         gui = GUI(auto)
         gui.build_modlist()
         app.exec_()
 
-    start_gui()
+    start_gui(asterics_home)

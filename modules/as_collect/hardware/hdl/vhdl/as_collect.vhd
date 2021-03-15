@@ -29,9 +29,18 @@
 --  or write to the Free Software Foundation, Inc.,
 --  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ----------------------------------------------------------------------------------
---! @file
+--! @file as_collect.vhd
 --! @brief This module collects data words, combining them into one new word.
+--! @addtogroup asterics_modules
+--! @{
+--! @defgroup as_collect as_collect: Increase AsStream Data Width
+--! This module collects DOUT_WIDTH/DIN_WIDTH data words and 
+--! corresponding VSYNC and HSYNC signals into one new data word.
+--! @}
 ----------------------------------------------------------------------------------
+
+--! @addtogroup as_collect
+--! @{
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -42,8 +51,11 @@ use work.helpers.all;
 entity as_collect is
   generic (
     DIN_WIDTH : integer := 8;
-    COLLECT_COUNT : integer := 4; -- collects this many data words to one data word
-    DOUT_ORDER_ASCENDING : boolean := false -- defines the order of the collected data words within the new word ('false' is what you ususally want for collecting data for a mem-writer in a little-endian system)
+    --! amount of incoming data words to pack into one outgoing data word
+    COLLECT_COUNT : integer := 4;
+    --! defines the order of the collected data words within the outgoing word
+    --! ('false' is what you ususally want for collecting data for a mem-writer in a little-endian system)
+    DOUT_ORDER_ASCENDING : boolean := false 
   );
   port (
     clk         : in  std_logic;
@@ -71,6 +83,7 @@ entity as_collect is
   );
 end as_collect;
 
+--! @}
 
 architecture RTL of as_collect is
 

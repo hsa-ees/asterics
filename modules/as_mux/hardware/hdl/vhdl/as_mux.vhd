@@ -29,7 +29,15 @@
 ----------------------------------------------------------------------------------
 --! @file  as_mux.vhd
 --! @brief Multiplexes between two input ports.
+--! @addtogroup asterics_modules
+--! @{
+--! @defgroup as_mux as_mux: AsStream Multiplexer
+--! Implements a 2 to 1 multiplexer for AsStream interfaces.
+--! @}
 ----------------------------------------------------------------------------------
+
+--! @addtogroup as_mux
+--! @{
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -79,6 +87,7 @@ port (
   );
 end as_mux;
 
+--! @}
 
 architecture RTL of as_mux is
 

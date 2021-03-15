@@ -1,0 +1,12 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" title=" " alt="" coords="5,143,92,170"/>
+<area shape="rect" id="node2" href="$classas__automatics__exceptions_1_1_as_error.html" title="Base exception class for all Automatics exceptions." alt="" coords="140,136,339,177"/>
+<area shape="rect" id="node3" href="$classas__automatics__exceptions_1_1_as_object_error.html" title="Generic Automatics exception class concerning a specific object." alt="" coords="387,71,585,112"/>
+<area shape="rect" id="node6" href="$classas__automatics__exceptions_1_1_as_text_error.html" title="Generic Automatics exception class with additional textual info." alt="" coords="387,201,585,243"/>
+<area shape="rect" id="node4" href="$classas__automatics__exceptions_1_1_as_assign_error.html" title="Automatics error class: AsAssignError Signifies a problem/error while assigning objects to each other..." alt="" coords="633,5,832,47"/>
+<area shape="rect" id="node5" href="$classas__automatics__exceptions_1_1_as_connection_error.html" title="Automatics error class: AsConnectionError Signifies a problem/error with a port, interface or module ..." alt="" coords="633,71,832,112"/>
+<area shape="rect" id="node7" href="$classas__automatics__exceptions_1_1_as_analysis_error.html" title="Automatics error class: AsAnalysisError Signifies a problem/error while analysing VHDL code." alt="" coords="633,136,832,177"/>
+<area shape="rect" id="node8" href="$classas__automatics__exceptions_1_1_as_file_error.html" title="Automatics error class: AsFileError Signifies a problem/error with a file object." alt="" coords="633,201,832,243"/>
+<area shape="rect" id="node9" href="$classas__automatics__exceptions_1_1_as_module_error.html" title="Automatics error class: AsModuleError Signifies a problem/error with an AsModule object." alt="" coords="633,267,832,308"/>
+<area shape="rect" id="node10" href="$classas__automatics__exceptions_1_1_as_name_error.html" title="Automatics error class: AsNameError Signifies a problem/error with a port/module/etc." alt="" coords="633,332,832,373"/>
+</map>

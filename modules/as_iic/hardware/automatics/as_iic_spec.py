@@ -28,7 +28,7 @@ of the ASTERICS hardware module as_iic.
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -49,14 +49,14 @@ from as_automatics_port import Port
 
 class IIC_Interface(Interface):
     def __init__(self):
-       super().__init__("iic_interface")
-       self.add_port(Port("scl_in", direction="in"))
-       self.add_port(Port("scl_out", direction="out"))
-       self.add_port(Port("scl_out_enable", direction="out"))
-       self.add_port(Port("sda_in", direction="in"))
-       self.add_port(Port("sda_out", direction="out"))
-       self.add_port(Port("sda_out_enable", direction="out"))
-       self.to_external = True
+        super().__init__("iic_interface")
+        self.add_port(Port("scl_in", direction="in"))
+        self.add_port(Port("scl_out", direction="out"))
+        self.add_port(Port("scl_out_enable", direction="out"))
+        self.add_port(Port("sda_in", direction="in"))
+        self.add_port(Port("sda_out", direction="out"))
+        self.add_port(Port("sda_out_enable", direction="out"))
+        self.to_external = True
 
 
 def get_module_instance(module_dir: str) -> AsModule:
@@ -65,12 +65,15 @@ def get_module_instance(module_dir: str) -> AsModule:
     toplevel_file = "hardware/hdl/vhdl/as_iic.vhd"
     module.files = []
     module.dependencies = ["helpers", "as_regmgr"]
+    module.show_in_browser = True
+    module.dev_status = AsModule.DevStatus.BETA
+    module.module_type = AsModule.ModuleTypes.HARDWARE_SW_CTRL
+    module.module_category = "External IO"
 
     module.add_local_interface_template(IIC_Interface())
 
     # as_automatics now automatically parses the toplevel file and discovers
     # ports, generics, existing interfaces and register interfaces
-    module.discover_module("{mdir}/{toplevel}"
-                           .format(mdir=module_dir, toplevel=toplevel_file))
+    module.discover_module(module_dir + "/" + toplevel_file)
 
     return module

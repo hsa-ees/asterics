@@ -1,0 +1,85 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% This file is part of the ASTERICS Framework. 
+%%
+%% Copyright (C) Hochschule Augsburg, University of Applied Sciences
+%% Efficient Embedded Systems Group
+%%
+%% Author(s): Gundolf Kiefer <gundolf.kiefer@hs-augsburg.de>
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\section{Common Per-Module Signals} \label{ch:05-02-interfaces-module_signals}
+
+\secauthor{Gundolf Kiefer}
+
+\subsection{Signal Overview}
+
+Table~\ref{05-02-module_signals} shows the common signals that should be present in every\asterics module. Optional signals are marked with an asterisk (*). The column "Default" denotes the value that should be assumed for outer modules if the respective signal is absent.
+
+All \asterics chains are synchronous designs the one common clock signal \texttt{CLK} with all flipflops being triggered with the raising edge of \texttt{CLK}. Unless noted otherwise, all other signals are active-high.
+
+\begin{longtable}[ht]{|c|c|c|c|}
+\hline 
+\textbf{Signal} & \textbf{Direction} & \textbf{Default} & \textbf{Description} \\
+% (* = optional) & (in / out) & (if optional) & \\
+\hline
+\hline
+\endhead
+
+\texttt{RESET} (*) & in & 0 &
+\parbox{7cm}{ ~ \\ Reset the module. \\ ~ \\ \small
+This signal may only be omitted if the module is purely combinational.
+If set for 1 clock cycle, the module must reset itself.
+\\ ~ } \\
+
+\hline 
+
+\texttt{READY} (*) & out & 1 &
+\parbox{7cm}{ ~ \\ Module is ready to operate. \\ ~ \\ \small
+This is the response signal to RESET. If the reset process requires more than 1 clock cycle, the module may keep the READY signal low until the module is ready for normal operation. Once set (1), the module is not allowed to unset the signal unless a reset request was received.
+The READY signal may be omitted if the module is purely combinational or if the reset process is guaranteed to complete within one clock cycle.
+\\ ~ } \\
+
+\hline 
+
+\texttt{SYNC\_ERROR} (*) & out & 0 &
+\parbox{7cm}{~ \\ A Synchronization error occured. \\ ~ \\ \small
+If the module encounters an error related to a potential loss of data or synchronization information, the module must raise this signal. At the same time, the module must go into a fail-safe state in which it does not generate any out potentially unexpected for subsequent modules. The SYNC\_ERROR output set to 1 and the fail-safe behaviour must persist until the
+RESET input is set.
+\\ ~ } \\
+
+\hline 
+
+\texttt{FLUSH} (*) & in & 1 &
+\parbox{7cm}{~ \\ Write out all internal buffers. \\ ~ \\ \small
+All modules with internal buffers that do not flush automatically must implement this signal.
+If set, the module processes all internally buffered data, regardless whether new input data is arriving. If the signal is unset again while there is still data buffered, the module should, but is not required to stop processing.
+\\ ~ } \\
+
+\hline 
+
+\caption{Per-Module Signals ( (*) = optional)} \label{05-02-module_signals}\\
+\end{longtable}
+
+
+
+\subsection{Module Reset and Error Handling} \label{ch:05-02-interfaces-module_signals-error_handling}
+
+The signals \texttt{RESET}, \texttt{READY}, and \texttt{SYNC\_ERROR} should all be made accessible to software (i.~e. as I/O register bits and as part of the module driver).
+
+On chain level, it is recommended to introduce global signals with the same names and make them accessible via I/O register bits. The global \texttt{READY} bit should be a logical "and" of all module-level \texttt{READY} signals. The global \texttt{SYNC\_ERROR} bit should be a logical "or" of all module-level \texttt{SYNC\_ERROR} signals.
+
+The provision of a global \texttt{RESET} signal is particularly helpful to avoid potential errors due to an incorrect reset order if the modules are reset individually by software. If a global reset mechanism is missing, the software must reset the modules in a correct topological (half-)order, starting at the input modules and proceeding towards the output modules. Otherwise, a module that has just been reset may receive input data from a not-yet reset module and get into an unwanted state or produce undesired output.
+
+
+
+\subsection{Module Flushing}
+
+Modules may contain internal data buffers. For example, memory writer modules collect a number of data words in order to write them out efficiently using burst transfers. 2D Window Pipelines must buffer multiple lines of image data for their operation. If a frame-oriented processing chain is operated in a single-shot mode with potentially long periods of time without new incoming frame data, it can thus happen that data of a previous frame resides inside such buffers without being processed further. In consequence, follow-up (software) modules waiting for the completion of a frame cannot proceed. In the worst case, this results in a deadlock: The application software is waiting for the \asterics chain to deliver the last results of the current frame and would trigger a new frame afterwards. The \asterics chain, on the other hand, is inactive since now new data is coming in. This, however, does not happen, because the software is waiting.
+
+The main purpose of the \texttt{FLUSH} signal is to circumvent such deadlock conditions. If set, the module is requested to completely process all of its internal data. In particular, if a unit of data (e.g. a frame) has been received completely at the input side, all output data of that frame must be emitted at its output side.
+
+The \texttt{FLUSH} signal should be made available both to hardware (i.~e. as an input signal) and to software (i.~e. as a bit inside a slave register). In a typical use case, it is controlled by software.

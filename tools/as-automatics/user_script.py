@@ -24,6 +24,7 @@
 # --------------------- DOXYGEN -----------------------------------------------
 ##
 # @file user_script.py
+# @ingroup automatics_usertemp
 # @author Philip Manke
 # @brief Template user script for running the ASTERICS generator Automatics.
 # -----------------------------------------------------------------------------
@@ -112,7 +113,7 @@ if success:
     # If Automatics finished successfully:
 
     # Optional: Generate and write a system graph
-    asterics.write_system_graph(chain)
+    chain.write_system_graph(chain)
     # Optional: List address space used by ASTERICS
     chain.list_address_space()
 

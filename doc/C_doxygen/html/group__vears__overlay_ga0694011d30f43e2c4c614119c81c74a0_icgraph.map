@@ -1,0 +1,4 @@
+<map id="vears_overlay_clear" name="vears_overlay_clear">
+<area shape="rect" id="node1" title="Clear the current draw overlay." alt="" coords="191,5,344,32"/>
+<area shape="rect" id="node2" href="$group__vears__driver.html#ga20c8ad70484fc5d6ad1d06b1d8330b49" title="Enable the VEARS modules overlay operation." alt="" coords="5,5,143,32"/>
+</map>

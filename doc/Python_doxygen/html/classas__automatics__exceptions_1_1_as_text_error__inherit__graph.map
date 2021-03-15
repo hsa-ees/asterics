@@ -1,0 +1,9 @@
+<map id="as_automatics_exceptions.AsTextError" name="as_automatics_exceptions.AsTextError">
+<area shape="rect" id="node1" title="Generic Automatics exception class with additional textual info." alt="" coords="387,104,585,145"/>
+<area shape="rect" id="node4" href="$classas__automatics__exceptions_1_1_as_analysis_error.html" title="Automatics error class: AsAnalysisError Signifies a problem/error while analysing VHDL code." alt="" coords="633,5,832,47"/>
+<area shape="rect" id="node5" href="$classas__automatics__exceptions_1_1_as_file_error.html" title="Automatics error class: AsFileError Signifies a problem/error with a file object." alt="" coords="633,71,832,112"/>
+<area shape="rect" id="node6" href="$classas__automatics__exceptions_1_1_as_module_error.html" title="Automatics error class: AsModuleError Signifies a problem/error with an AsModule object." alt="" coords="633,136,832,177"/>
+<area shape="rect" id="node7" href="$classas__automatics__exceptions_1_1_as_name_error.html" title="Automatics error class: AsNameError Signifies a problem/error with a port/module/etc." alt="" coords="633,201,832,243"/>
+<area shape="rect" id="node2" href="$classas__automatics__exceptions_1_1_as_error.html" title="Base exception class for all Automatics exceptions." alt="" coords="140,104,339,145"/>
+<area shape="rect" id="node3" title=" " alt="" coords="5,111,92,138"/>
+</map>

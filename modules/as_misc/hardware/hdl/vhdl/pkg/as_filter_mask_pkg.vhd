@@ -2,14 +2,14 @@
 --  This file is part of the ASTERICS Framework. 
 --  (C) 2019 Hochschule Augsburg, University of Applied Sciences
 ----------------------------------------------------------------------------------
--- Entity:         as_filter_mask_pkg
+-- Entity:         as_filter_mask
 --
 -- Company:        Efficient Embedded Systems Group at University of Applied Sciences, Augsburg, Germany
 -- Author:         Markus Bihler, Alexander Zoellner
 --
 -- Modified:       2019-04-08; Philip Manke: Rename to "as_filter_mask"
 --
--- Description:    Package for edge detection
+-- Description:    Helper package for Canny edge detection
 ----------------------------------------------------------------------------------
 --  This program is free software; you can redistribute it and/or
 --  modify it under the terms of the GNU Lesser General Public
@@ -27,8 +27,17 @@
 --  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ----------------------------------------------------------------------------------
 --! @file  as_filter_mask.vhd
---! @brief Package for edge detection
+--! @brief Helper package for Canny edge detection
+--! @addtogroup asterics_helpers
+--! @{
+--! @defgroup as_filter_mask as_filter_mask: ASTERICS Helpers for Canny Pipeline
+--! This helper package contains data types and functions used by 2D Window Pipeline
+--! modules used in the Canny edge detector system.
+--! @}
 ----------------------------------------------------------------------------------
+
+--! @addtogroup as_filter_mask
+--! @{
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -93,6 +102,8 @@ package as_filter_mask is
     
 
 end package as_filter_mask;
+
+--! @}
 
 package body as_filter_mask is
     

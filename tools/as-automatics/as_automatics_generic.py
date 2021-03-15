@@ -36,6 +36,7 @@ Implements the class 'Generic' for as_automatics.
 # --------------------- DOXYGEN -----------------------------------------------
 ##
 # @file as_automatics_generic.py
+# @ingroup automatics_intrep
 # @author Philip Manke
 # @brief Implements the class 'Generic' for as_automatics.
 # -----------------------------------------------------------------------------
@@ -46,11 +47,13 @@ import as_automatics_logging as as_log
 LOG = as_log.get_log()
 
 
+## @ingroup automatics_intrep
 class Generic:
-    """Description of a single generic as defined in the entity of the
-       associated module's top_level VHDL-file.
-       Additionally, some meta information for as_automatics and data
-       relevant only while building the processing chain is stored."""
+    """! @brief Class representing a VHDL generic.
+    Description of a single generic as defined in the entity of the
+    associated module's top_level VHDL-file.
+    Additionally, some meta information for as_automatics and data
+    relevant only while building the processing chain is stored."""
 
     generic_types = "interface", "module"
 
@@ -62,9 +65,11 @@ class Generic:
         data_type: str = "integer",
         link_to: str = "",
         to_external: bool = False,
+        comment: str = "",
     ):
 
         self.value_check_function = lambda value: True
+        self.comment = comment
 
         self.name = name
         self.default_value = default_value
@@ -83,7 +88,7 @@ class Generic:
             self.name = self.code_name
 
     def __str__(self) -> str:
-        """Print the configuration of this generic instance."""
+        """! @brief Print the configuration of this generic instance."""
         return "{}('{}'): {} with default value: {}".format(
             self.name, self.code_name, self.data_type, str(self.default_value)
         )
@@ -92,37 +97,44 @@ class Generic:
         return self.code_name
 
     def check_value(self):
-        """Check if the currently set value is valid. Can only be invalid
-           if set directly, not using the 'set_value()' method."""
+        """! @brief Check if the currently set value is valid.
+        Can only be invalid if set directly, not using the 'set_value()' method."""
         self.run_value_check(self.value)
 
+    ## @ingroup automatics_cds
     def keep_default_value(self):
-        """This Generic will set it's value to the default value read in
+        """! @brief Set the Generic back to its default value.
+        This Generic will set it's value to the default value read in
         from the VHDL source code of the module."""
         self.value = self.default_value
 
     def run_value_check(self, value) -> bool:
-        """Check if 'value' is valid for this generic."""
+        """! @brief Checks if 'value' is valid for this generic."""
         return self.value_check_function(value)
 
+    ## @ingroup automatics_cds
     def set_value_check(self, function):
-        """Set the function that is used to perform the value check
-           for this generic instance."""
+        """! @brief Set a value check function for this Generic.
+        Set the function that is used to perform the value check
+        for this generic instance."""
         if isfunction(function):
             self.value_check_function = function
         else:
             LOG.error(
-                ("Setting value check function failed. " "Parameter is not a function!")
+                (
+                    "Setting value check function failed. "
+                    "Parameter is not a function!"
+                )
             )
 
     def get_value(self, top_default: bool = True):
-        """Return the value of this generic object (the 'value' attribute).
+        """! @brief Return the value of this generic object.
         If this generic does not have an assigned value, the 'default_value'
         is returned.
         Will recursively resolve 'value' if it is set to another generic object.
         """
         if getattr(self.parent, "window_interfaces", False):
-            if self.value:
+            if self.value is not None:
                 return self.value
             return self.default_value
         # If this generic is on toplevel
@@ -142,11 +154,11 @@ class Generic:
         return self.value
 
     def is_value_set(self):
-        """Determine if the 'value' attribute is set."""
+        """! @brief Determine if the 'value' attribute is set."""
         return self.value is not None
 
     def set_value(self, value) -> bool:
-        """Set the 'value' attribute of this generic object safely."""
+        """! @brief Set the 'value' attribute of this generic object safely."""
         if self.run_value_check(value):
             # Generics can be linked through value attribute
             # -> propagate value change recursively
@@ -159,10 +171,11 @@ class Generic:
         return False
 
     def link_to_generic(self, link_to_generic: str):
-        """Setup this generic to link to another generic object."""
+        """! @brief Setup this generic to link to another generic object."""
         self.value = None
         self.link_to = link_to_generic
 
+    ## @ingroup automatics_connection
     def assign_to(self, parent):
-        """Assigns this instance as part of/linked to 'parent'"""
+        """! @brief Assigns this instance as part of/linked to 'parent'"""
         self.parent = parent

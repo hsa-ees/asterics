@@ -30,9 +30,18 @@
 --  or write to the Free Software Foundation, Inc.,
 --  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ----------------------------------------------------------------------------------
---! @file
+--! @file as_threshold.vhd
 --! @brief This module band-thresholds values of an image data stream.
+--! @addtogroup asterics_modules
+--! @{
+--! @defgroup as_threshold as_threshold: Two-Value Thresholding
+--! This module implements thresholding using two threshold values.
+--! The module must be configured via software.
+--! @}
 ----------------------------------------------------------------------------------
+
+--! @addtogroup as_threshold
+--! @{
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -78,6 +87,7 @@ entity as_threshold is
   );
 end as_threshold;
 
+--! @}
 
 architecture RTL of as_threshold is
 -- Slave register configuration:
@@ -172,6 +182,5 @@ begin
   end if;
   
 end process;
-
 
 end RTL;

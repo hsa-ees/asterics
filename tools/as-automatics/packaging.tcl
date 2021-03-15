@@ -163,10 +163,36 @@ set_property "board_part" $boardpart [current_project]
 if {[string equal [get_filesets -quiet sources_1] ""]} {
     create_fileset -srcset sources_1
 }
+#set_property library {asterics} [get_files {lolnope.vhd}]
+#set_property source_mgmt_mode All [current_project]
 
 add_files -norecurse -fileset [get_filesets sources_1] $hdl_files
 
+
+#set_property source_mgmt_mode None [current_project]
+
+# Set all files to VHDL 2008
+#set_property file_type {VHDL 2008} [get_files -of_objects [get_filesets sources_1]]
+
+set_property library {asterics} [get_files -of_objects [get_filesets sources_1]]
+
+set_property library {axi_master_burst_v2_0_7} -quiet [get_files -quiet axi_master_burst_v2_0_vh_rfs.vhd]
+set_property library {lib_srl_fifo_v1_0_2} -quiet [get_files -quiet lib_srl_fifo_v1_0_rfs.vhd]
+set_property library {lib_pkg_v1_0_2} -quiet [get_files -quiet lib_pkg_v1_0_rfs.vhd]
+
+
 set_property top $design [get_filesets sources_1]
+
+puts "Updating the compile order of all sources..."
+
+update_compile_order -fileset sources_1
+
+set to_disable []
+
+#source -notrace ${projdir}package_ooc_config.tcl
+source ${projdir}package_ooc_config.tcl
+
+set_property source_mgmt_mode DisplayOnly [current_project]
 
 #CONSTRAINTS
 if {[string equal [get_filesets -quiet constraints_1] ""]} {
@@ -199,13 +225,22 @@ if {[llength $ip_files] != 0} {
 # Package
 #########
 
-
+puts "Updating compile order and packaging..."
 ipx::package_project -import_files -force -root_dir $projdir -force_update_compile_order
+#ipx::package_project -import_files -force -root_dir $projdir
 
+# Set libraries for packaged IP Core
 set file_list [ipx::get_files -of_objects [ipx::get_file_groups xilinx_anylanguagesynthesis]]
 foreach { file } $file_list {
     set_property library_name asterics $file
 }
+set_property -quiet library_name {ieee} [ipx::get_files -quiet -of_objects [ipx::get_file_groups xilinx_anylanguagesynthesis] *fixed_pkg_2008.vhd]
+
+set_property -quiet library_name {axi_master_burst_v2_0_7} [ipx::get_files -quiet -of_objects [ipx::get_file_groups xilinx_anylanguagesynthesis] *axi_master_burst_v2_0_vh_rfs.vhd]
+
+set_property -quiet library_name {lib_srl_fifo_v1_0_2} [ipx::get_files -quiet -of_objects [ipx::get_file_groups xilinx_anylanguagesynthesis] *lib_srl_fifo_v1_0_rfs.vhd]
+
+set_property -quiet library_name {lib_pkg_v1_0_2} [ipx::get_files -quiet -of_objects [ipx::get_file_groups xilinx_anylanguagesynthesis] *lib_pkg_v1_0_rfs.vhd]
 
 source -notrace ${projdir}package_interface_config.tcl
 
@@ -227,12 +262,14 @@ set_property supported_families  { \
                      {zynquplus}  {Production} \
                      }   [ipx::current_core]
 
+
 ############################
 # Save and Write ZIP archive
 ############################
 
 ipx::create_xgui_files [ipx::current_core]
 ipx::update_checksums [ipx::current_core]
+puts "Saving IP-Core..."
 ipx::save_core [ipx::current_core]
 ipx::check_integrity -quiet [ipx::current_core]
 set result [ipx::archive_core [concat $projdir/$design.zip] [ipx::current_core]]

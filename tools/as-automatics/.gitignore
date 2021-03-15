@@ -5,7 +5,7 @@ Makefile
 doxygen/
 *Testfiles/
 *.log
-astertest/
+astertest*/
 *.jou
 *.svg
 *.pyc
@@ -13,3 +13,9 @@ astertest/
 *.str
 .Xil/*
 *.code-workspace
+demo_user_modules/as_*/
+cnn_imgs/*
+sw_out*/*
+*.npy
+*/*.npy
+vivado_cores/*

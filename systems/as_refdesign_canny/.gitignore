@@ -1,0 +1,11 @@
+vivado_cores
+hardware/build*/*
+hardware/.Xil/**
+software/*
+-software/Makefile
+*.zip
+*.svg
+*.log
+*.jou
+*.tar.gz
+.Xil/**

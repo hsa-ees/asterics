@@ -1,0 +1,103 @@
+@inproceedings{pohl_efficient_2012,
+	title = {An efficient and scalable architecture for real-time distortion removal and rectification of live camera images},
+	isbn = {978-1-4673-2921-7 978-1-4673-2919-4 978-1-4673-2920-0},
+	url = {http://ieeexplore.ieee.org/document/6416730/},
+	doi = {10.1109/ReConFig.2012.6416730},
+	pages = {1--7},
+	publisher = {{IEEE}},
+	author = {Pohl, Matthias and Schaeferling, Michael and Kiefer, Gundolf and Petrow, Plamen and Woitzel, Egmont and Papenfus, Frank},
+	urldate = {2017-02-09},
+	date = {2012-12}
+}
+
+@inproceedings{pohl_efficient_2014,
+	title = {An efficient {FPGA}-based hardware framework for natural feature extraction and related Computer Vision tasks},
+	doi = {10.1109/FPL.2014.6927463},
+	abstract = {The paper presents an efficient and flexible framework for extensive image processing tasks. While most available frameworks concentrate on pixel-based modules and interfaces for image preprocessing tasks, our proposal also covers the seamless integration of higher-level algorithms. Window-oriented filter operations, such as noise filters, edge filters or natural feature detectors, are performed within an efficient 2D window pipeline. This structure is generated and optimized automatically based on a user-defined filter configuration. For complex, higher-level algorithms, an optimized array of independent, software-based processing units is generated. As an example application, we chose object recognition based on the well-known {SURF} algorithm (“Speeded Up Robust Features”), which performs natural feature detection and description. All involved image processing steps were successfully mapped to our architecture. Thus, exploiting the {FPGAs} full potential regarding parallelism, we synthesized one of the most efficient {SURF} detectors and a complete object recognition system in a single mid-size {FPGA}.},
+	eventtitle = {2014 24th International Conference on Field Programmable Logic and Applications ({FPL})},
+	pages = {1--8},
+	booktitle = {2014 24th International Conference on Field Programmable Logic and Applications ({FPL})},
+	author = {Pohl, M. and Schaeferling, M. and Kiefer, G.},
+	date = {2014-09},
+	keywords = {computer vision, Detectors, feature detection, feature extraction, field programmable gate arrays, {FPGA}-based hardware framework, Hardware, higher-level algorithms, Image Processing, Object recognition, object recognition system, Pipelines, speeded up robust features, Streaming media, {SURF} algorithm}
+}
+
+@inproceedings{EES_ew_2015_asterics,
+    author = {Schaeferling, Michael and Bihler, Markus and Pohl, Matthias and Kiefer, Gundolf},
+	title = {{ASTERICS}-An Open Toolbox for Sophisticated {FPGA}-Based Image Processing},
+	booktitle = {13th embedded world Conference},
+	address = {Nuernberg},
+	date = {2015-02}
+}
+
+
+@inproceedings{kiefer_configurable_2016,
+	title = {A Configurable Architecture for the Generalized Hough Transform Applied to the Analysis of Huge Aerial Images and to Traffic Sign Detection},
+	doi = {10.1109/ReConFig.2016.7857143},
+	abstract = {Object recognition in huge image data sets or in live camera images at interactive frame rates is a very demanding task, especially within embedded systems. The recognition task includes the localization of a reference object and its rotation and scaling in a search image. The Generalized Hough Transform ({GHT}) is known as a powerful and robust technique to support this task by transforming the search image into a 4D parameter space. However, the {GHT} itself is very complex and demanding towards computational power and memory consumption. This paper presents a novel hardware architecture to perform a complete 4D {GHT} at interactive frame rates in an {FPGA}. The architecture is configurable in order to allow a trade-off between performance, accuracy and hardware usage. The proposed architecture has been implemented in a low-cost Zynq-7000 {FPGA} and successfully evaluated in two practical applications, namely groyne detection in aerial images and traffic sign detection.},
+	eventtitle = {2016 International Conference on {ReConFigurable} Computing and {FPGAs} ({ReConFig})},
+	pages = {1--7},
+	booktitle = {2016 International Conference on {ReConFigurable} Computing and {FPGAs} ({ReConFig})},
+	author = {Kiefer, G. and Vahl, M. and Sarcher, J. and Schaeferling, M.},
+	date = {2016-11},
+	keywords = {4D {GHT}, 4D parameter space, aerial image analysis, Aerial Images, Computer architecture, computer vision, configurable architecture, embedded systems, Field programmable gate arrays, {FPGA}, generalized Hough transform, groyne detection, Hardware, Hough transforms, huge image data sets, Image edge detection, image recognition, interactive frame rates, live camera images, object recognition, recognition task, reference object localization, Search problems, shape, {SoC}, traffic engineering computing, traffic sign detection, Transforms, Zynq-7000 {FPGA}}
+}
+
+@inproceedings{hough_object_recog,
+title = {A Configurable Framework for Hough-Transform-Based Embedded Object Recognition Systems},
+author = {Julian Sarcher and Christian Scheglmann and Alexander Zoellner and Tim Dolereit and Michael Schaeferling and Matthias Vahl and Gundolf Kiefer},
+eventtitle = {IEEE International Conference on Application-specific Systems 2018},
+year = {2018},
+month = {07},
+day = {10},
+address = {Mailand}
+}
+
+@inproceedings{nitra_paper0,
+author = {Matthias Pohl and Michael Schaeferling and Gundolf Kiefer and Plamen Petrow and Egmont Woitzel and Frank Papenfuss},
+title = {Leveraging polynomial approximation for non-linear image transformations in real time},
+journal = {Computers & Electrical Engineering},
+year = {2014},
+month = {01},
+issn = {0045-7906},
+doi = {DOI: 10.1016/j.compeleceng.2013.12.011}
+}
+
+@inproceedings{nitra_paper1,
+author = {Matthias Pohl and Michael Schaeferling and Gundolf Kiefer and Plamen Petrow and Egmont Woitzel and Frank Papenfuss},
+title = {An Efficient and Scalable Architecture for Real-Time Distortion Removal and Rectification of Live Camera Images},
+eventtitle = {IEEE International Conference on ReConFigurable Computing and FPGAs (ReConFig)},
+year = {2012},
+doi = {10.1109/ReConFig.2012.6416730},
+}
+
+@misc{ees_hp,
+	title = {Workgroup Efficient Embedded Systems},
+    author = {Michael Schaeferling},
+	url = {http://ees.hs-augsburg.de/index_en.html},
+	urldate = {2018-07-16}
+}
+
+@misc{asterics_doxygen,
+	title = {{ASTERICS}-Doxygen},
+	url = {http://asterics-wiki.informatik.hs-augsburg.de/doc/modules/api/html/index.html},
+	urldate = {2018-07-16}
+}
+
+@online{tflite_website,
+  author={{\relax Google} Inc.},
+  title={TensorFlow Lite - ML for Mobile and Edge Devices},
+  url={https://www.tensorflow.org/lite/},
+  month={12},
+  year={2020}
+}
+
+@inproceedings{manke_ew2020,
+author = {Philip Manke and Gundolf Kiefer and Michael Schaeferling},
+title = {Using the {ASTERICS} Framework for Rapid Prototyping and Education in Image Processing on {FPGAs}},
+year = {2020},
+month = {02},
+booktitle = {embedded world Conference 2020 Proceedings},
+ISBN = {978-3-645-50186-6},
+institute={University of Applied Sciences Augsburg}
+}

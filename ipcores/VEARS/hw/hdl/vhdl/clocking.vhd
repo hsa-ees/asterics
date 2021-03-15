@@ -91,7 +91,7 @@ constant c_clk_settings : clk_settings_array_t := ((30.0, 6 ,15), -- (0):  20 - 
                                                    (20.0, 4 ,10), -- (1):  40 -  <60 MHz clk_out
                                                    (10.0, 2 , 5), -- (2):  60 -  <80 MHz clk_out
                                                    (10.0, 2 , 5), -- (3):  80 - <100 MHz clk_out
-                                                   (10.0, 2 , 5), -- (4):  80 - <120 MHz clk_out
+                                                   (10.0, 2 , 5), -- (4): 100 - <120 MHz clk_out
                                                    (10.0, 2 , 5)  -- (5):        120 MHz clk_out
                                                   );
 

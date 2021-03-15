@@ -1,0 +1,4 @@
+<map id="vears_reset" name="vears_reset">
+<area shape="rect" id="node1" title="Reset the VEARS module." alt="" coords="140,5,239,32"/>
+<area shape="rect" id="node2" href="$group__vears__driver.html#ga37c9f106f54f6984a44897e5db7674a4" title="Initialize and reset the VEARS module." alt="" coords="5,5,92,32"/>
+</map>

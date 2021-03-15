@@ -28,7 +28,7 @@ of the ASTERICS hardware module as_generic_filter_module.
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -41,22 +41,27 @@ of the ASTERICS hardware module as_generic_filter_module.
 # @brief Specifics for as_generic_filter_module used by as_automatics
 # -----------------------------------------------------------------------------
 
-from as_automatics_window_module import AsWindowModule
+from as_automatics_2d_window_module import AsWindowModule
+
+
 def get_module_instance(module_dir: str) -> AsWindowModule:
     module = AsWindowModule()
 
     toplevel_file = "hardware/hdl/vhdl/pipeline/as_generic_filter_module.vhd"
     module.files = []
     module.dependencies = ["as_generic_filter"]
-    
-    # Module delay in clock cycles. 
-    # Number of clock cycles before a result pixel is 
+
+    # Module delay in clock cycles.
+    # Number of clock cycles before a result pixel is
     # generated on the output of this module. (default = 0, valid: delay >= 0)
     module.delay = 2
-    
+
+    module.show_in_browser = False
+    module.dev_status = AsWindowModule.DevStatus.BETA
+    module.module_type = AsWindowModule.ModuleTypes.HARDWARE
+    module.module_category = "Internal Submodules"
 
     # Automatic module discovery is skipped accordingly.
-    module.discover_module("{mdir}/{toplevel}"
-                           .format(mdir=module_dir, toplevel=toplevel_file))
+    module.discover_module(module_dir + "/" + toplevel_file)
 
     return module

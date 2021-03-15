@@ -27,9 +27,18 @@
 --  or write to the Free Software Foundation, Inc.,
 --  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ----------------------------------------------------------------------------------
---! @file
+--! @file as_pixel_diff.vhd
 --! @brief Compute the absolute difference between two pixel streams
+--! @addtogroup asterics_modules
+--! @{
+--! @defgroup as_pixel_diff as_pixel_diff: Subtract two AsStreams
+--! Subtract an AsStream from another stream.
+--! Returns the absolute difference in an output AsStream.
+--! @}
 ----------------------------------------------------------------------------------
+
+--! @addtogroup as_pixel_diff
+--! @{
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -41,58 +50,56 @@ entity as_pixel_diff is
     DATA_WIDTH  : integer := 8
   );
   port (
-    Clk         : in  std_logic;
-    Reset       : in  std_logic;
-    Ready       : out std_logic;
+    clk         : in  std_logic;
+    reset       : in  std_logic;
+    ready       : out std_logic;
 
     -- IN ports 0
-    VSYNC_IN_0    : in  std_logic;
-    HSYNC_IN_0    : in  std_logic;
-    STROBE_IN_0   : in  std_logic;
-    DATA_IN_0     : in  std_logic_vector(DATA_WIDTH-1 downto 0);
-    XRES_IN_0     : in  std_logic_vector(11 downto 0);
-    YRES_IN_0     : in  std_logic_vector(11 downto 0);
+    vsync_in_0    : in  std_logic;
+    hsync_in_0    : in  std_logic;
+    strobe_in_0   : in  std_logic;
+    data_in_0     : in  std_logic_vector(DATA_WIDTH-1 downto 0);
+    xres_in_0     : in  std_logic_vector(11 downto 0);
+    yres_in_0     : in  std_logic_vector(11 downto 0);
     
-    SYNC_ERROR_IN_0  : in  std_logic;
-    DATA_ERROR_IN_0 : in  std_logic;
-    STALL_OUT_0      : out std_logic;
+    sync_error_in_0  : in  std_logic;
+    data_error_in_0 : in  std_logic;
+    stall_out_0      : out std_logic;
 
     -- IN ports 1
-    VSYNC_IN_1    : in  std_logic;
-    HSYNC_IN_1    : in  std_logic;
-    STROBE_IN_1   : in  std_logic;
-    DATA_IN_1     : in  std_logic_vector(DATA_WIDTH-1 downto 0);
-    XRES_IN_1     : in  std_logic_vector(11 downto 0);
-    YRES_IN_1     : in  std_logic_vector(11 downto 0);
+    vsync_in_1    : in  std_logic;
+    hsync_in_1    : in  std_logic;
+    strobe_in_1   : in  std_logic;
+    data_in_1     : in  std_logic_vector(DATA_WIDTH-1 downto 0);
+    xres_in_1     : in  std_logic_vector(11 downto 0);
+    yres_in_1     : in  std_logic_vector(11 downto 0);
     
-    SYNC_ERROR_IN_1  : in  std_logic;
-    DATA_ERROR_IN_1 : in  std_logic;
-    STALL_OUT_1      : out std_logic;
+    sync_error_in_1  : in  std_logic;
+    data_error_in_1 : in  std_logic;
+    stall_out_1      : out std_logic;
 
     -- OUT ports
-    VSYNC_OUT   : out std_logic;
-    HSYNC_OUT   : out std_logic;
-    STROBE_OUT  : out std_logic;
-    DATA_OUT    : out std_logic_vector(DATA_WIDTH-1 downto 0);
-    XRES_OUT    : out std_logic_vector(11 downto 0);
-    YRES_OUT    : out std_logic_vector(11 downto 0);
+    vsync_out   : out std_logic;
+    hsync_out   : out std_logic;
+    strobe_out  : out std_logic;
+    data_out    : out std_logic_vector(DATA_WIDTH-1 downto 0);
+    xres_out    : out std_logic_vector(11 downto 0);
+    yres_out    : out std_logic_vector(11 downto 0);
     
-    SYNC_ERROR_OUT  : out std_logic;
-    DATA_ERROR_OUT : out std_logic;
-    STALL_IN        : in  std_logic
+    sync_error_out  : out std_logic;
+    data_error_out : out std_logic;
+    stall_in        : in  std_logic
     
   );
 end as_pixel_diff;
 
+--! @}
 
 architecture RTL of as_pixel_diff is
-
 begin
-
 
 STALL_OUT_0 <= STALL_IN;
 STALL_OUT_1 <= STALL_IN;
-
 
 process (Clk)
 begin
@@ -120,6 +127,5 @@ begin
   end if;
 
 end process;
-
 
 end RTL;

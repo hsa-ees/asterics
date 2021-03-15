@@ -1,0 +1,26 @@
+var annotated_dup =
+[
+    [ "as_buffer_config_s", "structas__buffer__config__s.html", "structas__buffer__config__s" ],
+    [ "as_buffer_manager_ctx_s", "structas__buffer__manager__ctx__s.html", "structas__buffer__manager__ctx__s" ],
+    [ "as_buffer_obj_queue_s", "structas__buffer__obj__queue__s.html", "structas__buffer__obj__queue__s" ],
+    [ "as_buffer_obj_s", "structas__buffer__obj__s.html", "structas__buffer__obj__s" ],
+    [ "as_ctrl_params_t", "structas__ctrl__params__t.html", "structas__ctrl__params__t" ],
+    [ "as_ioctl_params_t", "structas__ioctl__params__t.html", "structas__ioctl__params__t" ],
+    [ "as_memio_buffer_handler_s", "structas__memio__buffer__handler__s.html", "structas__memio__buffer__handler__s" ],
+    [ "as_memio_config_s", "structas__memio__config__s.html", "structas__memio__config__s" ],
+    [ "as_memio_file_s", "structas__memio__file__s.html", "structas__memio__file__s" ],
+    [ "as_memio_hw_settings_s", "structas__memio__hw__settings__s.html", "structas__memio__hw__settings__s" ],
+    [ "as_reader_writer_config_s", "structas__reader__writer__config__s.html", "structas__reader__writer__config__s" ],
+    [ "as_tasklet_s", "structas__tasklet__s.html", "structas__tasklet__s" ],
+    [ "asterics_i2c", "structasterics__i2c.html", "structasterics__i2c" ],
+    [ "buffer_info_t", "unionbuffer__info__t.html", "unionbuffer__info__t" ],
+    [ "canny_feature_struct", "structcanny__feature__struct.html", "structcanny__feature__struct" ],
+    [ "device_data_t", "structdevice__data__t.html", "structdevice__data__t" ],
+    [ "device_info_t", "structdevice__info__t.html", "structdevice__info__t" ],
+    [ "glyphs", "structglyphs.html", "structglyphs" ],
+    [ "mmap_info", "structmmap__info.html", "structmmap__info" ],
+    [ "sensor_cmd", "structsensor__cmd.html", "structsensor__cmd" ],
+    [ "sensor_config_struct", "structsensor__config__struct.html", "structsensor__config__struct" ],
+    [ "video_settings_t", "structvideo__settings__t.html", "structvideo__settings__t" ],
+    [ "VideoModule", "structVideoModule.html", "structVideoModule" ]
+];

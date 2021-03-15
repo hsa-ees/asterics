@@ -1,0 +1,28 @@
+var searchData=
+[
+  ['malloc_724',['MALLOC',['../group__asterics__support.html#ga3933bc3cd585b42094d348f1b2f38e3c',1,'as_support.h']]],
+  ['manage_5fcache_725',['manage_cache',['../structas__memio__config__s.html#a931fdf22611679f0bc44c39979a9ca15',1,'as_memio_config_s::manage_cache()'],['../structas__memio__hw__settings__s.html#a4a3424c4535688fae1b01196c08b8846',1,'as_memio_hw_settings_s::manage_cache()'],['../structdevice__data__t.html#ad3fa6148fdb2d34dc3f25020e8d1da08',1,'device_data_t::manage_cache()'],['../structdevice__info__t.html#a696efea6ea63d2a5379323ad7156e803',1,'device_info_t::manage_cache()']]],
+  ['mask_726',['mask',['../embedded__augmenter__helpers_8c.html#ae97a83d9e681d8dfc3f6e912d3e793d5',1,'mask():&#160;embedded_augmenter_helpers.c'],['../embedded__augmenter__helpers_8h.html#ae97a83d9e681d8dfc3f6e912d3e793d5',1,'mask():&#160;embedded_augmenter_helpers.c']]],
+  ['max_5fburst_5flength_727',['max_burst_length',['../structas__reader__writer__config__s.html#ae56790b11e2e395ecf69a883567b9121',1,'as_reader_writer_config_s']]],
+  ['max_5fdevices_728',['MAX_DEVICES',['../group__as__driver.html#ga4e132cfaa78353e3af1474a86b2dd535',1,'as_driver.h']]],
+  ['max_5ftasklets_729',['MAX_TASKLETS',['../as__support_8c.html#aa910db898798778873757df41d0a4a98',1,'as_support.c']]],
+  ['memio_5factive_730',['memio_active',['../structdevice__data__t.html#ae274832088a2c1f08760d1f0d07a05e3',1,'device_data_t']]],
+  ['memio_5fbuffer_5fhandler_731',['memio_buffer_handler',['../structas__memio__file__s.html#a76fd39e4c1bd75e5b5cbbf2b4823421a',1,'as_memio_file_s']]],
+  ['memio_5ffile_732',['memio_file',['../structdevice__data__t.html#a4aeadbb57d7fd393d5c22b36701049a2',1,'device_data_t']]],
+  ['memio_20device_733',['memio device',['../group__memio__file__ops.html',1,'']]],
+  ['memio_5fhw_5fsettings_734',['memio_hw_settings',['../structas__memio__file__s.html#a8ffc28d6416dd23435e842371cbae172',1,'as_memio_file_s']]],
+  ['midh_5freg_735',['MIDH_REG',['../as__sensor__ov7670_8c.html#a1af98220fe9823a834c02fbd81e78147',1,'as_sensor_ov7670.c']]],
+  ['midh_5freg_5fval_736',['MIDH_REG_VAL',['../as__sensor__ov7670_8c.html#a44845c72219d80e7d2c728a50550f6bd',1,'as_sensor_ov7670.c']]],
+  ['midl_5freg_737',['MIDL_REG',['../as__sensor__ov7670_8c.html#ad8fb5a0ae0913ed4976be36fa472c828',1,'as_sensor_ov7670.c']]],
+  ['midl_5freg_5fval_738',['MIDL_REG_VAL',['../as__sensor__ov7670_8c.html#a5ba3e50799c448d18f4a4fce67d1e231',1,'as_sensor_ov7670.c']]],
+  ['mmap_739',['mmap',['../structdevice__data__t.html#a525ff5655fcedb364e6c17f2db1821a6',1,'device_data_t']]],
+  ['mmap_20device_740',['mmap device',['../group__mmap__file__ops.html',1,'']]],
+  ['mmap_5finfo_741',['mmap_info',['../structmmap__info.html',1,'']]],
+  ['mmap_5finfo_5ft_742',['mmap_info_t',['../group__as__driver.html#ga757e5b33d99e97eb2f45fb2b4fbf6b05',1,'as_driver.h']]],
+  ['module_5fauthor_743',['MODULE_AUTHOR',['../as__driver_8c.html#a835c763ed9cce2be12762713aeb3ccf2',1,'MODULE_AUTHOR(&quot;Alexander Zoellner&quot;):&#160;as_driver.c'],['../as__driver_8c.html#a0bfdf21255515b5eb03fba896003dc82',1,'MODULE_AUTHOR(&quot;Patrick Zacharias&quot;):&#160;as_driver.c']]],
+  ['module_5fdescription_744',['MODULE_DESCRIPTION',['../as__driver_8c.html#a3b0fd20f155add04de5b159475244423',1,'as_driver.c']]],
+  ['module_5fdevice_5ftable_745',['MODULE_DEVICE_TABLE',['../group__as__driver.html#ga5c62b5c955d9e88e14652836e82fe44e',1,'as_driver.c']]],
+  ['module_5flicense_746',['MODULE_LICENSE',['../as__driver_8c.html#ad94b36675e7eb067ea3ce6ff9e244a44',1,'as_driver.c']]],
+  ['module_5fplatform_5fdriver_747',['module_platform_driver',['../group__as__driver.html#ga5dc4e18b40a67ccf4424b1a648fe9d8b',1,'as_driver.c']]],
+  ['module_5fsupported_5fdevice_748',['MODULE_SUPPORTED_DEVICE',['../as__driver_8c.html#a5ea17d21f3b79af6384eecc02eda3069',1,'as_driver.c']]]
+];

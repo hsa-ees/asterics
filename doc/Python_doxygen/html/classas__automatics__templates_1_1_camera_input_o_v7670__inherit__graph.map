@@ -1,0 +1,4 @@
+<map id="as_automatics_templates.CameraInputOV7670" name="as_automatics_templates.CameraInputOV7670">
+<area shape="rect" id="node1" title="Template definition for the Camera interface used by the OmniiVision OV7670 camera sensor." alt="" coords="5,95,200,136"/>
+<area shape="rect" id="node2" href="$classas__automatics__interface_1_1_interface.html" title="Class representing an interface comprised of VHDL ports and generics." alt="" coords="9,5,196,47"/>
+</map>

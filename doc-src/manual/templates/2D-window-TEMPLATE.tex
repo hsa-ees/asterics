@@ -1,0 +1,60 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% This file is part of the ASTERICS Framework. 
+%%
+%% Copyright (C) Hochschule Augsburg, University of Applied Sciences
+%% Efficient Embedded Systems Group
+%%
+%% Author(s): Alexander Zoellner <alexander.zoellner@hs-augsburg.de>
+%%
+%% Description: Template file for describing 2D-sliding windows used by a 2D 
+%%              window module for a 2D-pipeline implemenation.
+%%              The 2D window describes the input and output fields from the 
+%%              pipeline's perspective.
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Colors and meaning:
+%%                          Input:           \cellcolor{red!75}
+%%                          Input-Ref:       \cellcolor{yellow!75}
+%%                          In-Out:          \cellcolor{magenta!75}
+%%                          Output-Ref:      \cellcolor{cyan!25}
+%%                          Output:          \cellcolor{blue!75}
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Example for a 2D window for a Gaussian filter
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \cellcolor{blue!75} & \cellcolor{blue!75} & \cellcolor{blue!75} \\
+        \hline
+        \cellcolor{blue!75} & \cellcolor{cyan!25} & \cellcolor{blue!75} \\
+        \hline
+        \cellcolor{blue!75} & \cellcolor{blue!75} & \cellcolor{magenta!75} \\
+        \hline
+    \end{tabular}
+    \caption{2D-window of Gaussian filter.} 
+    \label{table:appropriate-label}
+\end{table}
+
+% Example for a 2D window with unused fields in between (white fields)
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+        \hline
+        \cellcolor{blue!75} & & & & \cellcolor{blue!75} \\
+        \hline
+        & \cellcolor{blue!75} & & \cellcolor{blue!75} & \\
+        \hline
+        & & \cellcolor{blue!75} & & \\
+        \hline
+        & \cellcolor{blue!75} & & \cellcolor{blue!75} & \\
+        \hline
+        \cellcolor{blue!75} & & & \cellcolor{red!75} & \cellcolor{blue!75} \\
+        \hline
+    \end{tabular}
+    \caption{2D-window of custom filter.} 
+    \label{table:appropriate-label}
+\end{table}

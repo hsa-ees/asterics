@@ -1,0 +1,25 @@
+var classAS__MEM__ADDRESS__GENERATOR =
+[
+    [ "RTL", "classAS__MEM__ADDRESS__GENERATOR_1_1RTL.html", "classAS__MEM__ADDRESS__GENERATOR_1_1RTL" ],
+    [ "ADDRESS_BIT_WIDTH", "group__as__mem__address__generator.html#gaab51370def3ea498970495f8ea1538c8", null ],
+    [ "burst_enable", "group__as__mem__address__generator.html#gaa33b6dce326d1b43c49f39d26f77f666", null ],
+    [ "burst_length", "group__as__mem__address__generator.html#ga814428adf64dbdbca95ce93fa12c0a75", null ],
+    [ "BURST_LENGTH_WIDTH", "group__as__mem__address__generator.html#ga799d9236c0610032ba070f5a332b650f", null ],
+    [ "clk", "group__as__mem__address__generator.html#ga4a4609c199d30b3adebbeb3a01276ec5", null ],
+    [ "cnt_en", "group__as__mem__address__generator.html#gae38744f3a642f6ace049aa96c2398489", null ],
+    [ "go", "group__as__mem__address__generator.html#ga8326af812e678749f4f25fbe159d1876", null ],
+    [ "ieee", "group__as__mem__address__generator.html#ga0a6af6eef40212dbaf130d57ce711256", null ],
+    [ "max_burst_length", "group__as__mem__address__generator.html#gaa0b0948e3839b827b801fedfe754e09d", null ],
+    [ "memory_address", "group__as__mem__address__generator.html#ga6b2eb74124ec14a8774bceced31dc4c1", null ],
+    [ "MEMORY_BIT_WIDTH", "group__as__mem__address__generator.html#gae85e3b4ee9eae47a593062fb4c198a91", null ],
+    [ "numeric_std", "group__as__mem__address__generator.html#ga2edc34402b573437d5f25fa90ba4013e", null ],
+    [ "ready", "group__as__mem__address__generator.html#ga893483753e4885f3fc77cf3a1e06d244", null ],
+    [ "reset", "group__as__mem__address__generator.html#gaad8dc6359d9e23dabcbf342fadf2fa06", null ],
+    [ "section_addr", "group__as__mem__address__generator.html#ga067c9c258aab52a7e3ab9c0d93162aea", null ],
+    [ "section_count", "group__as__mem__address__generator.html#ga29e544c71084c225c1f0c171e440cdbb", null ],
+    [ "section_offset", "group__as__mem__address__generator.html#gae5c9b0b767012beae083fca26c567899", null ],
+    [ "section_size", "group__as__mem__address__generator.html#ga6fc0d14fdb2ee4f3963683ef3759794c", null ],
+    [ "std_logic_1164", "group__as__mem__address__generator.html#gacd03516902501cd1c7296a98e22c6fcb", null ],
+    [ "SUPPORT_MULTIPLE_SECTIONS", "group__as__mem__address__generator.html#gab27372759f764d89e32a8b415473a59f", null ],
+    [ "SUPPORT_VARIABLE_BURST_LENGTH", "group__as__mem__address__generator.html#gae2e2861a4aeae1d4faef3e325cc90b0d", null ]
+];

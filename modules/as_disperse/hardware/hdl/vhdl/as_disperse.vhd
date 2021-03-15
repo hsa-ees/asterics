@@ -9,9 +9,8 @@
 --
 -- Modified:       
 --
--- Description:    This module disperses DIN_WIDTH/DOUT_WIDTH data words to put image data and 
---                 corresponding VSYNC and HSYNC signals into one new data word.
---                 Thus, the new data words contain image data values of 4 pixels.
+-- Description:    Converts a given input data width (2^x) into n data words with a smaller
+--                 data width (2^y; with x>y). DOUT_WIDTH must evenly divide DIN_WIDTH.
 ----------------------------------------------------------------------------------
 --  This program is free software; you can redistribute it and/or
 --  modify it under the terms of the GNU Lesser General Public
@@ -29,9 +28,17 @@
 --  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ----------------------------------------------------------------------------------
 --! @file  as_disperse.vhd
---! @brief Converts a given input data length (2^x) into n data words with a smaller
---         data length (2^y; with x>y).
+--! @brief Reduce AsStream data width by producing multiple strobes per data input.
+--! @addtogroup asterics_modules
+--! @{
+--! @defgroup as_disperse as_disperse: Reduce AsStream Data Width
+--! Converts a given input data width (2^x) into n data words with a smaller
+--! data width (2^y; with x>y). DOUT_WIDTH must evenly divide DIN_WIDTH.
+--! @}
 ----------------------------------------------------------------------------------
+
+--! @addtogroup as_disperse
+--! @{
 
 
 library IEEE;
@@ -72,6 +79,7 @@ entity as_disperse is
   );
 end as_disperse;
 
+--! @}
 
 architecture RTL of as_disperse is
 
@@ -292,4 +300,3 @@ begin
     end generate; -- gen_disperse
 
 end RTL;
-

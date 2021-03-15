@@ -1,0 +1,6 @@
+<map id="vears_draw_circle" name="vears_draw_circle">
+<area shape="rect" id="node1" title="Draw a circle of radius r around (x, y)." alt="" coords="5,31,144,57"/>
+<area shape="rect" id="node2" href="$ea__draw__circle_8c.html#ab7f4ab5a5bd6de4d80428e84b526cb6b" title=" " alt="" coords="223,5,341,32"/>
+<area shape="rect" id="node4" href="$vears_8c.html#a5c9f2a05f3fe62106f55e90dbcc9cf53" title=" " alt="" coords="192,56,372,83"/>
+<area shape="rect" id="node3" href="$ea__draw__point_8c.html#a061e9dc2b155528bc460f9c692659ed2" title=" " alt="" coords="420,5,537,32"/>
+</map>

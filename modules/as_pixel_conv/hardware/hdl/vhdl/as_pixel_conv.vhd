@@ -28,11 +28,17 @@
 ----------------------------------------------------------------------------------
 --! @file  as_pixel_conv.vhd
 --! @brief Perform linear modifications of streaming pixel data.
+--! @addtogroup asterics_modules
+--! @{
+--! @defgroup as_pixel_conv as_pixel_conv: AsStream Data Expansion
+--! Repeat input AsStream data over the entire output data width.
+--! Useful for data expansion (eg. grayscale to RGB)
+--! @}
 ----------------------------------------------------------------------------------
 
+--! @addtogroup as_pixel_conv
+--! @{
 
---! \addtogroup as_pixel_conv
---!  @{
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -99,4 +105,3 @@ begin
     end process;
 
 end RTL;
-

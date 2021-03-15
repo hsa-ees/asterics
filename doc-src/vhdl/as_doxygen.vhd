@@ -1,0 +1,4 @@
+--! @defgroup asterics_modules ASTERICS hardware modules
+--! @{
+--! This Doxygen group contains all ASTERICS hardware modules
+--! @}

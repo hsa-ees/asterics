@@ -32,8 +32,12 @@
  * @file  as_crop.h
  * @brief Driver (header file) for as_crop module.
  *
- * \defgroup as_crop Module as_crop
- * 
+ * @addtogroup asterics_modules
+ * @{
+ * \defgroup as_crop as_crop: Image Cropping
+ * @}
+ * as_crop can remove lines and rows from an image using the as_stream interface.
+ * Synchronization signals are required for operation.
  */
 
 

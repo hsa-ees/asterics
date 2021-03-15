@@ -38,6 +38,7 @@ manage registers and the required 'as_regmgr' module.
 # --------------------- DOXYGEN -----------------------------------------------
 ##
 # @file as_automatics_register.py
+# @ingroup automatics_intrep
 # @author Philip Manke
 # @brief Implements the class 'SlaveRegisterInterface' for as_automatics.
 # -----------------------------------------------------------------------------
@@ -55,14 +56,18 @@ import as_automatics_logging as as_log
 LOG = as_log.get_log()
 
 
+## @ingroup automatics_intrep
 class SlaveRegisterInterface(Interface):
-    """Describes the interface between an ASTERICS hardware module
-       and the systems software in the form of slave registers
-       of an AXI interface."""
+    """! @brief Class representing the ASTERICS slave register interface.
+    Describes the interface between an ASTERICS hardware module
+    and the systems software in the form of slave registers
+    of an AXI interface.
+    Inherits as_automatics_interface::Interface."""
 
     CONST_NAME = "slave_register_configuration"
     DEFAULT_NAME = "slv_reg_interface"
-    # Mapping for VHDL register type configuration <=> internal representation
+
+    ## @brief Mapping for VHDL register type configuration <=> internal representation
     REG_DIR_MATCH = {
         "00": "None",
         "01": "HW -> SW",
@@ -76,14 +81,13 @@ class SlaveRegisterInterface(Interface):
 
     @classmethod
     def is_register_port(cls, port_name: str) -> bool:
-        """Checks if 'port_name' is a defined port name
-           of the defined register interface"""
+        """! @brief Checks if 'port_name' is a defined port name
+        of the defined register interface"""
         return port_name in cls.reg_names
 
     @classmethod
     def set_register_port_names(cls, new_names: Sequence[str]):
-        """Overwrites the statically defined port names
-           of the register interface."""
+        """! @brief Overwrites the statically defined port names of the register interface."""
         cls.reg_names = new_names
 
     def __init__(self, parent=None, data_width: int = 32, address: int = 0):
@@ -108,7 +112,7 @@ class SlaveRegisterInterface(Interface):
         return self.name_prefix + self.name + self.name_suffix
 
     def set_module_base_addr(self, base_addr: int, regif_num: int):
-        """Set the base address for this register interface
+        """! @brief Set the base address for this register interface
         (used for the as_regmgr)."""
         self.base_address = base_addr
         self.regif_num = regif_num
@@ -117,9 +121,10 @@ class SlaveRegisterInterface(Interface):
         )
 
     def set_config_constant(self, const: Constant) -> bool:
-        """Set the configuration constant, defining the register types of
-           this interface. This method expects a Constant object,
-           defined in as_automatics_constant.py."""
+        """! @brief Define the Constant defining the register configuration.
+        Set the configuration constant, defining the register types of
+        this interface. This method expects a Constant object,
+        defined in as_automatics_constant.py."""
         # Is the config constant already assigned?
         if self.config is None:
             # Check if the config constants prefix and suffix
@@ -127,9 +132,14 @@ class SlaveRegisterInterface(Interface):
             this_prefix, this_suffix = as_help.get_prefix_suffix(
                 const.name, const.code_name, []
             )
-            if (this_suffix != self.name_suffix) or (this_prefix != self.name_prefix):
+            if (this_suffix != self.name_suffix) or (
+                this_prefix != self.name_prefix
+            ):
                 LOG.debug(
-                    ("Config constant '%s' didn't fit, " "prefix/suffix mismatch!"),
+                    (
+                        "Config constant '%s' didn't fit, "
+                        "prefix/suffix mismatch!"
+                    ),
                     const.code_name,
                 )
                 return False
@@ -138,7 +148,10 @@ class SlaveRegisterInterface(Interface):
                 # Log some data about the constant. Implicitely checks type
                 try:
                     LOG.debug(
-                        ("Check constant '%s': data type: '%s'," " value: '%s'"),
+                        (
+                            "Check constant '%s': data type: '%s',"
+                            " value: '%s'"
+                        ),
                         const.code_name,
                         const.data_type,
                         const.value,
@@ -163,8 +176,8 @@ class SlaveRegisterInterface(Interface):
         return False
 
     def clear_config_const(self):
-        """Remove the configuration constant
-           and reset the internal register type configuration."""
+        """! @brief Remove the configuration constant.
+        Also resets the internal register type configuration."""
         # Reset all attributes determined only by the register type config
         self.config_applied = False
         self.bidirectional_regs = 0
@@ -176,7 +189,7 @@ class SlaveRegisterInterface(Interface):
         self.config = None
 
     def get_reg_count(self) -> int:
-        """Returns the number of registers of this register interface."""
+        """! @brief Returns the number of registers of this register interface."""
         # Run the analysis of the config constant, if not already complete
         if not self.config_applied:
             if not self.__decode_slvreg_table__():
@@ -185,8 +198,7 @@ class SlaveRegisterInterface(Interface):
         return self.reg_count
 
     def get_register_numbers(self) -> [int, int, int]:
-        """Prints the numbers of different registers this
-           interface has configured."""
+        """! @brief Returns number of register types in this register interface."""
         # Run the analysis of the config constant, if not already complete
         if not self.config_applied:
             if not self.__decode_slvreg_table__():
@@ -194,22 +206,26 @@ class SlaveRegisterInterface(Interface):
 
         return self.bidirectional_regs, self.hwtosw_regs, self.swtohw_regs
 
+    ## @ingroup automatics_intrep
     def get_reg_list(self) -> Sequence[str]:
-        """Returns a string list for all registers. The register type is
-           encoded in the string per register (None, SW->HW, HW->SW, HW<=>SW).
-           """
+        """! @brief Returns a string list for all registers.
+        The register type is encoded in the string per register
+        (None, SW->HW, HW->SW, HW<=>SW).
+        """
         if not self.config_applied:
             if not self.__decode_slvreg_table__():
                 return []
         return self.register_table
 
+    ## @ingroup automatics_analyze
     def __decode_slvreg_table__(self) -> bool:
-        """Decodes the value of the config Constant object. Assumes that the
-           value is in the format: '('{'"XX"',}','' '['others => "XX"']')'
-           Where the 'X's may be either '0' or '1'.
-           Additionally, instead of "XX", the constants "AS_REG_X" may be used,
-           where the 'X' can be any of: "NONE", "STATUS", "CONTROL" and "BOTH".
-           """
+        """! @brief Decodes the value of the config Constant object.
+        Assumes that the value is in the format:
+        '('{'"XX"',}','' '['others => "XX"']')'
+        Where the 'X's may be either '0' or '1'.
+        Additionally, instead of "XX", the constants "AS_REG_X" may be used,
+        where the 'X' can be any of: "NONE", "STATUS", "CONTROL" and "BOTH".
+        """
         self.config_applied = False
         # Do we even have a config Constant assigned?
         if self.config is None:
@@ -260,14 +276,19 @@ class SlaveRegisterInterface(Interface):
                     except KeyError:
                         # If that also doesn't work, error!
                         LOG.warning(
-                            ("Unrecognized register config: " "'%s' in module '%s'"),
+                            (
+                                "Unrecognized register config: "
+                                "'%s' in module '%s'"
+                            ),
                             item,
                             str(self.parent),
                         )
                         return False
                     # Else, "fill up" the remaining empty slots of the register
                     # type list
-                    LOG.debug("'others' found, with register type '%s'.", others_reg)
+                    LOG.debug(
+                        "'others' found, with register type '%s'.", others_reg
+                    )
                     reg_count = self.ports[0].data_width.b + 1
                     while len(self.register_table) < reg_count:
                         self.register_table.append(others_reg)
@@ -288,13 +309,20 @@ class SlaveRegisterInterface(Interface):
                         current_reg = self.REG_DIR_MATCH[temp]
                     except KeyError:
                         LOG.error(
-                            ("Unrecognized register config " "assignment: '%s'"), temp
+                            (
+                                "Unrecognized register config "
+                                "assignment: '%s'"
+                            ),
+                            temp,
                         )
                         return False
 
                 else:
                     LOG.error(
-                        ("Unrecognized register config: " "'%s' in module '%s'"),
+                        (
+                            "Unrecognized register config: "
+                            "'%s' in module '%s'"
+                        ),
                         item,
                         str(self.parent),
                     )
@@ -306,12 +334,14 @@ class SlaveRegisterInterface(Interface):
         # Update the register type count (count: HW->SW, SW->HW, HW<=>SW)
         self.__count_register_types__()
         self.get_generic("REG_COUNT").value = self.reg_count
-        LOG.debug("Register configuration decoded as: '%s'", str(self.register_table))
+        LOG.debug(
+            "Register configuration decoded as: '%s'", str(self.register_table)
+        )
         return True
 
     def __count_register_types__(self):
-        """This method is used to update the attributes 'bidirectional_regs',
-           'hwtosw_regs' and 'swtohw_regs'."""
+        """! @brief This method is used to update the attributes 'bidirectional_regs',
+        'hwtosw_regs' and 'swtohw_regs'."""
         if not self.config_applied:
             self.__decode_slvreg_table__()
         self.bidirectional_regs = 0
@@ -334,8 +364,9 @@ class SlaveRegisterInterface(Interface):
             + self.inactive_regs
         )
 
+    ## @ingroup automatics_connection
     def assign_to(self, parent):
-        """Assigns this instance as part of/linked to 'parent'"""
+        """! @brief Assigns this instance as part of/linked to 'parent'"""
         self.parent = parent
 
     def set_connected(self, value: bool = True):
@@ -345,7 +376,7 @@ class SlaveRegisterInterface(Interface):
             port.set_connected(value)
 
     def print_interface(self, verbose: bool = False):
-        """Print an exhaustive listing of information about this interface."""
+        """! @brief Print information about this interface to the console."""
         if not self.config_applied:
             self.__decode_slvreg_table__()
 
@@ -370,6 +401,6 @@ class SlaveRegisterInterface(Interface):
             print(self.config)
 
     def list_ports(self):
-        """Print a simple string representation
-           of all ports assigned to this interface."""
+        """! @brief Print a simple string representation
+        of all ports assigned to this interface."""
         print([port.code_name for port in self.ports])

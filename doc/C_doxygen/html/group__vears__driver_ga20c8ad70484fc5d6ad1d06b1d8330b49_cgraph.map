@@ -1,0 +1,10 @@
+<map id="vears_overlay_on" name="vears_overlay_on">
+<area shape="rect" id="node1" title="Enable the VEARS modules overlay operation." alt="" coords="5,136,143,163"/>
+<area shape="rect" id="node2" href="$group__vears__overlay.html#ga0694011d30f43e2c4c614119c81c74a0" title="Clear the current draw overlay." alt="" coords="204,56,357,83"/>
+<area shape="rect" id="node5" href="$group__vears__overlay.html#gac2bbf918679083cde66d20cbd14d5c7d" title="Set the current target overlay for subsequent drawing." alt="" coords="197,111,364,137"/>
+<area shape="rect" id="node7" href="$group__vears__driver.html#ga131ffd2ca121aea36286568e3c8a57c7" title="Set entry of the overlay color map." alt="" coords="191,161,371,188"/>
+<area shape="rect" id="node8" href="$group__vears__driver.html#gabaf6a60417efd2efa949667b2ddfd154" title="Set the overlay base address." alt="" coords="203,212,358,239"/>
+<area shape="rect" id="node3" href="$ea__erase_8c.html#a89724ca74b21a55c1b456c12f36e92ea" title=" " alt="" coords="471,5,552,32"/>
+<area shape="rect" id="node4" href="$vears_8c.html#a5c9f2a05f3fe62106f55e90dbcc9cf53" title=" " alt="" coords="421,56,601,83"/>
+<area shape="rect" id="node6" href="$ea__set__overlay__software__address_8c.html#a0fe824df3698fa1c4032b3acd1220a5d" title=" " alt="" coords="419,107,604,149"/>
+</map>

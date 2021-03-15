@@ -29,20 +29,30 @@
 --  or write to the Free Software Foundation, Inc.,
 --  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ----------------------------------------------------------------------------------
---! @file
+--! @file as_stream_sync.vhd
 --! @brief Synchronize two as_stream pixel data streams
+--! @addtogroup asterics_modules
+--! @{
+--! @defgroup as_stream_sync as_stream_sync: Synchronization of two AsStreams
+--! This module synchronizes two AsStream interfaces using the number of strobe
+--! signals received from either stream.
+--! Useful for possible short timing discrepencies between two AsStream sources
+--! that must operate synchronously.
+--! Buffer depth is configurable through generics.
+--! @}
 ----------------------------------------------------------------------------------
+
+--! @addtogroup as_stream_sync
+--! @{
 
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
---library asterics;
---use asterics.helpers.all;
---use asterics.fifo_fwft;
-use work.helpers.all;
-use work.fifo_fwft;
+library asterics;
+use asterics.helpers.all;
+use asterics.fifo_fwft;
 
 
 entity as_stream_sync is
@@ -56,48 +66,49 @@ port (
     reset       : in  std_logic;
     ready       : out std_logic;
 
-    -- as_stream IN ports 0
-    VSYNC_IN_0    : in  std_logic;
-    HSYNC_IN_0    : in  std_logic;
-    STROBE_IN_0   : in  std_logic;
-    DATA_IN_0     : in  std_logic_vector(DATA_WIDTH_0-1 downto 0);
+    -- as_stream in ports 0
+    vsync_in_0    : in  std_logic;
+    hsync_in_0    : in  std_logic;
+    strobe_in_0   : in  std_logic;
+    data_in_0     : in  std_logic_vector(DATA_WIDTH_0-1 downto 0);
     
-    SYNC_ERROR_IN_0  : in  std_logic;
-    DATA_ERROR_IN_0 : in  std_logic;
-    STALL_OUT_0      : out std_logic;
+    sync_error_in_0  : in  std_logic;
+    data_error_in_0 : in  std_logic;
+    stall_out_0      : out std_logic;
     
-    -- IN ports 1
-    VSYNC_IN_1    : in  std_logic;
-    HSYNC_IN_1    : in  std_logic;
-    STROBE_IN_1   : in  std_logic;
-    DATA_IN_1     : in  std_logic_vector(DATA_WIDTH_1-1 downto 0);
+    -- in ports 1
+    vsync_in_1    : in  std_logic;
+    hsync_in_1    : in  std_logic;
+    strobe_in_1   : in  std_logic;
+    data_in_1     : in  std_logic_vector(DATA_WIDTH_1-1 downto 0);
     
-    SYNC_ERROR_IN_1  : in  std_logic;
-    DATA_ERROR_IN_1 : in  std_logic;
-    STALL_OUT_1      : out std_logic;
+    sync_error_in_1  : in  std_logic;
+    data_error_in_1 : in  std_logic;
+    stall_out_1      : out std_logic;
     
-    -- OUT ports 0
-    VSYNC_OUT_0   : out std_logic;
-    HSYNC_OUT_0   : out std_logic;
-    STROBE_OUT_0  : out std_logic;
-    DATA_OUT_0    : out std_logic_vector(DATA_WIDTH_0-1 downto 0);
+    -- out ports 0
+    vsync_out_0   : out std_logic;
+    hsync_out_0   : out std_logic;
+    strobe_out_0  : out std_logic;
+    data_out_0    : out std_logic_vector(DATA_WIDTH_0-1 downto 0);
     
-    SYNC_ERROR_OUT_0  : out std_logic;
-    DATA_ERROR_OUT_0 : out std_logic;
-    STALL_IN_0        : in  std_logic;
+    sync_error_out_0  : out std_logic;
+    data_error_out_0 : out std_logic;
+    stall_in_0        : in  std_logic;
 
-    -- OUT ports 1
-    VSYNC_OUT_1   : out std_logic;
-    HSYNC_OUT_1   : out std_logic;
-    STROBE_OUT_1  : out std_logic;
-    DATA_OUT_1    : out std_logic_vector(DATA_WIDTH_1-1 downto 0);
+    -- out ports 1
+    vsync_out_1   : out std_logic;
+    hsync_out_1   : out std_logic;
+    strobe_out_1  : out std_logic;
+    data_out_1    : out std_logic_vector(DATA_WIDTH_1-1 downto 0);
     
-    SYNC_ERROR_OUT_1  : out std_logic;
-    DATA_ERROR_OUT_1 : out std_logic;
-    STALL_IN_1        : in  std_logic
+    sync_error_out_1  : out std_logic;
+    data_error_out_1 : out std_logic;
+    stall_in_1        : in  std_logic
 );
 end as_stream_sync;
 
+--! @}
 
 architecture RTL of as_stream_sync is
 
@@ -175,12 +186,12 @@ fifo_in_proc: process (clk)
 begin
   if rising_edge(clk) then
     -- DATASTREAM_0
-    wr_en_0 <= STROBE_IN_0;
-    din_0   <= DATA_IN_0 & DATA_ERROR_IN_0 & SYNC_ERROR_IN_0 & HSYNC_IN_0 & VSYNC_IN_0;
+    wr_en_0 <= strobe_in_0;
+    din_0   <= data_in_0 & data_error_in_0 & sync_error_in_0 & hsync_in_0 & vsync_in_0;
 
     -- DATASTREAM_1
-    wr_en_1 <= STROBE_IN_1;
-    din_1   <= DATA_IN_1 & DATA_ERROR_IN_1 & SYNC_ERROR_IN_1 & HSYNC_IN_1 & VSYNC_IN_1;
+    wr_en_1 <= strobe_in_1;
+    din_1   <= data_in_1 & data_error_in_1 & sync_error_in_1 & hsync_in_1 & vsync_in_1;
   end if;
   
 end process;
@@ -196,21 +207,21 @@ data_valid_out <= '1' when ((empty_0 = '0') and (empty_1 = '0') and (stall_in = 
 
 -- DATASTREAM_0
 rd_en_0      <= data_valid_out;
-STROBE_OUT_0 <= data_valid_out;
-DATA_OUT_0   <= dout_0(c_fifo_0_data_width - 1 downto 4);
-VSYNC_OUT_0  <= dout_0(0);
-HSYNC_OUT_0  <= dout_0(1);
-SYNC_ERROR_OUT_0  <= dout_0(2);
-DATA_ERROR_OUT_0 <= dout_0(3);
+strobe_out_0 <= data_valid_out;
+data_out_0   <= dout_0(c_fifo_0_data_width - 1 downto 4);
+vsync_out_0  <= dout_0(0);
+hsync_out_0  <= dout_0(1);
+sync_error_out_0  <= dout_0(2);
+data_error_out_0 <= dout_0(3);
 
 -- DATASTREAM_1
 rd_en_1      <= data_valid_out;
-STROBE_OUT_1 <= data_valid_out;
-DATA_OUT_1   <= dout_1(c_fifo_1_data_width - 1 downto 4);
-VSYNC_OUT_1  <= dout_1(0);
-HSYNC_OUT_1  <= dout_1(1);
-SYNC_ERROR_OUT_1 <= dout_1(2);
-DATA_ERROR_OUT_1 <= dout_1(3);
+strobe_out_1 <= data_valid_out;
+data_out_1   <= dout_1(c_fifo_1_data_width - 1 downto 4);
+vsync_out_1  <= dout_1(0);
+hsync_out_1  <= dout_1(1);
+sync_error_out_1 <= dout_1(2);
+data_error_out_1 <= dout_1(3);
 
 
 -- Stall each stream, if their FIFO is full
@@ -218,15 +229,15 @@ stall_proc: process (clk)
 begin
   if rising_edge(clk) then
   
-    STALL_OUT_0 <= '0';
-    STALL_OUT_1 <= '0';
+    stall_out_0 <= '0';
+    stall_out_1 <= '0';
   
     if (fifo_0_full = '1') then
-      STALL_OUT_0 <= '1';
+      stall_out_0 <= '1';
     end if;
     
     if (fifo_1_full = '1') then
-      STALL_OUT_1 <= '1';
+      stall_out_1 <= '1';
     end if;
   end if;
 end process;

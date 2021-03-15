@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.3.0">
+  <help_text>// Uncomment the following line to change the fontsize and font:
+fontsize=16
+// fontfamily=SansSerif //possible: SansSerif,Serif,Monospaced
+fontfamily=Monospaced
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+// Welcome to UMLet!
+//
+// Double-click on elements to add them to the diagram, or to copy them
+// Edit elements by modifying the text in this panel
+// Hold Ctrl to select multiple elements
+// Use Ctrl+mouse to select via lasso
+//
+// Use +/- or Ctrl+mouse wheel to zoom
+// Drag a whole relation at its central square icon
+//
+// Press Ctrl+C to copy the whole diagram to the system clipboard (then just paste it to, eg, Word)
+// Edit the files in the "palettes" directory to create your own element palettes
+//
+// Select "Custom Elements &gt; New..." to create new element types
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+
+// This text will be stored with each diagram;  use it for notes.</help_text>
+  <zoom_level>11</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>242</x>
+      <y>165</y>
+      <w>1089</w>
+      <h>506</h>
+    </coordinates>
+    <panel_attributes>lw=0
+bg=#EFD000
+layer=-1
+transparency=0</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>275</x>
+      <y>407</y>
+      <w>869</w>
+      <h>231</h>
+    </coordinates>
+    <panel_attributes>/*ASTERICS*/
+fontsize=40
+halign=center
+bg=white
+lw=0
+transparency=25</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>297</x>
+      <y>0</y>
+      <w>110</w>
+      <h>132</h>
+    </coordinates>
+    <panel_attributes>bg=gray
+lw=4
+fontsize=24
+/CAMERA/
+valign=center
+halign=center</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>242</x>
+      <y>0</y>
+      <w>77</w>
+      <h>143</h>
+    </coordinates>
+    <panel_attributes>lt=-
+lw=4</panel_attributes>
+    <additional_attributes>50.0;80.0;10.0;110.0;10.0;10.0;50.0;40.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>396</x>
+      <y>55</y>
+      <w>66</w>
+      <h>187</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-
+lw=4
+layer=2</panel_attributes>
+    <additional_attributes>40.0;150.0;40.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>616</x>
+      <y>473</y>
+      <w>176</w>
+      <h>132</h>
+    </coordinates>
+    <panel_attributes>*/as_collect/*
+halign=center
+valign=center
+bg=#EFD000
+layer=1
+transparency=0
+lw=0
+fontsize=24</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>869</x>
+      <y>473</y>
+      <w>198</w>
+      <h>132</h>
+    </coordinates>
+    <panel_attributes>*/as_/*
+*/memwriter/*
+halign=center
+valign=center
+bg=#EFD000
+layer=1
+transparency=0
+lw=0
+fontsize=24</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>781</x>
+      <y>528</y>
+      <w>110</w>
+      <h>33</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-
+lw=4
+layer=2</panel_attributes>
+    <additional_attributes>80.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1056</x>
+      <y>528</y>
+      <w>154</w>
+      <h>33</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-
+lw=4
+layer=2</panel_attributes>
+    <additional_attributes>120.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1188</x>
+      <y>198</y>
+      <w>110</w>
+      <h>440</h>
+    </coordinates>
+    <panel_attributes>
+*/RAM/*
+halign=center
+valign=top
+bg=white
+layer=1
+transparency=0
+lw=8
+lt=.
+fontsize=32
+fg=Black</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>429</x>
+      <y>341</y>
+      <w>33</w>
+      <h>154</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-
+lw=4
+layer=2</panel_attributes>
+    <additional_attributes>10.0;120.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>341</x>
+      <y>473</y>
+      <w>198</w>
+      <h>132</h>
+    </coordinates>
+    <panel_attributes>*/as_picam/*
+halign=center
+valign=center
+bg=#EFD000
+layer=1
+transparency=0
+lw=0
+fontsize=24</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>528</x>
+      <y>528</y>
+      <w>110</w>
+      <h>33</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-
+lw=4
+layer=2</panel_attributes>
+    <additional_attributes>80.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1188</x>
+      <y>528</y>
+      <w>77</w>
+      <h>33</h>
+    </coordinates>
+    <panel_attributes>Output
+layer=2
+lw=0</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>275</x>
+      <y>198</y>
+      <w>869</w>
+      <h>176</h>
+    </coordinates>
+    <panel_attributes>fontsize=40
+halign=center
+bg=white
+lw=0
+transparency=25</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>341</x>
+      <y>220</y>
+      <w>198</w>
+      <h>132</h>
+    </coordinates>
+    <panel_attributes>*/video_in/*
+halign=center
+valign=center
+bg=#EFD000
+layer=1
+transparency=0
+lw=0
+fontsize=24</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>

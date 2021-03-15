@@ -8,7 +8,7 @@
 -- Company:        Efficient Embedded Systems Group at University of Applied Sciences, Augsburg, Germany
 -- Author:         Michael Schaeferling
 --
--- Modified:       Philip Manke - 2019-12-14: New slave register interface.
+-- Modified:       
 --
 -- Description:    OmniVision OV7670 image sensor interface:
 --                 Synchronize data into internal system clock domain and
@@ -30,8 +30,18 @@
 --  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ----------------------------------------------------------------------------------
 --! @file as_sensor_ov7670.vhd
---! @brief OmniVision OV7670 image sensor interface, provides AS_STREAM compatible image data signals.
+--! @brief OmniVision OV7670 image sensor interface, provides AsStream compatible image data signals.
+--! @addtogroup asterics_modules
+--! @{
+--! @defgroup as_sensor_ov7670 as_sensor_ov7670: OmniVision OV7670 Camera Adapter
+--! OmniVision OV7670 image sensor interface:
+--! Synchronize data into internal system clock domain and
+--! generate appropriate VSYNC and HSYNC signals from camera signals
+--! @}
 ----------------------------------------------------------------------------------
+
+--! @addtogroup as_sensor_ov7670
+--! @{
 
 
 library ieee;
@@ -39,10 +49,9 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use ieee.math_real.all;
 
-
--- for Xilinx FIFO macro
-Library UNIMACRO;
-use UNIMACRO.vcomponents.all;
+-- for Xilinx XPM FIFO macro
+Library xpm;
+use xpm.vcomponents.all;
 
 
 library asterics;
@@ -90,6 +99,7 @@ entity as_sensor_ov7670 is
   );
 end as_sensor_ov7670;
 
+--! @}
 
 architecture RTL of as_sensor_ov7670 is
 
@@ -112,26 +122,6 @@ architecture RTL of as_sensor_ov7670 is
   signal parm0_reg     : std_logic_vector(REG_DATA_WIDTH - 1 downto 0);
   --! Signal used as an intermidiate to apply the control_reset logic and then update the register
   signal control_new : std_logic_vector(15 downto 0);
-
---COMPONENT as_sensor_ov7670_clkdom_fifo_16x13
---  GENERIC (
---    C_FAMILY : string  := "spartan6"
---  );
-COMPONENT as_sensor_ov7670_clkdom_fifo_16x13_vivado is
-  PORT (
-    wr_clk : IN STD_LOGIC;
-    wr_rst : IN STD_LOGIC;
-    wr_en : IN STD_LOGIC;
-    din : IN STD_LOGIC_VECTOR(12 DOWNTO 0);
-    full : OUT STD_LOGIC;
-    --
-    rd_clk : IN STD_LOGIC;
-    rd_rst : IN STD_LOGIC;
-    rd_en : IN STD_LOGIC;
-    dout : OUT STD_LOGIC_VECTOR(12 DOWNTO 0);
-    empty : OUT STD_LOGIC
-  );
-END COMPONENT;
 
 -- Sensor Clock Domain:
 signal s_Sensor_Data       : std_logic_vector(SENSOR_DATA_WIDTH-1 downto 0);
@@ -211,43 +201,63 @@ begin
 assert (SENSOR_DATA_WIDTH = 8) and (DOUT_WIDTH = 8) report "SENSOR_DATA_WIDTH and DOUT_WIDTH must be set to 8. The module processes all 8 bits provided by the OV7670 image sensor." severity failure;
 
 
-  -- FIFO_DUALCLOCK_MACRO: Dual-Clock First-In, First-Out (FIFO) RAM Buffer
-  --                       Artix-7
-  -----------------------------------------------------------------
-  -- DATA_WIDTH | FIFO_SIZE | FIFO Depth | RDCOUNT/WRCOUNT Width --
-  -- ===========|===========|============|=======================--
-  --   37-72    |  "36Kb"   |     512    |         9-bit         --
-  -----------------------------------------------------------------
-  FIFO_DUALCLOCK_MACRO_inst : FIFO_DUALCLOCK_MACRO
-  generic map (
-      DEVICE                  => "7SERIES", -- Target Device: "VIRTEX5", "VIRTEX6", "7SERIES"
-      ALMOST_FULL_OFFSET      => X"0004",   -- Sets almost full threshold
-      ALMOST_EMPTY_OFFSET     => X"0006",   -- Sets the almost empty threshold
-      DATA_WIDTH              => 13,        -- Valid values are 1-72 (37-72 only valid when FIFO_SIZE="36Kb")
-      FIFO_SIZE               => "18Kb",    -- Target BRAM, "18Kb" or "36Kb"
-      FIRST_WORD_FALL_THROUGH => TRUE       -- Sets the FIFO FWFT to TRUE or FALSE
-  )
-  port map (
-      RST         => FIFO_reset,         -- 1-bit input reset
-      WRCLK       => Sensor_PixClk,      -- 1-bit input write clock
-      WREN        => FIFO_Wr_En,         -- 1-bit input write enable
-      DI          => FIFO_Data_In,       -- Input data, width defined by DATA_WIDTH parameter
-      ALMOSTFULL  => open,               -- 1-bit output almost full
-      FULL        => open,               -- 1-bit output full
-      WRCOUNT     => open,               -- Output write count, width determined by FIFO depth
-      WRERR       => open,               -- 1-bit output write error
-      
-      RDCLK       => Clk,                -- 1-bit input read clock
-      RDEN        => FIFO_Rd_En,         -- 1-bit input read enable
-      DO          => FIFO_Data_Out,      -- Output data, width defined by DATA_WIDTH parameter
-      ALMOSTEMPTY => open,               -- 1-bit output almost empty
-      EMPTY       => FIFO_empty,         -- 1-bit output empty
-      RDCOUNT     => open,               -- Output read count, width determined by FIFO depth
-      RDERR       => open                -- 1-bit output read error
-      
-  );
-  -- End of FIFO_DUALCLOCK_MACRO_inst instantiation
+--Xilinx Parameterized Macro, version 2018.1
+	xpm_fifo_async_inst : xpm_fifo_async
+	generic map(
+		--DECIMAL
+		WRITE_DATA_WIDTH=>13,--DECIMAL
+		READ_DATA_WIDTH=>13,--DECIMAL
+		FIFO_WRITE_DEPTH=>128,--DECIMAL --2048
+		READ_MODE=>"fwft",
+		DOUT_RESET_VALUE =>"0",--String
+		FULL_RESET_VALUE=>0,--DECIMAL
 
+		WR_DATA_COUNT_WIDTH=>1,--DECIMAL
+		RD_DATA_COUNT_WIDTH=>1,--DECIMAL
+
+		CDC_SYNC_STAGES => 2,--DECIMAL
+		ECC_MODE => "no_ecc",--String
+		FIFO_MEMORY_TYPE=>"auto",--String
+		FIFO_READ_LATENCY=>1,--DECIMAL
+		PROG_EMPTY_THRESH=>28,--DECIMAL
+		PROG_FULL_THRESH=>100,--DECIMAL
+		--String
+		RELATED_CLOCKS=>0,--DECIMAL
+		USE_ADV_FEATURES=>"0707",--String
+		WAKEUP_TIME=>0
+	)
+	port map(
+
+		rst=>FIFO_reset,
+		wr_clk=>Sensor_PixClk,
+		wr_en=>FIFO_Wr_En,
+		din=>FIFO_Data_In,
+
+		rd_clk=>Clk,
+		rd_en=>FIFO_Rd_En,
+		dout=>FIFO_Data_Out,
+		empty=>FIFO_empty,
+
+		almost_empty=>open,
+		almost_full=>open,
+		data_valid=>open,
+		dbiterr=>open,
+		full=>open,
+		overflow=>open,
+		prog_empty=>open,
+		prog_full=>open,
+		rd_data_count=>open,
+		rd_rst_busy=>open,
+		sbiterr=>open,
+		underflow=>open,
+		wr_ack=>open,
+		wr_data_count=>open,
+		wr_rst_busy=>open,
+		injectdbiterr=>'0',
+		injectsbiterr=>'0',
+		sleep=>'0'
+	);
+--End of xpm_fifo_async_inst instantiation
 
 
 -- PowerDown mode is not supported yet:
@@ -270,8 +280,6 @@ state <= (
       0 => state_reg_frame_done,
       others => '0'
     );
-
-
 
 --- **** Synchronous to Sensor_PixClk ****
 -- FIFO In ports:

@@ -1,0 +1,30 @@
+<map id="as_sensor_ov7670_gain_set" name="as_sensor_ov7670_gain_set">
+<area shape="rect" id="node1" title=" " alt="" coords="5,335,209,361"/>
+<area shape="rect" id="node2" href="$as__sensor__ov7670_8c.html#a4af880494f665dfc2d878bcd991246d3" title=" " alt="" coords="257,309,436,336"/>
+<area shape="rect" id="node3" href="$as__sensor__ov7670_8c.html#ad5b49e677d2124f73482764e3270bb42" title=" " alt="" coords="273,360,420,387"/>
+<area shape="rect" id="node4" href="$group__as__iic__user.html#ga5ae8936ee892843eda5df7b9a418bd52" title=" " alt="" coords="484,360,611,387"/>
+<area shape="rect" id="node5" href="$group__as__iic__user.html#ga2a4e5ee19e84cc95de665e29b92ccda1" title=" " alt="" coords="659,360,801,387"/>
+<area shape="rect" id="node6" href="$group__as__iic__helpers.html#ga53e6050a2c66be89ac23084fd9de9c23" title=" " alt="" coords="849,360,1025,387"/>
+<area shape="rect" id="node25" href="$group__as__iic__helpers.html#ga67cc002a1b20c75dc26f7b328ca5ddc9" title=" " alt="" coords="1073,563,1288,589"/>
+<area shape="rect" id="node26" href="$group__as__iic__helpers.html#gad5e0aa9a71f8f0f65e1fbded8134b11f" title=" " alt="" coords="1091,157,1270,184"/>
+<area shape="rect" id="node7" href="$group__as__iic__bitchecks.html#gaa4e8718c748b5a7e956a38ffd6dbe15d" title=" " alt="" coords="1356,360,1508,387"/>
+<area shape="rect" id="node11" href="$group__as__iic__wait.html#gad3cfec26b8a73166e060108cf1444a2b" title=" " alt="" coords="1353,513,1511,554"/>
+<area shape="rect" id="node12" href="$group__as__iic__user.html#gacdb0c71d0fcfe5e50a7f7316762cd0c0" title=" " alt="" coords="1587,461,1708,488"/>
+<area shape="rect" id="node17" href="$group__as__iic__wait.html#ga0bc5aad64893b674c42943fb64d17676" title=" " alt="" coords="1336,309,1528,336"/>
+<area shape="rect" id="node19" href="$group__as__iic__bitchecks.html#gad90ab4c2ed7fbca8f768c87cdb5794ee" title=" " alt="" coords="1107,512,1255,539"/>
+<area shape="rect" id="node20" href="$group__as__iic__user.html#gae03c311fae3d6a830878a2b0c2c1c2bf" title=" " alt="" coords="1349,259,1515,285"/>
+<area shape="rect" id="node21" href="$group__as__iic__reg__funcs.html#gac83a48fc09234a7a99adafb1ce565eb0" title=" " alt="" coords="1578,208,1717,235"/>
+<area shape="rect" id="node24" href="$group__as__iic__reg__funcs.html#ga8058473baeded71954aa72ee8df24e9b" title=" " alt="" coords="1576,107,1719,133"/>
+<area shape="rect" id="node8" href="$group__as__iic__reg__funcs.html#ga8daa8fde0a7776aa2f5b335250b5aa2a" title=" " alt="" coords="1769,335,1931,361"/>
+<area shape="rect" id="node9" href="$group__asterics__support.html#ga8e5c2bfd2e4498d10289377bd94cef07" title=" " alt="" coords="2006,107,2107,133"/>
+<area shape="rect" id="node10" href="$group__asterics__support.html#ga4c6d688b840a6e2edc9bc0b8ed961677" title=" " alt="" coords="2180,107,2313,133"/>
+<area shape="rect" id="node13" href="$group__asterics__support.html#gab803703ab5b845023ca31b7b2664419c" title=" " alt="" coords="1608,520,1687,547"/>
+<area shape="rect" id="node14" href="$group__asterics__support.html#ga284d9e0d170cf7cabc16ccd7e62d95bd" title=" " alt="" coords="1812,520,1888,547"/>
+<area shape="rect" id="node15" href="$group__asterics__support.html#gad294e0c5530bd6fb800a2394179070e1" title=" " alt="" coords="1997,495,2117,521"/>
+<area shape="rect" id="node16" href="$group__asterics__support.html#ga07e09e825f2608339f6213edb9d0c8b3" title=" " alt="" coords="1989,545,2125,572"/>
+<area shape="rect" id="node18" href="$group__as__iic__bitchecks.html#ga4629e4514c3531d0bcd44ae20abc6bad" title=" " alt="" coords="1581,309,1713,336"/>
+<area shape="rect" id="node22" href="$group__asterics__support.html#ga6345b997e24a6cd5f9143cef27629d49" title=" " alt="" coords="1797,183,1903,209"/>
+<area shape="rect" id="node23" href="$group__asterics__support.html#gab651cc2c035ce61b354578434e59f822" title=" " alt="" coords="1981,183,2132,209"/>
+<area shape="rect" id="node27" href="$group__as__iic__bitchecks.html#ga2ef7a1f9767986f2033697f584cd4feb" title=" " alt="" coords="1359,5,1505,32"/>
+<area shape="rect" id="node28" href="$group__as__iic__reg__funcs.html#gaca309e97934beed04c02e31ba9cfbd3a" title=" " alt="" coords="1767,44,1933,71"/>
+</map>

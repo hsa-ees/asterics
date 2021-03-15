@@ -1,0 +1,171 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% This file is part of the ASTERICS Framework. 
+%%
+%% Copyright (C) Hochschule Augsburg, University of Applied Sciences
+%% Efficient Embedded Systems Group
+%%
+%% Author(s): Gundolf Kiefer <gundolf.kiefer@hs-augsburg.de>
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\section{2D Pipeline Generator} \label{ch:06-04-tools-pipegen}
+
+\secauthor{Alexander Zöllner}
+
+\subsection{Brief Description}
+The \textit{2D Pipeline Generator} is a script-based tool for building a 2D pipeline in a semi-automatic way.
+Required filter masks for the 2D window modules are extracted from images using the program Gimp.
+The resulting 2D pipeline consists of storage elements for each data type and a number of \textit{2D Window Interfaces}.
+
+Note: A similar functionality has been implemented into the Python script based generator Automatics, which will eventually supersede this generator tool.
+
+\subsubsection{Hardware Components}
+
+Table~\ref{06-04-pipeline-generator-components} lists the required hardware components for the 2D Pipeline Generator in order to build the pipeline.
+
+\begin{longtable}[ht]{|c|c|}
+\hline 
+\textbf{Component} & \textbf{Purpose}\\
+\hline 
+\hline 
+\endhead
+
+\texttt{myLittleHelpersPkg.vhd} & 
+\parbox{7cm}{ ~ \\ 
+Defines several mathematic functions such as finding the exponent of two required for representing a given integer.
+\\ ~ } \\
+
+\hline 
+
+\texttt{dram\_shift\_reg.vhd} & 
+\parbox{7cm}{ ~ \\ 
+Implements the logic required to store data in the 2D-sliding window buffer using distributed RAM (DRAM), i.e. slice registers. DRAM is used for small sections up to 100 elements.
+\\ ~ } \\
+
+\hline 
+
+\texttt{bram\_shift\_reg.vhd} & 
+\parbox{7cm}{~ \\ 
+Implements the logic required to store data in the 2D-sliding window buffer using Block-RAM (BRAM). BRAM is used for long sections which require more than 100 elements.
+\\ ~ } \\
+
+\hline 
+
+\texttt{myBRAM.vhd} & 
+\parbox{7cm}{~ \\ 
+Implements the actual storage element in BRAM.
+\\ ~ } \\
+
+\hline 
+
+\caption{Hardware components required for the 2D Pipeline Generator} \label{06-04-pipeline-generator-components}\\
+\end{longtable}
+
+\subsubsection{Generator Input}
+In order to build the 2D pipeline, the 2D Pipeline Generator has to determine the required interfaces.
+Therefore, an image for each filter mask has to be provided using the image program Gimp (of version 2.8).
+In the first step, a new image has to be created. 
+The height of the image has to match the one of the filter mask and the width the resolution of the image in x direction.
+For the filter mask, a new layer has to be created, matching the size of the image.
+The layer should be named appropriately, since the generator uses the same name for the corresponding interface of the filter mask.
+Further, the background layer has to be deleted.
+The in- and output positions of the 2D window module are chosen by coloring the associated pixel, as shown in table~\ref{06-04-pipeline-generator-filter-masks}.
+Reference pixels are solely for visual user assistance, e.g. marking the center pixel of a Gaussian filter mask.
+In a final step, the generated image has to be exported in a png format.
+
+\begin{longtable}[ht]{|c|c|c|c|}
+  \hline
+  & In & Ref. & Out \\
+  \hline
+  In & \cellcolor{red!75}0xff0000 & \cellcolor{yellow!75}0xffff00 & \cellcolor{magenta!75}0xff00ff \\
+  \hline
+  Ref. & \cellcolor{yellow!75}0xffff00 & \cellcolor{green!75}0x00ff00 & \cellcolor{cyan!25}0x00ffff \\
+  \hline
+  Out & \cellcolor{magenta!75}0xff00ff & \cellcolor{cyan!25}0x00ffff & \cellcolor{blue!75}0x0000ff \\
+  \hline
+  \caption{Color encoding used for I/O configuration} \label{06-04-pipeline-generator-filter-masks}
+\end{longtable}
+
+The in- and output ports of the filter masks have to be associated with their corresponding data type to infer the required amount of storage elements and connecting them correctly.
+For this reason, an input file, namely \textit{data.txt} has to be provided, which contains labels for all data types with their associated bit width.
+An entry has the format \texttt{<label>:<bit-width>}, where the \textit{label} must only contain letters (a-z, A-Z) and the \textit{bit-width} only digits (0-9).
+
+Data types are associated with the filter masks by assigning the labels to the ports of a given filter port.
+This is done in the \textit{connections.txt}, which is an output of the 2D Pipeline Generator.
+
+
+\subsubsection{Scripts}
+
+\begin{longtable}[ht]{|c|c|}
+\hline 
+\textbf{Name} & \textbf{Purpose} \\
+\hline 
+\hline 
+\endhead
+
+\texttt{generateConnectionFile.py} & 
+\parbox{7cm}{ ~ \\ 
+Generates the file connections.txt from the png files containing the filter masks and data.txt for the data types.
+\\ ~ } \\
+
+\hline 
+
+\texttt{generateDataPipeline.py} & 
+\parbox{7cm}{ ~ \\ 
+Generates the actual 2D pipeline.
+\\ ~ } \\
+
+\hline 
+
+\texttt{dataPipeline.py} & 
+\parbox{7cm}{ ~ \\ 
+Implements the functionality of the 2D Pipeline Generator and provides methods for generateConnectionFile.py and generateDataPipeline.py
+\\ ~ } \\
+
+\hline 
+
+\caption{Scripts of the 2D Pipeline Generator} \label{06-04-pipeline-generator-scripts}\\
+\end{longtable}
+
+\subsection{Output Products}
+
+\begin{longtable}[ht]{|c|c|}
+\hline 
+\textbf{Name} & \textbf{Purpose}\\
+\hline 
+\hline 
+\endhead
+
+\texttt{connections.txt} & 
+\parbox{7cm}{ ~ \\ 
+Lists ports of all filter masks. Has to be edited by user.
+\\ ~ } \\
+
+\hline 
+
+\texttt{dataLayers.log} & 
+\parbox{7cm}{ ~ \\ 
+Lists the BRAM resource consumption as well as implementation details for individual layers.
+\\ ~ } \\
+
+\hline 
+
+\texttt{dataPipeline.vhd} & 
+\parbox{7cm}{~ \\ 
+The vhdl module containing the 2D pipeline to be instantiated by the user.
+\\ ~ } \\
+
+\hline 
+
+\texttt{dataPipeline\_mapping.vhd} & 
+\parbox{7cm}{~ \\ 
+Provides signal declarations and component instantiation in vhdl, which can be copied in the user design.
+\\ ~ } \\
+
+\hline 
+
+\caption{Output products of the 2D Pipeline Generator} \label{06-04-pipeline-generator-output}\\
+\end{longtable}

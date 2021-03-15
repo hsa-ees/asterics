@@ -1,59 +1,57 @@
-##--------------------------------------------------------------------
-## This file is part of the ASTERICS Framework.
-## Copyright (C) Hochschule Augsburg, University of Applied Sciences
-##--------------------------------------------------------------------
-## File:     Makefile
-##
-## Company:  Efficient Embedded Systems Group
-##           University of Applied Sciences, Augsburg, Germany
-##           https://ees.hs-augsburg.de
-##
-## Author:   Michael Schaeferling <michael.schaeferling@hs-augsburg.de>
-## Date:     2020-09-28
-## Modified: 
-##
-## Description:
-##   The ASTERICS main Makefile.
-##
-##--------------------------------------------------------------------
-##  This program is free software; you can redistribute it and/or
-##  modify it under the terms of the GNU Lesser General Public
-##  License as published by the Free Software Foundation; either
-##  version 3 of the License, or (at your option) any later version.
-##  
-##  This program is distributed in the hope that it will be useful,
-##  but WITHOUT ANY WARRANTY; without even the implied warranty of
-##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-##  Lesser General Public License for more details.
-##  
-##  You should have received a copy of the GNU Lesser General Public License
-##  along with this program; if not, see <http://www.gnu.org/licenses/>
-##  or write to the Free Software Foundation, Inc.,
-##  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-##--------------------------------------------------------------------
+PREFIX = /opt
+
+all: help
+
+.PHONY: help
+help:
+	@echo "help:        Show this message"
+	@echo "update-docs: Rebuild all documentation into ./doc"
+	@echo "reset-docs:  Reset all documentation to current state of the git repository"
+	@echo "install:     Install ASTERICS on this system."
+	@echo "             Use PREFIX=\"path\" to choose installation target. Default is \"/opt/\""
+
+PHONY: update-docs
+update-docs:
+	$(MAKE) -C ./doc-src update-doxygen-all
+	$(MAKE) -C ./doc-src update-doc-free
+	$(MAKE) -C ./doc-src veryclean
+	
+
+PHONY: reset-docs
+reset-docs:
+	$(MAKE) -C ./doc-src reset-doxygen-all
+	$(MAKE) -C ./doc-src reset-doc-free
 
 
-# Needed by the 'install' target:
-PREFIX ?= /opt/asterics
-DISTRIB_PARTS ?= README.md LICENSE settings.sh doc/ ipcores/ modules/ support/ systems/ tools/
-
-
-.PHONY: download
-download:
-	@# Nothing to do
-
-.PHONY: build
-build:
-	@# Nothing to do
-
-.PHONY: clean
-clean:
-	@# Nothing to do
-
-.PHONY: install
+PHONY: install
 install:
-	@test "$(PREFIX)" != "" || ( echo "ERROR: Make variable PREFIX must be set for the 'install' target."; exit 3; )
-	mkdir $(PREFIX) && \
-	for p in $(DISTRIB_PARTS); do \
-	  cp -ar $$p $(PREFIX); \
-	done
+	@echo "Copying files to \"$(PREFIX)/asterics/\" ..."
+	mkdir -p $(PREFIX)/asterics/systems
+	mkdir -p $(PREFIX)/asterics/bin/ees
+	mkdir -p $(PREFIX)/asterics/lib
+	cp -r ./doc $(PREFIX)/asterics/
+	cp -r ./tools/ees $(PREFIX)/asterics/bin/
+	cp ./tools/as-automatics/as_automatics*.py $(PREFIX)/asterics/lib
+	cp ./tools/as-automatics/asterics.py $(PREFIX)/asterics/lib
+	cp ./tools/as-automatics/packaging.tcl $(PREFIX)/asterics/lib
+	cp ./tools/as-automatics/as-module-browser* $(PREFIX)/asterics/bin
+	cp ./tools/as-automatics/as-gui $(PREFIX)/asterics/bin
+	cp ./tools/as-automatics/gui.ui $(PREFIX)/asterics/lib
+	cp ./tools/as-automatics/main_gui.py $(PREFIX)/asterics/lib
+	cp -r ./tools/as-automatics/images $(PREFIX)/asterics/lib
+	cp -r ./modules $(PREFIX)/asterics
+	cp -r ./ipcores $(PREFIX)/asterics
+	cp -r ./support $(PREFIX)/asterics
+	cp -r ./systems/as_refdesign_zynq $(PREFIX)/asterics/systems
+	cp ./systems/README $(PREFIX)/asterics/systems
+	cp ./settings.sh $(PREFIX)/asterics
+	cp ./README.md $(PREFIX)/asterics
+	cp ./LICENSE $(PREFIX)/asterics
+	
+	@echo ""
+	@echo "Installation complete!"
+	@echo "To use ASTERICS, the settings file '$(PREFIX)/asterics/settings.sh' must be sourced."
+	@echo "For convenience, consider adding the following to your .bashrc or .aliases:"
+	@echo "alias source-asterics='source $(PREFIX)/asterics/settings.sh'"
+
+

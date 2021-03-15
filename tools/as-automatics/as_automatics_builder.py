@@ -36,29 +36,38 @@ Functions that handle common tasks when building a hardware processing chain.
 # --------------------- DOXYGEN -----------------------------------------------
 ##
 # @file as_automatics_builder.py
+# @ingroup automatics_generate
 # @author Philip Manke
 # @brief Functions handling common tasks when building processing chains.
 # -----------------------------------------------------------------------------
 
 import os
+import itertools as ittls
+
 from shutil import copy, rmtree
 from datetime import datetime
 
+from asterics import asterics_home, automatics_home
 from as_automatics_proc_chain import AsProcessingChain
 from as_automatics_module import AsModule
+from as_automatics_module_group import AsModuleGroup
+from as_automatics_module_wrapper import AsModuleWrapper
 from as_automatics_exceptions import AsFileError, AsModuleError
-from as_automatics_helpers import append_to_path
+from as_automatics_helpers import append_to_path, minimize_name
+from as_automatics_builder_templates import *
+
 import as_automatics_logging as as_log
-import as_automatics_helpers as as_help
 
 LOG = as_log.get_log()
 
 
-IPCORE_FOLDER = "vivado_cores/"
+##
+# @addtogroup automatics_helpers
+# @{
 
 
 def copytree(src: str, dst: str, clobber: bool = True):
-    """Copy a directory with all files and subdirectories.
+    """! @brief Copy a directory with all files and subdirectories.
     Not using shutil.copytree, as it raises an error when the destination
     folder already exists. This function uses shutil.copy to copy files."""
     for item in os.listdir(src):
@@ -79,27 +88,32 @@ def copytree(src: str, dst: str, clobber: bool = True):
 
 
 def get_unique_modules(chain: AsProcessingChain) -> list:
-    """This function returns a list containing all entity names of modules
+    """! @brief Returns a set of all module types in 'chain'.
+    This function returns a list containing all entity names of modules
     that are included and depended on by the passed processing chain.
     The returned list is free of duplicates."""
 
     unique_modules = []
     # Collect all module entity names
     for module in chain.modules:
-        if module.entity_name not in unique_modules:
+        if module.entity_name not in unique_modules and not isinstance(
+            module, AsModuleGroup
+        ):
             unique_modules.append(module.entity_name)
             get_dependencies(chain, module, unique_modules)
     return unique_modules
 
 
-def get_dependencies(chain: AsProcessingChain, module: AsModule, module_list: list):
-    """Recursively determine the dependencies on other AsModules of 'module',
+def get_dependencies(
+    chain: AsProcessingChain, module: AsModule, module_list: list
+):
+    """! @brief Add module dependencies of 'module' to 'module_list'.
+    Recursively determine the dependencies on other AsModules of 'module',
     as stored in the attribute AsModule.dependencies.
     Adds any new dependencies found to the parameter 'module_list'.
-    Parameters:
-      chain: The current AsProcessingChain. Used to retrieve AsModule templates.
-      module: The module to analyse the dependencies of.
-      module_list: Where to store additional dependencies.
+    @param chain: The current AsProcessingChain. Used to retrieve AsModule templates.
+    @param module: The module to analyse the dependencies of.
+    @param module_list: Where to store additional dependencies.
     """
     # For all direct dependencies of 'module'
     for dep in module.dependencies:
@@ -110,7 +124,9 @@ def get_dependencies(chain: AsProcessingChain, module: AsModule, module_list: li
             # ... and determine further dependencies of the new dependency
             dep_mod = chain.library.get_module_template(dep)
             if dep_mod is None:
-                dep_mod = chain.library.get_module_template(dep, window_module=True)
+                dep_mod = chain.library.get_module_template(
+                    dep, window_module=True
+                )
                 if dep_mod is None:
                     LOG.error(
                         "Module '%s' not found! Required by '%s'.",
@@ -126,14 +142,20 @@ def get_dependencies(chain: AsProcessingChain, module: AsModule, module_list: li
             get_dependencies(chain, dep_mod, module_list)
 
 
+## @}
+
+##
+# @addtogroup automatics_generate
+# @{
+
+
 def prepare_output_path(
     source_path: str, output_path: str, allow_deletion: bool = False
 ):
-    """Copy the template directory tree for a blank system to output_path.
-    Parameters:
-      source_path: path to the folder to copy.
-      output_path: Where to copy source_path to.
-      allow_deletion: If output_path is not empty delete the contents if
+    """! @brief Copy the template directory tree for a blank system to output_path.
+    @param source_path: path to the folder to copy.
+    @param output_path: Where to copy source_path to.
+    @param allow_deletion: If output_path is not empty delete the contents if
                       allow_deletion is True, else throw an error."""
     LOG.info("Preparing output project directory...")
     if os.path.isdir(output_path) and os.listdir(output_path):
@@ -152,6 +174,7 @@ def prepare_output_path(
                     detail=str(err),
                     msg="'shutil.rmtree' failed to remove output directory!",
                 )
+            os.makedirs(output_path)
         else:
             raise AsFileError(
                 output_path,
@@ -175,19 +198,18 @@ def prepare_output_path(
             )
 
 
-VEARS_REL_PATH = "ipcores/VEARS/"
-
-
 def add_vears_core(
-    output_path: str, asterics_path: str, use_symlinks: bool = True, force: bool = False
+    output_path: str,
+    asterics_path: str,
+    use_symlinks: bool = True,
+    force: bool = False,
 ):
-    """Link or copy the VEARS IP-Core from the ASTERICS installation
-    to the output path.
-    Parameters:
-      output_path: Directory to link/copy VEARS to.
-      asterics_path: Toplevel folder of the ASTERICS installation.
-      use_symlinks: If True, VEARS will be linked, else copied.
-      force: If True, the link or folder will be deleted if already present."""
+    """! @brief Link or copy the VEARS IP-Core.
+    VEARS is copied/linked from the ASTERICS installation to the output path.
+    @param output_path: Directory to link/copy VEARS to.
+    @param asterics_path: Toplevel folder of the ASTERICS installation.
+    @param use_symlinks: If True, VEARS will be linked, else copied.
+    @param force: If True, the link or folder will be deleted if already present."""
     vears_path = append_to_path(asterics_path, VEARS_REL_PATH)
     vears_path = os.path.realpath(vears_path)
     target = append_to_path(output_path, "VEARS", add_trailing_slash=False)
@@ -197,17 +219,25 @@ def add_vears_core(
             try:
                 os.remove(target)
             except IOError as err:
-                LOG.error("Could not remove file '%s'! VEARS not added!", target)
+                LOG.error(
+                    "Could not remove file '%s'! VEARS not added!", target
+                )
                 raise AsFileError(
-                    target, "Could not remove file to link/copy VEARS!", str(err)
+                    target,
+                    "Could not remove file to link/copy VEARS!",
+                    str(err),
                 )
         else:
             try:
                 rmtree(target)
             except IOError as err:
-                LOG.error("Could not remove folder '%s'! VEARS not added!", target)
+                LOG.error(
+                    "Could not remove folder '%s'! VEARS not added!", target
+                )
                 raise AsFileError(
-                    target, "Could not remove folder to link/copy VEARS!", str(err)
+                    target,
+                    "Could not remove folder to link/copy VEARS!",
+                    str(err),
                 )
 
     if use_symlinks:
@@ -221,14 +251,20 @@ def add_vears_core(
                     str(err),
                 )
                 raise AsFileError(
-                    output_path, "Could not create directory for VEARS!", str(err)
+                    output_path,
+                    "Could not create directory for VEARS!",
+                    str(err),
                 )
         try:
             target = os.path.realpath(target)
             os.symlink(vears_path, target, target_is_directory=True)
         except IOError as err:
-            LOG.error("Could not create a link to the VEARS IP-Core! - '%s'", str(err))
-            raise AsFileError(target, "Could not create link to VEARS!", str(err))
+            LOG.error(
+                "Could not create a link to the VEARS IP-Core! - '%s'", str(err)
+            )
+            raise AsFileError(
+                target, "Could not create link to VEARS!", str(err)
+            )
     else:
         try:
             os.makedirs(target, mode=0o755, exist_ok=True)
@@ -239,119 +275,71 @@ def add_vears_core(
             raise AsFileError(output_path, "Could not copy VEARS!", str(err))
 
 
-def write_config_c(output_path: str):
-    """Write the file 'as_config.c', containing the build date
-    and version string. Version string is currently not implemented!"""
+def write_config_hc(chain, output_path: str):
+    """! @brief Write the files 'as_config.[hc]'
+    The files contain the build date, version string and configuration macros."""
     LOG.info("Generating as_config.c source file...")
-    config_c_name = "as_config.c"
-    config_c_template = (
-        'const char *buildVersion = "{version}";\n'
-        'const char *buildDate = "{date}";\n'
-    )
     # Fetch and format todays date
     date_string = datetime.today().strftime("%Y-%m-%d")
-    version_string = "TEMPORARY"
+    version_string = chain.parent.version
+    hashstr = "'" + "', '".join(chain.get_hash()) + "'"
+    filepath = append_to_path(
+        output_path, AS_CONFIG_C_NAME, add_trailing_slash=False
+    )
 
     try:
-        with open(output_path + config_c_name, "w") as file:
+        with open(filepath, "w") as file:
             file.write(
-                config_c_template.format(date=date_string, version=version_string)
+                AS_CONFIG_C_TEMPLATE.format(
+                    header=ASTERICS_HEADER_SW.format(
+                        filename=AS_CONFIG_C_NAME,
+                        description=AS_CONFIG_C_DESCRIPTION,
+                    ),
+                    hashstr=hashstr,
+                    date=date_string,
+                    version=version_string,
+                )
             )
     except IOError as err:
-        LOG.error("Could not write 'as_config.c'! '%s'", str(err))
+        LOG.error("Could not write '%s'! '%s'", AS_CONFIG_C_NAME, str(err))
         raise AsFileError(
-            output_path + config_c_name, detail=str(err), msg="Could not write to file"
+            filepath,
+            detail=str(err),
+            msg="Could not write to file",
+        )
+
+    LOG.info("Generating as_config.h source file...")
+    filepath = append_to_path(
+        output_path, AS_CONFIG_H_NAME, add_trailing_slash=False
+    )
+    try:
+        with open(filepath, "w") as file:
+            file.write(
+                AS_CONFIG_H_TEMPLATE.format(
+                    header=ASTERICS_HEADER_SW.format(
+                        filename=AS_CONFIG_H_NAME,
+                        description=AS_CONFIG_H_DESCRIPTION,
+                    )
+                )
+            )
+    except IOError as err:
+        LOG.error("Could not write '%s'! '%s'", AS_CONFIG_H_NAME, str(err))
+        raise AsFileError(
+            filepath,
+            detail=str(err),
+            msg="Could not write to file",
         )
 
 
-# Template for the ASTERICS toplevel C header file
-ASTERICS_H_TEMPLATE = """
-/*------------------------------------------------------------------------------
---  This file is part of the ASTERICS Framework.
---  (C) 2019 Hochschule Augsburg, University of Applied Sciences
---------------------------------------------------------------------------------
--- File:           asterics.h
---
--- Company:        University of Applied Sciences, Augsburg, Germany
--- Author:         ASTERICS Automatics
---
--- Description:    Driver (header file) for the ASTERICS IP core.
---                 This header file
---                  a) incorporates drivers of implemented ASTERICS modules and
---                  b) defines register mapping for low level hardware access.
---------------------------------------------------------------------------------
---  This program is free software; you can redistribute it and/or
---  modify it under the terms of the GNU Lesser General Public
---  License as published by the Free Software Foundation; either
---  version 3 of the License, or (at your option) any later version.
---  
---  This program is distributed in the hope that it will be useful,
---  but WITHOUT ANY WARRANTY; without even the implied warranty of
---  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
---  Lesser General Public License for more details.
---  
---  You should have received a copy of the GNU Lesser General Public License
---  along with this program; if not, see <http://www.gnu.org/licenses/>
---  or write to the Free Software Foundation, Inc.,
---  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-------------------------------------------------------------------------------*/
-
-/**
- * @file  asterics.h
- * @brief Incorporating drivers for ASTERICS IP core modules and register mapping definition.
- *
- * \\defgroup asterics_mod ASTERICS modules
- *
- */
-
-#ifndef ASTERICS_H
-#define ASTERICS_H
-
-#ifdef __cplusplus
-extern "C"
-{{
-#endif
-
-#include "as_support.h"
-
-
-/************************** Integrated Modules ***************************/
-
-{module_driver_includes}
-
-/************************** ASTERICS IP-Core Base Address ***************************/
-#define ASTERICS_BASEADDR {base_addr:#8X}
-
-#define AS_REGISTERS_PER_MODULE {regs_per_mod}
-
-/************************** Module Register Mapping ***************************/
-
-{base_regs}
-
-/************************** Module Address Mapping ***************************/
-
-{addr_map}
-
-
-{module_additions}
-
-#ifdef __cplusplus
-}}
-#endif
-
-#endif /** ASTERICS_H */
-"""
-
-ASTERICS_H_NAME = "asterics.h"
-
-
 def write_asterics_h(chain: AsProcessingChain, output_path: str):
-    """Write the toplevel ASTERICS driver header containing include
-    statements for all driver header files and the definition of the register
-    ranges and base addresses."""
+    """! @brief Write the toplevel ASTERICS driver C header
+    The header contains include statements for all driver header files
+    and the definition of the register ranges and base addresses."""
+
     LOG.info("Generating ASTERICS main software driver header file...")
     asterics_h_path = append_to_path(output_path, "/")
-    include_list = ""
+    include_list = set()
+    include_str = ""
     include_template = '#include "{}" \n'
 
     module_base_reg_template = "#define AS_MODULE_BASEREG_{modname} {offset}\n"
@@ -377,15 +365,21 @@ def write_asterics_h(chain: AsProcessingChain, output_path: str):
     unique_modules = get_unique_modules(chain)
 
     # Collect driver header files that need to be included
+    def add_header(mod: AsModule):
+        for driver in mod.driver_files:
+            if driver.endswith(".h"):
+                include_list.add(driver.rsplit("/", maxsplit=1)[-1])
+
+    for mod in list(ittls.chain(chain.modules, chain.pipelines)):
+        add_header(mod)
     for entity in unique_modules:
-        module = chain.library.get_module_template(entity)
-        driver_path = module.module_dir + "software/driver/"
-        if not os.path.isdir(driver_path):
-            continue
-        for file in os.listdir(driver_path):
-            if file[-2:] == ".h":
-                if not any(file in include for include in include_list):
-                    include_list += include_template.format(file)
+        mod = chain.library.get_module_template(entity)
+        if mod is not None:
+            add_header(mod)
+    # Build include list
+    include_str = "".join(
+        [include_template.format(i) for i in sorted(include_list)]
+    )
 
     # Register base definition list and register range order
     reg_bases = ""
@@ -401,16 +395,22 @@ def write_asterics_h(chain: AsProcessingChain, output_path: str):
         reg_bases += module_base_reg_template.format(
             modname=regif_modname.upper(), offset=regif.regif_num
         )
-        reg_addrs += module_base_addr_template.format(modname=regif_modname.upper())
+        reg_addrs += module_base_addr_template.format(
+            modname=regif_modname.upper()
+        )
 
     try:
         with open(asterics_h_path + ASTERICS_H_NAME, "w") as file:
             # Write asterics.h
             file.write(
                 ASTERICS_H_TEMPLATE.format(
+                    header=ASTERICS_HEADER_SW.format(
+                        filename=ASTERICS_H_NAME,
+                        description=ASTERICS_H_DESCRIPTION,
+                    ),
                     base_addr=chain.asterics_base_addr,
                     regs_per_mod=chain.max_regs_per_module,
-                    module_driver_includes=include_list,
+                    module_driver_includes=include_str,
                     base_regs=reg_bases,
                     addr_map=reg_addrs,
                     module_additions=module_additions,
@@ -418,7 +418,11 @@ def write_asterics_h(chain: AsProcessingChain, output_path: str):
             )
 
     except IOError as err:
-        print("Couldn't write {}: '{}'".format(asterics_h_path + ASTERICS_H_NAME, err))
+        print(
+            "Couldn't write {}: '{}'".format(
+                asterics_h_path + ASTERICS_H_NAME, err
+            )
+        )
         raise AsFileError(
             asterics_h_path + ASTERICS_H_NAME,
             detail=str(err),
@@ -426,48 +430,10 @@ def write_asterics_h(chain: AsProcessingChain, output_path: str):
         )
 
 
-# Generic file header, adapted for TCL files
-TCL_HEADER = """
-#------------------------------------------------------------------------------
-#-  This file is part of the ASTERICS Framework.
-#-  (C) 2019 Hochschule Augsburg, University of Applied Sciences
-#-------------------------------------------------------------------------------
-#- File:           {}
-#-
-#- Company:        University of Applied Sciences, Augsburg, Germany
-#- Author:         ASTERICS Automatics
-#-
-#- Description:    {}
-#-------------------------------------------------------------------------------
-#- This program is free software; you can redistribute it and/or
-#- modify it under the terms of the GNU Lesser General Public
-#- License as published by the Free Software Foundation; either
-#- version 3 of the License, or (at your option) any later version.
-#- 
-#- This program is distributed in the hope that it will be useful,
-#- but WITHOUT ANY WARRANTY; without even the implied warranty of
-#- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#- Lesser General Public License for more details.
-#- 
-#- You should have received a copy of the GNU Lesser General Public License
-#- along with this program; if not, see <http://www.gnu.org/licenses/>
-#- or write to the Free Software Foundation, Inc.,
-#- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-#-----------------------------------------------------------------------------*/
-
-"""
-
-# Names for the TCL fragments
-TCL1_NAME = "package_config.tcl"
-TCL2_NAME = "package_interface_config.tcl"
-# Path in the project directory to store the TCL fragments in
-TCL_FOLDER = "vivado_cores/ASTERICS/"
-
-
 def write_vivado_package_tcl(
     chain: AsProcessingChain, output_path: str, additions_c1: str = ""
 ) -> bool:
-    """Write two TCL script fragments sourced by the packaging TCL script.
+    """! @brief Write two TCL script fragments sourced by the packaging TCL script.
     This function generates Vivado-specific TCL commands!
     The first fragment is sourced very early in the packaging script and
     contains basic information like the project directory,
@@ -482,86 +448,11 @@ def write_vivado_package_tcl(
     output_path - String: Toplevel folder of the current project
     Returns a boolean value: True on success, False otherwise"""
 
-    as_iic_map_tcl_template = (
-        "# Set up interface properties:\n"
-        "ipx::add_bus_interface {iic_if_name} [ipx::current_core]\n"
-        "set_property abstraction_type_vlnv xilinx.com:interface:iic_rtl:1.0 "
-        "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]\n"
-        "set_property bus_type_vlnv xilinx.com:interface:iic:1.0 "
-        "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]\n"
-        "set_property interface_mode master "
-        "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]\n"
-        "set_property display_name asterics_{iic_if_name} "
-        "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]\n"
-        "# IIC port mapping:\n"
-        "ipx::add_port_map SCL_T [ipx::get_bus_interfaces {iic_if_name} "
-        "-of_objects [ipx::current_core]]\n"
-        "set_property physical_name {iic_signal_prefix}scl_out_enable "
-        "[ipx::get_port_maps SCL_T -of_objects "
-        "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]]\n"
-        "ipx::add_port_map SDA_O [ipx::get_bus_interfaces {iic_if_name} "
-        "-of_objects [ipx::current_core]]\n"
-        "set_property physical_name {iic_signal_prefix}sda_out "
-        "[ipx::get_port_maps SDA_O -of_objects "
-        "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]]\n"
-        "ipx::add_port_map SDA_I [ipx::get_bus_interfaces {iic_if_name} "
-        "-of_objects [ipx::current_core]]\n"
-        "set_property physical_name {iic_signal_prefix}sda_in "
-        "[ipx::get_port_maps SDA_I -of_objects "
-        "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]]\n"
-        "ipx::add_port_map SDA_T [ipx::get_bus_interfaces {iic_if_name} "
-        "-of_objects [ipx::current_core]]\n"
-        "set_property physical_name {iic_signal_prefix}sda_out_enable "
-        "[ipx::get_port_maps SDA_T -of_objects "
-        "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]]\n"
-        "ipx::add_port_map SCL_O [ipx::get_bus_interfaces {iic_if_name}"
-        " -of_objects [ipx::current_core]]\n"
-        "set_property physical_name {iic_signal_prefix}scl_out "
-        "[ipx::get_port_maps SCL_O -of_objects "
-        "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]]\n"
-        "ipx::add_port_map SCL_I [ipx::get_bus_interfaces {iic_if_name} "
-        "-of_objects [ipx::current_core]]\n"
-        "set_property physical_name {iic_signal_prefix}scl_in "
-        "[ipx::get_port_maps SCL_I -of_objects "
-        "[ipx::get_bus_interfaces {iic_if_name} -of_objects [ipx::current_core]]]\n"
-    )
-
     # Class to manage the AXI interface information for the TCL packaging
     # script
     class TCL_AXI_Interface:
         """'Private' class capsuling methods to write the TCL fragments
         required for the packaging script for Xilinx targets."""
-
-        # TCL command templates:
-        bus_if_association_tcl_template = (
-            "ipx::associate_bus_interfaces -clock {clk} -busif {busif} -clear "
-            "[ipx::current_core]\n"
-            "# ^ Dissassociate any signals with this AXI interface"
-            " (to be save)\n"
-            "# Associate the correct clock and reset signals\n"
-            "ipx::associate_bus_interfaces -clock {clk} -reset {rst} "
-            "-busif {busif} [ipx::current_core]\n"
-            "# Store the interface object in a variable with known name\n"
-            "set {ref} [ipx::get_bus_interfaces -of_objects "
-            "[ipx::current_core] {busif}]\n"
-        )
-        memory_map_tcl_template = (
-            "ipx::remove_memory_map slave_s_axi [ipx::current_core]\n"
-            "ipx::remove_memory_map {ref} [ipx::current_core]\n"
-            "# ^ Remove any memory maps from the interface\n"
-            "# (potentially) Re-add a memory map\n"
-            "ipx::add_memory_map {mem_map_ref} [ipx::current_core]\n"
-            "# Add a slave memory map reference\n"
-            "set_property slave_memory_map_ref {mem_map_ref} ${ref}\n"
-            "# Add an address block to the memory map "
-            "using the above reference\n"
-            "ipx::add_address_block {{{axi_type}}} [ipx::get_memory_maps "
-            "{mem_map_ref} -of_objects [ipx::current_core]]\n"
-            "# Set the address block range\n"
-            "set_property range {{{mem_range}}} [ipx::get_address_blocks "
-            "{{{axi_type}}} -of_objects [ipx::get_memory_maps "
-            "{{{mem_map_ref}}}  -of_objects [ipx::current_core]]]\n"
-        )
 
         def __init__(self, axi_type: str):
             # Type of AXI interface ("AXI Slave" / "AXI Master")
@@ -581,7 +472,7 @@ def write_vivado_package_tcl(
 
         def get_tcl_bus_assoc_commands(self) -> str:
             """Generate the bus interface association TCL commands"""
-            return self.bus_if_association_tcl_template.format(
+            return BUS_IF_ASSOCIATION_TCL_TEMPLATE.format(
                 busif=self.bus_if_name,
                 clk=self.clock_name,
                 rst=self.reset_name,
@@ -600,7 +491,7 @@ def write_vivado_package_tcl(
                 )
                 return ""
             # Else ->
-            return self.memory_map_tcl_template.format(
+            return MEMORY_MAP_TCL_TEMPLATE.format(
                 ref=self.refname,
                 axi_type=self.if_type,
                 mem_range=self.memory_range,
@@ -621,6 +512,9 @@ def write_vivado_package_tcl(
     )
     content2 = TCL_HEADER.format(
         TCL2_NAME, "TCL fragment (2) part of the IP packaging TCL script"
+    )
+    content3 = TCL_HEADER.format(
+        TCL3_NAME, "TCL fragment (2) part of the IP packaging TCL script"
     )
 
     # Generate the commands for the first basic fragment
@@ -645,7 +539,7 @@ def write_vivado_package_tcl(
             else:
                 temp = TCL_AXI_Interface(templates[1])
             temp.refname = (
-                as_help.minimize_name(inter.name_prefix)
+                minimize_name(inter.name_prefix)
                 .replace(temp.axi_type.lower(), "")
                 .strip("_")
             )
@@ -677,12 +571,14 @@ def write_vivado_package_tcl(
                 )
                 mod_prefix = ""
             else:
-                mod_prefix = as_help.minimize_name(
+                mod_prefix = minimize_name(
                     top_if.name_prefix, chain.NAME_FRAGMENTS_REMOVED_ON_TOPLEVEL
                 )
-            iic_if_inst_str.append("#Instantiate interface for {}\n".format(if_name))
             iic_if_inst_str.append(
-                as_iic_map_tcl_template.format(
+                "#Instantiate interface for {}\n".format(if_name)
+            )
+            iic_if_inst_str.append(
+                AS_IIC_MAP_TCL_TEMPLATE.format(
                     iic_signal_prefix=mod_prefix, iic_if_name=if_name
                 )
             )
@@ -692,49 +588,74 @@ def write_vivado_package_tcl(
     # Assemble the IIC interface string and add to the TCL fragment
     content2 += "\n".join(iic_if_inst_str)
 
-    # Make sure both files are newline-terminated
+    tcl_ooc_remove_outsourced_template = "set_property is_enabled false -quiet [get_files -quiet -of_objects [get_filesets sources_1] {{{files}}}]\n"
+
+    outsourced_files = []
+    ooc_modules = [
+        mod for mod in chain.modules if isinstance(mod, AsModuleWrapper)
+    ]
+    if ooc_modules:
+        tcl_ooc_commands = [
+            "# Create OOC blocks\n",
+            'puts "Generating Out-of-Context Synthesis Runs..."\n',
+        ]
+    else:
+        tcl_ooc_commands = []
+    count = 1
+    for mod in ooc_modules:
+        source_files = set()
+        modfilename = mod.name + ".vhd"
+        source_files.add(modfilename)
+        outsourced_files.append(modfilename)
+        source_files.update(mod.modules[0].files)
+        dep_mods = []
+        get_dependencies(chain, mod.modules[0], dep_mods)
+        if dep_mods:
+            for dmod in dep_mods:
+                modtemplate = chain.library.get_module_template(dmod)
+                source_files.update(modtemplate.files)
+        source_files = (
+            sf.rsplit("/", maxsplit=1)[-1] for sf in sorted(source_files)
+        )
+        tcl_ooc_commands.append(
+            TCL_OOC_TEMPLATE.format(
+                ent_name=mod.entity_name,
+                source_files=" ".join(source_files),
+                top_source=mod.name + ".vhd",
+                progress=str(count) + " of " + str(len(ooc_modules)),
+            )
+        )
+        count += 1
+    tcl_ooc_commands.append(
+        tcl_ooc_remove_outsourced_template.format(
+            files=" ".join(outsourced_files)
+        )
+    )
+
+    content3 += "\n".join(tcl_ooc_commands)
+
+    # Make sure all files are newline-terminated
     content1 += "\n"
     content2 += "\n"
+    content3 += "\n"
 
-    # Write fragment 1
-    try:
-        with open(project_dir + TCL1_NAME, "w") as file:
-            file.write(content1)
-    except IOError as err:
-        LOG.error("Could not write '%s' in '%s'.", TCL1_NAME, project_dir)
-        raise AsFileError(project_dir + TCL1_NAME, "Could not write file!", str(err))
-
-    # Write fragment 2
-    try:
-        with open(project_dir + TCL2_NAME, "w") as file:
-            file.write(content2)
-    except IOError as err:
-        LOG.error("Could not write '%s' in '%s'.", TCL2_NAME, project_dir)
-        raise AsFileError(project_dir + TCL2_NAME, "Could not write file!", str(err))
-
-
-VIVADO_TCL_COMMANDLINE_TEMPLATE = (
-    "ees-vivado -mode tcl -source {}packaging.tcl "
-    '-notrace -tclargs "{}package_config.tcl"'
-)
-
-HOUSE_CLEANING_LIST_VIVADO = (
-    "package_interface_config.tcl",
-    "package_config.tcl",
-    "asterics.hw",
-    "asterics.cache",
-    "asterics.ip_user_files",
-    "asterics.xpr",
-    "asterics.zip",
-    "vivado.log",
-    "vivado.jou",
-)
+    for name, content in zip(
+        (TCL1_NAME, TCL2_NAME, TCL3_NAME), (content1, content2, content3)
+    ):
+        try:
+            with open(project_dir + name, "w") as file:
+                file.write(content)
+        except IOError as err:
+            LOG.error("Could not write '%s' in '%s'.", name, project_dir)
+            raise AsFileError(
+                project_dir + name, "Could not write file!", str(err)
+            )
 
 
 def run_vivado_packaging(
     chain: AsProcessingChain, output_path: str, tcl_additions: str = ""
 ):
-    """Write the necessary TCL fragments and then run the TCL packaging script.
+    """! @brief Write the necessary TCL fragments and run the TCL packaging script.
     Requires Vivado to be installed and in callable from the current terminal.
     Parameters:
     chain: The current processing chain.
@@ -744,10 +665,10 @@ def run_vivado_packaging(
     write_vivado_package_tcl(chain, output_path, tcl_additions)
     # Clean path
     path = append_to_path(os.path.realpath(output_path), "/")
-    # Get automatics home directory
-    auto_path = append_to_path(chain.library.asterics_dir, "tools/as-automatics")
     # Input path to launch string
-    launch_string = VIVADO_TCL_COMMANDLINE_TEMPLATE.format(auto_path, path)
+    launch_string = VIVADO_TCL_COMMANDLINE_TEMPLATE.format(
+        automatics_home + "/", path
+    )
     cwd = os.getcwd()
 
     LOG.info("Running Vivado IP-Core packaging...")
@@ -762,35 +683,48 @@ def run_vivado_packaging(
         LOG.critical("Packaging via Vivado has failed!\nError: '%s'", str(err))
         raise err
     # Cleanup
-    for target_suf in HOUSE_CLEANING_LIST_VIVADO:
-        target = append_to_path(output_path, target_suf, False)
-        # Choose remove function
-        if os.path.isdir(target):
-            rm_op = rmtree
-        else:
-            rm_op = os.unlink
-        # Try to remove file/directory
-        try:
-            rm_op(target)
-        except FileNotFoundError:
-            pass  # This is fine, we wanted it gone anyways ;)
-        except IOError as err:
-            LOG.warning(
-                "Packaging: Can't remove temporary file(s) '%s' - %s.", target, str(err)
+    ooc_runs_present = any(
+        (isinstance(mod, AsModuleWrapper) for mod in chain.modules)
+    )
+    if not ooc_runs_present:
+        for target_suf in HOUSE_CLEANING_LIST_VIVADO:
+            target = append_to_path(output_path, target_suf, False)
+            # Choose remove function
+            if os.path.isdir(target):
+                rm_op = rmtree
+            else:
+                rm_op = os.unlink
+            # Try to remove file/directory
+            try:
+                rm_op(target)
+            except FileNotFoundError:
+                pass  # This is fine, we wanted it gone anyways ;)
+            except IOError as err:
+                LOG.warning(
+                    "Packaging: Can't remove temporary file(s) '%s' - %s.",
+                    target,
+                    str(err),
+                )
+    else:
+        LOG.warning(
+            "Vivado Project including Out-of-Context runs generated to '{}'.".format(
+                output_path
             )
+        )
     LOG.info("Packaging complete!")
 
 
 def gather_hw_files(
     chain: AsProcessingChain, output_folder: str, use_symlinks: bool = True
 ) -> bool:
-    """Collect all required hardware descriptive files
+    """! @brief Copy or link to module VHDL files of an ASTERICS chain.
+    Collect all required hardware descriptive files
     for the current ASTERICS system. Mainly looks at the AsModule.files,
     .module_dir and .dependencies attributes to find required files.
-    Parameters:
-    chain: current processing chain
-    output_folder: The root of the output folder structure
-    Returns True on success, else False"""
+    @param chain: current processing chain
+    @param output_folder: The root of the output folder structure
+    @param use_symlinks: Whether or not to link (True) or copy (False) files
+    @return  True on success, else False"""
 
     LOG.info("Gathering HDL source files...")
     out_path = os.path.realpath(output_folder)
@@ -805,14 +739,18 @@ def gather_hw_files(
         except FileExistsError:
             pass
         module = chain.library.get_module_template(entity)
+        if module is None:
+            continue
         module_dir = os.path.realpath(module.module_dir)
         for hw_file in module.files:
             source = os.path.realpath(hw_file)
-            comp = os.path.commonprefix([module_dir, source])
-
-            if comp != module_dir:
-                # Append the file path to the module directory, cutting off '/'
-                source = append_to_path(module_dir, hw_file)[:-1]
+            if not hw_file.startswith("/"):
+                comp = os.path.commonprefix([module_dir, source])
+                if comp != module_dir:
+                    # Append the file path to the module directory, cutting off '/'
+                    source = append_to_path(
+                        module_dir, hw_file, add_trailing_slash=False
+                    )
             if not os.path.isfile(source):
                 raise AsFileError(source, "File not found!")
             filename = source.rsplit("/", maxsplit=1)[-1]
@@ -831,7 +769,10 @@ def gather_hw_files(
                         os.symlink(source, dest)
                     except IOError as err:
                         LOG.critical(
-                            ("Could not link file '%s' of module '%s'!" " - '%s'"),
+                            (
+                                "Could not link file '%s' of module '%s'!"
+                                " - '%s'"
+                            ),
                             filename,
                             entity,
                             str(err),
@@ -865,114 +806,85 @@ def gather_sw_files(
     use_symlinks: bool = True,
     sep_dirs: bool = False,
 ) -> bool:
-    """Collect all available software driver files in 'drivers' folders
+    """! @brief Copy or link to software files for an ASTERICS chain.
+    Collect all available software driver files in 'drivers' folders
     of the module source directories in the output folder structure.
-    Parameters:
-      chain: The current AsProcessingChain. Source of the modules list.
-      output_folder: The root of the output folder structure.
-    Returns True on success, False otherwise."""
+    @param chain: The current AsProcessingChain. Source of the modules list.
+    @param output_folder: The root of the output folder structure.
+    @param use_symlinks: Whether or not to link (True) or copy (False) files
+    @param sep_dirs: Whether or not to generate separate directories per module driver
+    @return True on success, False otherwise."""
+
     LOG.info("Gathering ASTERICS module software driver source files...")
     out_path = os.path.realpath(output_folder)
     # We don't want the trailing slash if we're not using separate folders
     out_path = append_to_path(out_path, "/", sep_dirs)
     # Collect all module entity names
     unique_modules = get_unique_modules(chain)
+    modules = list(ittls.chain(chain.modules, chain.pipelines))
+    handled_entities = []
 
-    for entity in unique_modules:
-        module = chain.library.get_module_template(entity)
-        source_path = os.path.realpath(
-            append_to_path(module.module_dir, "/software/driver/")
+    # Initialize driver list with asterics support package drivers
+    drivers = [
+        (
+            "as_support",
+            list(
+                asp_driver.format(asterics_root=asterics_home)
+                for asp_driver in ASP_FILES
+            ),
         )
-        if not os.path.exists(source_path):
-            # If driver folder not present:
-            # This module doesn't need drivers -> skip
-            LOG.debug(
-                ("Gather SW files: Skipped '%s' (%s): " "Directory doesn't exist."),
-                entity,
-                source_path,
-            )
-            continue
+    ]
 
+    for mod in modules:
+        if mod.entity_name not in handled_entities:
+            drivers.append((mod.entity_name, mod.driver_files))
+            handled_entities.append(mod.entity_name)
+
+    for entity in filter(
+        lambda ent: ent not in handled_entities, unique_modules
+    ):
+        module = chain.library.get_module_template(entity)
+        drivers.append((module.entity_name, module.driver_files))
+
+    driver_dir = {}
+    for entity, paths in drivers:
+        if not paths:
+            continue
+        try:
+            driver_dir[entity].extend(paths)
+        except KeyError:
+            driver_dir[entity] = paths
+
+    for entity in driver_dir:
+        driverlist = driver_dir[entity]
         if sep_dirs:
             # Build destination path: out + entity name (cut off trailing '/')
             dest_path = append_to_path(out_path, entity, False)
         else:
             # If drivers should not be stored in separate directories
             dest_path = out_path
+        # Linking / copying the driver files
+        # Get mode of operation
+        mode = "link" if use_symlinks else "copy"
+        copy_op = os.symlink if use_symlinks else copy
 
-        # Linking / copying the driver folders / files
-        if use_symlinks and sep_dirs:
-            LOG.debug("Gather SW files: Link '%s' to '%s'", source_path, dest_path)
+        for driverfile in driverlist:
+            filename = driverfile.rsplit("/", maxsplit=1)[-1]
+            dest_file = append_to_path(dest_path, filename, False)
+            if os.path.exists(dest_file):
+                os.unlink(dest_file)
             try:
-                os.symlink(source_path, dest_path, target_is_directory=True)
-            except FileExistsError:
-                os.unlink(dest_path)
-                try:
-                    os.symlink(source_path, dest_path, target_is_directory=True)
-                except IOError as err:
-                    LOG.critical(
-                        "Could not link drivers of module '%s'! - '%s", entity, str(err)
-                    )
-                    return False
+                copy_op(driverfile, dest_file)
             except IOError as err:
                 LOG.critical(
-                    "Could not link drivers of module '%s'! - '%s", entity, str(err)
+                    ("Could not %s driver file '%s' of module '%s'!" " - '%s"),
+                    mode,
+                    filename,
+                    entity,
+                    str(err),
                 )
                 return False
-        elif not use_symlinks and sep_dirs:
-            LOG.debug("Gather SW files: Copy '%s' to '%s'", source_path, dest_path)
-            try:
-                os.makedirs(dest_path, 0o755)
-            except FileExistsError:
-                rmtree(dest_path)
-                os.makedirs(dest_path, 0o755)
-            try:
-                copytree(source_path, dest_path)
-            except IOError as err:
-                LOG.critical(
-                    "Could not copy drivers of module '%s'! - '%s", entity, str(err)
-                )
-                return False
-        else:
-            # Get mode of operation
-            mode = "link" if use_symlinks else "copy"
-            copy_op = os.symlink if use_symlinks else copy
-
-            LOG.debug(
-                "Gather SW files: %sing drivers of module '%s'...", mode.title(), entity
-            )
-            # For every drive file
-            for sw_file in os.listdir(source_path):
-                source_file = append_to_path(source_path, sw_file, False)
-                if use_symlinks:
-                    dest = append_to_path(dest_path, sw_file, False)
-                else:
-                    dest = dest_path
-                # try to copy/link
-                try:
-                    copy_op(source_file, dest)
-                # Remove existing files on error
-                except FileExistsError:
-                    os.unlink(append_to_path(dest_path, sw_file, False))
-                    # Retry copy/link
-                    try:
-                        copy_op(source_file, dest)
-                    except IOError as err:
-                        LOG.critical(
-                            ("Could not %s driver file '%s' of module '%s'!" " - '%s"),
-                            mode,
-                            sw_file,
-                            entity,
-                            str(err),
-                        )
-                        return False
-                except IOError as err:
-                    LOG.critical(
-                        ("Could not %s driver file '%s' of module '%s'" "! - '%s"),
-                        mode,
-                        sw_file,
-                        entity,
-                        str(err),
-                    )
-                    return False
     return True
+
+
+## @}

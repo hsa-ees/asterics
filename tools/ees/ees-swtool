@@ -15,12 +15,18 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# Modified:
+#    13-12-2020 Philip Manke: Add option "-l / --library"
+#           Add a library to an existing BSP; Bump VERSION to 0.10
 
-VERSION=0.9
+
+VERSION=0.10
 
 TMP=/tmp
 TOOL="${0##*/}"
 CMDLINE="${0##*/} $@"
+
+XILINX_TOOL=xsct
 
 if [[ "$EES_VIVADO_SETTINGS" != "" ]]; then
   test -f $EES_VIVADO_SETTINGS && . $EES_VIVADO_SETTINGS
@@ -32,7 +38,7 @@ OPT_PROCESSOR="ps7_cortexa9_0"
 OPT_OS="standalone"
 OPT_APP_TEMPLATE="hello_world"
 OPT_FORCE="0"
-
+OPT_ADDLIB=""
 
 
 
@@ -52,8 +58,11 @@ usage () {
   echo "      Select the processor by its ID [default = $OPT_PROCESSOR]."
   echo "  -o | --os <OS selection>"
   echo "      Select an OS option [default = $OPT_OS]."
+  echo "  -l | --library <library selection>"
+  echo "      Add an additional library to an existing BSP."
+  echo "      Must not be used with option -f."
   echo "  -f | --force"
-  echo "      Override the target directory if it already exists."
+  echo "      Delete the target directory if it already exists and rebuild."
   echo
   echo "Operations:"
   echo
@@ -144,19 +153,19 @@ print_info () {
   print_tcl_head "Print HSI infos $ON..."
 
   echo "puts \"\n##### Software cores of type 'OS':\n\""
-  echo "puts [get_sw_cores -filter {TYPE == \"OS\"}]"
+  echo "puts [hsi::get_sw_cores -filter {TYPE == \"OS\"}]"
   echo
   echo "puts \"\n\n##### Available application templates:\n\""
-  echo "puts [generate_app -lapp]"
+  echo "puts [hsi::generate_app -lapp]"
   echo
   if [[ "$1" != "" ]]; then
     echo "puts \"\n\n##### Hardware design top-level:\n\""
-    echo "puts [open_hw_design $HDF]"
+    echo "puts [hsi::open_hw_design $HDF]"
     echo
     echo "puts \"\""
     echo "report_property [hsi::current_hw_design]"
     echo "puts \"\n\n##### Processors in the design:\n\""
-    echo "puts [get_cells -filter {IP_TYPE==PROCESSOR}]"
+    echo "puts [hsi::get_cells -filter {IP_TYPE==PROCESSOR}]"
   fi
 }
 
@@ -182,8 +191,8 @@ print_app () {
 
   # Go ahead...
   print_tcl_head "Generate application based on '$TEMPLATE'..."
-  echo "open_hw_design $HDF"
-  echo "generate_app -dir $DIR -proc $OPT_PROCESSOR -os $OPT_OS -app $TEMPLATE"
+  echo "hsi::open_hw_design $HDF"
+  echo "hsi::generate_app -dir $DIR -proc $OPT_PROCESSOR -os $OPT_OS -app $TEMPLATE"
 }
 
 
@@ -205,10 +214,15 @@ print_bsp () {
 
   print_tcl_head "Generate / update BSP ..."
   if [ -n "$REPO" ]; then
-    echo "set_repo_path $REPO"
+    echo "hsi::set_repo_path $REPO"
   fi
-  echo "open_hw_design $HDF"
-  echo "generate_bsp -dir $DIR -proc $OPT_PROCESSOR -os $OPT_OS"
+  echo "hsi::open_hw_design $HDF"
+  # Add library; first must open an existing BSP
+  if [ -n "$OPT_ADDLIB" ]; then
+    echo "hsi::open_sw_design $DIR/system.mss"
+    echo "hsi::add_library $OPT_ADDLIB"
+  fi
+  echo "hsi::generate_bsp -dir $DIR -proc $OPT_PROCESSOR -os $OPT_OS"
 }
 
 
@@ -228,7 +242,9 @@ run_script () {
     if [[ "$OPT_FORCE" == "1" ]]; then
       rm -fr $DIR
     else
-      test -e "$DIR" && error "Directory '$DIR' already exists - not overwriting."
+      if [[ "$OPT_ADDLIB" == "" ]]; then
+        test -e "$DIR" && error "Directory '$DIR' already exists - not overwriting."
+      fi
     fi
   fi
   shift
@@ -237,17 +253,27 @@ run_script () {
   SCRIPT="$TOOL.tcl"
   print_script_header > $SCRIPT
   $@ >> $SCRIPT
-  hsi -nolog -nojournal -mode tcl < $SCRIPT | grep -v "^INFO:"
+  #hsi -nolog -nojournal -mode tcl < $SCRIPT | grep -v "^INFO:"
+  $XILINX_TOOL < $SCRIPT
 
   # Cleanup...
   # WORKAROUND [2018-02-26]: When opening an HDF file, 'xsi' presently creates a
   #     couple of 'ps7_init*' files in the directory where the HDF is located.
   #     Also, the original bitfile is copied here.
   #     We do not need them here!!
-  HDF_FILE=$(grep open_hw_design $SCRIPT | cut -c16-)
+  HDF_FILE=$(grep hsi::open_hw_design $SCRIPT | cut -c21-)
   HDF_RELPATH=$(dirname "${HDF_FILE}")
   cd ${HDF_RELPATH}
-  rm -fr $SCRIPT .Xil ps7_init.[hc] ps7_init_gpl.[hc] ps7_init.tcl ps7_init.html design_1_wrapper.bit
+
+  # [2020-12-13]: Add check for processor type.
+  #               When using UltraScale platform the generated file names differ
+  if [[ "$OPT_PROCESSOR" == "ps7_cortexa9_0" ]]; then
+    rm -fr $SCRIPT .Xil ps7_init.[hc] ps7_init_gpl.[hc] ps7_init.tcl ps7_init.html
+  fi
+  if [[ "$OPT_PROCESSOR" == "psu_cortexa53_0" ]]; then
+    rm -fr $SCRIPT .Xil psu_init.[hc] psu_init_gpl.[hc] psu_init.tcl psu_init.html
+  fi
+  rm -f design_1_wrapper.bit
 }
 
 
@@ -274,6 +300,10 @@ while [[ $PARSE_OPTS == "1" ]]; do
     -f|--force)
       OPT_FORCE="1"
       shift
+      ;;
+    -l|--library)
+      OPT_ADDLIB="$2"
+      shift 2
       ;;
 
     # Operations...

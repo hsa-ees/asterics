@@ -34,7 +34,19 @@
 ----------------------------------------------------------------------------------
 --! @file  fifo_fwft.vhd
 --! @brief First Word Fall Through FIFO.
+--! @addtogroup asterics_helpers
+--! @{
+--! @defgroup fifo_fwft fifo_fwft: First Word Fall Through FIFO
+--! First Word Fall Through FIFO:
+--! If data is written into the empty fifo, it is presented
+--! on the output ports one clock cycle later.
+--! The read_in port confirms the data at the output ports. The 
+--! FIFO will present the next data package, if available.
+--! @}
 ----------------------------------------------------------------------------------
+
+--! @addtogroup fifo_fwft
+--! @{
 
 
 library ieee;
@@ -73,6 +85,7 @@ port (
 );
 end fifo_fwft;
 
+--! @}
 
 architecture RTL of fifo_fwft is
 
@@ -190,4 +203,3 @@ begin
 
 
 end RTL;
-

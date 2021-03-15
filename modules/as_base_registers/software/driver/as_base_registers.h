@@ -31,7 +31,9 @@
  * @file  as_base_registers.h
  * @brief Driver (header file) for as_base_registers module.
  *
- * \defgroup as_base_registers Module as_base_registers
+ * @addtogroup asterics_modules
+ * @{
+ * \defgroup as_base_registers as_base_registers: System Base Register
  * 
  * This module provides basic information about the ASTERICS hardware.
  * 

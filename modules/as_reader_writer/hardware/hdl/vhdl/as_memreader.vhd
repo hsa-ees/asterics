@@ -11,7 +11,7 @@
 -- Modified:       Philip Manke: Use new slaveregister system for as_automatics
 --
 -- Description:    This module reads image data from memory and outputs an image
---                 data stream with HSYNC and VSYNC signals.
+--                 data stream (AsStream).
 --                 The module is able to access memory sectionwise 
 --                 with stride for 2D operations.
 ----------------------------------------------------------------------------------
@@ -30,9 +30,19 @@
 --  or write to the Free Software Foundation, Inc.,
 --  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ----------------------------------------------------------------------------------
---! @file
+--! @file as_memreader.vhd
 --! @brief This module reads data from memory and outputs a data stream.
+--! @addtogroup as_reader_writer
+--! @{
+--! @defgroup as_memreader as_memreader: AXI to AsStream Interface
+--! This module reads data via AXI interface from the system, eg. from main memory
+--! and outputs it on an AsStream interface. 
+--! The module is able to access memory sectionwise with stride for 2D operations.
+--! @}
 ----------------------------------------------------------------------------------
+
+--! @addtogroup as_memreader
+--! @{
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -100,6 +110,8 @@ entity AS_MEMREADER is
     mem_out_data       : out std_logic_vector(MEMORY_DATA_WIDTH-1 downto 0)
   );
 end AS_MEMREADER;
+
+--! @}
 
 architecture RTL of AS_MEMREADER is
 

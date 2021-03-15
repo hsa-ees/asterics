@@ -27,7 +27,7 @@ of the ASTERICS support module fifo_fwft.
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -49,10 +49,13 @@ def get_module_instance(module_dir: str) -> AsModule:
     toplevel_file = "hardware/hdl/vhdl/fifo/fifo_fwft.vhd"
     module.files = []
     module.dependencies = ["helpers", "ram"]
+    module.show_in_browser = False
+    module.dev_status = AsModule.DevStatus.STABLE
+    module.module_type = AsModule.ModuleTypes.HARDWARE
+    module.module_category = "Internal Submodules"
 
     # as_automatics now automatically parses the toplevel file and discovers
     # ports, generics, existing interfaces and register interfaces
-    module.discover_module("{mdir}/{toplevel}"
-                           .format(mdir=module_dir, toplevel=toplevel_file))
+    module.discover_module(module_dir + "/" + toplevel_file)
 
     return module

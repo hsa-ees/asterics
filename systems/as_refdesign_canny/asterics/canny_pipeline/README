@@ -1,0 +1,60 @@
+  ,===========================================,
+  |                                           |
+  |         ASTERICS Reference Design         |
+  |                                           |
+  '==========================================='
+
+Author: Philip Manke <philip.manke@hs-augsburg.de>
+Date of revision: 2020-05-26
+
+
+ASTERICS Design: "canny_pipeline"
+
+
+ASTERICS Streaming Modules:
+  * as_sensor_ov7670
+  * as_collect
+  * as_memwriter
+
+ASTERICS Pipeline Modules:
+  * as_pipeline_flush
+  * as_2d_conv_filter_internal;
+  * as_cordic_direction;
+  * as_edge_list
+  * as_edge_nms
+  * as_edge_threshold
+  * as_feature_counter
+  * as_gradient_weight
+  * as_pipeline_flush
+  * as_pipeline_row
+
+Description of the ASTERICS chain:
+  This ASTERICS reference design implements a set of ASTERICS modules to
+  calculate a Canny edge image and write the edge direction and edge coordinates
+  to main memory. The VEARS ipcore is used to display the original camera image 
+  and the returned features on a monitor.
+
+
+Demo operation:
+  The demo design is running in a loop, controlled by dip-switches 
+  and buttons on the development board:
+    SW0: Select between the original camera image (off/0) and 
+         the memory region for the canny features (on/1) 
+         to be displayed on the monitor
+    SW1, SW2: Canny threshold selection
+     switch state | Threshold (high, low) 
+     -------------|----------------------
+         [0,0]    |  0x40, 0x20         
+         [0,1]    |  0x20, 0x10          
+         [1,0]    |  0x10, 0x08         
+         [1,1]    |  0x08, 0x04          
+
+    BNT0: Set the Canny threshold defined via the switches
+
+    BTN1: Draw the Canny features stored to main memory for the last frame
+          on the monitor using the VEARS overlay
+
+    BTN2: Clear the VEARS overlay
+          
+
+

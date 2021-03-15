@@ -1,0 +1,28 @@
+var annotated_dup =
+[
+    [ "as_automatics_2d_pipeline", "namespaceas__automatics__2d__pipeline.html", "namespaceas__automatics__2d__pipeline" ],
+    [ "as_automatics_2d_pipeline_row", "namespaceas__automatics__2d__pipeline__row.html", "namespaceas__automatics__2d__pipeline__row" ],
+    [ "as_automatics_2d_window_def", "namespaceas__automatics__2d__window__def.html", "namespaceas__automatics__2d__window__def" ],
+    [ "as_automatics_2d_window_interface", "namespaceas__automatics__2d__window__interface.html", "namespaceas__automatics__2d__window__interface" ],
+    [ "as_automatics_2d_window_module", "namespaceas__automatics__2d__window__module.html", "namespaceas__automatics__2d__window__module" ],
+    [ "as_automatics_cnn_layer", "namespaceas__automatics__cnn__layer.html", "namespaceas__automatics__cnn__layer" ],
+    [ "as_automatics_constant", "namespaceas__automatics__constant.html", "namespaceas__automatics__constant" ],
+    [ "as_automatics_env", "namespaceas__automatics__env.html", "namespaceas__automatics__env" ],
+    [ "as_automatics_exceptions", "namespaceas__automatics__exceptions.html", "namespaceas__automatics__exceptions" ],
+    [ "as_automatics_generic", "namespaceas__automatics__generic.html", "namespaceas__automatics__generic" ],
+    [ "as_automatics_gui", "namespaceas__automatics__gui.html", "namespaceas__automatics__gui" ],
+    [ "as_automatics_interface", "namespaceas__automatics__interface.html", "namespaceas__automatics__interface" ],
+    [ "as_automatics_module", "namespaceas__automatics__module.html", "namespaceas__automatics__module" ],
+    [ "as_automatics_module_group", "namespaceas__automatics__module__group.html", "namespaceas__automatics__module__group" ],
+    [ "as_automatics_module_lib", "namespaceas__automatics__module__lib.html", "namespaceas__automatics__module__lib" ],
+    [ "as_automatics_module_wrapper", "namespaceas__automatics__module__wrapper.html", "namespaceas__automatics__module__wrapper" ],
+    [ "as_automatics_port", "namespaceas__automatics__port.html", "namespaceas__automatics__port" ],
+    [ "as_automatics_proc_chain", "namespaceas__automatics__proc__chain.html", "namespaceas__automatics__proc__chain" ],
+    [ "as_automatics_register", "namespaceas__automatics__register.html", "namespaceas__automatics__register" ],
+    [ "as_automatics_signal", "namespaceas__automatics__signal.html", "namespaceas__automatics__signal" ],
+    [ "as_automatics_templates", "namespaceas__automatics__templates.html", "namespaceas__automatics__templates" ],
+    [ "as_automatics_vhdl_reader", "namespaceas__automatics__vhdl__reader.html", "namespaceas__automatics__vhdl__reader" ],
+    [ "as_automatics_vhdl_writer", "namespaceas__automatics__vhdl__writer.html", "namespaceas__automatics__vhdl__writer" ],
+    [ "as_automatics_visual", "namespaceas__automatics__visual.html", "namespaceas__automatics__visual" ],
+    [ "main_gui", "namespacemain__gui.html", "namespacemain__gui" ]
+];

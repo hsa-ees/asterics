@@ -29,99 +29,104 @@
 ----------------------------------------------------------------------------------
 --! @file as_stream_splitter.vhd
 --! @brief This module outputs the same input as_stream on its two ouput streams.
+--! @addtogroup asterics_modules
+--! @{
+--! @defgroup as_stream_splitter as_stream_splitter: AsStream Duplicator
+--! This module duplicates an AsStream interface, outputting the same data on
+--! 2 output streams.
+--! @}
 ----------------------------------------------------------------------------------
+
+--! @addtogroup as_stream_splitter
+--! @{
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
----- Uncomment the following library declaration if instantiating
----- any Xilinx primitives in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
 
 entity as_stream_splitter is
   generic (
     DATA_WIDTH  : integer := 8
   );
   port (
-    Clk         : in  std_logic;
-    Reset       : in  std_logic;
-    Ready       : out std_logic;
+    clk         : in  std_logic;
+    reset       : in  std_logic;
+    ready       : out std_logic;
 
-    -- IN ports
-    VSYNC_IN    : in  std_logic;
-    HSYNC_IN    : in  std_logic;
-    STROBE_IN   : in  std_logic;
-    DATA_IN     : in  std_logic_vector(DATA_WIDTH-1 downto 0);
-    XRES_IN     : in  std_logic_vector(11 downto 0);
-    YRES_IN     : in  std_logic_vector(11 downto 0);
+    -- in ports
+    vsync_in    : in  std_logic;
+    hsync_in    : in  std_logic;
+    strobe_in   : in  std_logic;
+    data_in     : in  std_logic_vector(DATA_WIDTH-1 downto 0);
+    xres_in     : in  std_logic_vector(11 downto 0);
+    yres_in     : in  std_logic_vector(11 downto 0);
     
-    SYNC_ERROR_IN  : in  std_logic;
-    PIXEL_ERROR_IN : in  std_logic;
-    STALL_OUT      : out std_logic;
+    sync_error_in  : in  std_logic;
+    pixel_error_in : in  std_logic;
+    stall_out      : out std_logic;
 
-    -- OUT ports
-    VSYNC_OUT_0   : out std_logic;
-    HSYNC_OUT_0   : out std_logic;
-    STROBE_OUT_0  : out std_logic;
-    DATA_OUT_0    : out std_logic_vector(DATA_WIDTH-1 downto 0);
-    XRES_OUT_0    : out std_logic_vector(11 downto 0);
-    YRES_OUT_0    : out std_logic_vector(11 downto 0);
+    -- out ports
+    vsync_out_0   : out std_logic;
+    hsync_out_0   : out std_logic;
+    strobe_out_0  : out std_logic;
+    data_out_0    : out std_logic_vector(DATA_WIDTH-1 downto 0);
+    xres_out_0    : out std_logic_vector(11 downto 0);
+    yres_out_0    : out std_logic_vector(11 downto 0);
     
-    SYNC_ERROR_OUT_0  : out std_logic;
-    PIXEL_ERROR_OUT_0 : out std_logic;
-    STALL_IN_0        : in  std_logic;
+    sync_error_out_0  : out std_logic;
+    pixel_error_out_0 : out std_logic;
+    stall_in_0        : in  std_logic;
 
-	VSYNC_OUT_1  : out std_logic;
-    HSYNC_OUT_1  : out std_logic;
-    STROBE_OUT_1 : out std_logic;
-    DATA_OUT_1   : out std_logic_vector(DATA_WIDTH-1 downto 0);
-    XRES_OUT_1   : out std_logic_vector(11 downto 0);
-    YRES_OUT_1   : out std_logic_vector(11 downto 0);
+    vsync_out_1  : out std_logic;
+    hsync_out_1  : out std_logic;
+    strobe_out_1 : out std_logic;
+    data_out_1   : out std_logic_vector(DATA_WIDTH-1 downto 0);
+    xres_out_1   : out std_logic_vector(11 downto 0);
+    yres_out_1   : out std_logic_vector(11 downto 0);
     
-    SYNC_ERROR_OUT_1 : out std_logic;
-    PIXEL_ERROR_OUT_1: out std_logic;
-    STALL_IN_1       : in  std_logic
+    sync_error_out_1 : out std_logic;
+    pixel_error_out_1: out std_logic;
+    stall_in_1       : in  std_logic
 
   );
 end as_stream_splitter;
 
+--! @}
 
 architecture RTL of as_stream_splitter is
 
-
 begin
 
- -- stream out 0
-VSYNC_OUT_0  <= VSYNC_IN;
-HSYNC_OUT_0  <= HSYNC_IN;
-STROBE_OUT_0 <= STROBE_IN;
+ -- Stream out 0
+vsync_out_0  <= vsync_in;
+hsync_out_0  <= hsync_in;
+strobe_out_0 <= strobe_in;
 
-DATA_OUT_0 <= DATA_IN;
+data_out_0 <= data_in;
 
-XRES_OUT_0   <= XRES_IN;
-YRES_OUT_0   <= YRES_IN;
+xres_out_0   <= xres_in;
+yres_out_0   <= yres_in;
 
-SYNC_ERROR_OUT_0 <= SYNC_ERROR_IN;
-PIXEL_ERROR_OUT_0 <= PIXEL_ERROR_IN;
+sync_error_out_0 <= sync_error_in;
+pixel_error_out_0 <= pixel_error_in;
 
 
- -- stream out 1
-VSYNC_OUT_1 <= VSYNC_IN;
-HSYNC_OUT_1 <= HSYNC_IN;
-STROBE_OUT_1 <= STROBE_IN;
+ -- Stream out 1
+vsync_out_1 <= vsync_in;
+hsync_out_1 <= hsync_in;
+strobe_out_1 <= strobe_in;
 
-DATA_OUT_1 <= DATA_IN;
+data_out_1 <= data_in;
 
-XRES_OUT_1  <= XRES_IN;
-YRES_OUT_1  <= YRES_IN;
+xres_out_1  <= xres_in;
+yres_out_1  <= yres_in;
 
-SYNC_ERROR_OUT_1<= SYNC_ERROR_IN;
-PIXEL_ERROR_OUT_1<= PIXEL_ERROR_IN;
+sync_error_out_1<= sync_error_in;
+pixel_error_out_1<= pixel_error_in;
 
 
  -- stall out for both
-STALL_OUT <= STALL_IN_0 or STALL_IN_1;
+stall_out <= stall_in_0 or stall_in_1;
 
 end RTL;

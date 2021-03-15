@@ -9,7 +9,7 @@
 --
 -- Modified:       
 --
--- Description:    Implements BRAM which is performs a write operation before a 
+-- Description:    Implements BRAM which performs a write operation before a 
 --                 read operation.
 ----------------------------------------------------------------------------------
 --  This program is free software; you can redistribute it and/or
@@ -27,10 +27,17 @@
 --  or write to the Free Software Foundation, Inc.,
 --  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ----------------------------------------------------------------------------------
---! @file  BRAM_WRITE_FIRST.vhd
---! @brief Implements BRAM which is performs a write operation before a 
---         read operation.
+--! @file BRAM_WRITE_FIRST.vhd
+--! @brief BRAM with write-first behaviour. 
+--! @addtogroup asterics_helpers
+--! @{
+--! @defgroup BRAM_WRITE_FIRST BRAM_WRITE_FIRST: Write-first BRAM
+--! Implements BRAM which performs a write operation before a read operation.
+--! @}
 ----------------------------------------------------------------------------------
+
+--! @addtogroup BRAM_WRITE_FIRST
+--! @{
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -39,10 +46,12 @@ use IEEE.NUMERIC_STD.ALL;
 use work.helpers.all;
 
 entity BRAM_WRITE_FIRST is
-    generic ( gen_data_width : integer := 8;   -- width of each ram cell
-            gen_data_depth : integer := 1024 -- number of ram cells
-           );
-    port (CLK       : in std_logic;
+    generic ( 
+        gen_data_width : integer := 8;   -- width of each ram cell
+        gen_data_depth : integer := 1024 -- number of ram cells
+    );
+    port (
+        CLK       : in std_logic;
         EN        : in std_logic;
         WE      : in std_logic;
         ADDR    : in std_logic_vector(log2_ceil(gen_data_depth)-1 downto 0);
@@ -50,6 +59,8 @@ entity BRAM_WRITE_FIRST is
         DO      : out std_logic_vector(gen_data_width-1 downto 0)
        );   
 end BRAM_WRITE_FIRST;
+
+--! @}
 
 architecture RTL of BRAM_WRITE_FIRST is
   type ramType is array (0 to gen_data_depth-1) of std_logic_vector(gen_data_width-1 downto 0);
@@ -73,4 +84,3 @@ begin
     end if;
   end process;
 end RTL;
-

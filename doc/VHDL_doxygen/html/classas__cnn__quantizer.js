@@ -1,0 +1,25 @@
+var classas__cnn__quantizer =
+[
+    [ "RTL", "classas__cnn__quantizer_1_1RTL.html", "classas__cnn__quantizer_1_1RTL" ],
+    [ "ACTIVATION_FUNCTION", "group__as__cnn__serial__convolution__filter__internal.html#gaa55b18ed0947a77d34abaa861ea92aec", null ],
+    [ "as_cnn_helpers", "group__as__cnn__serial__convolution__filter__internal.html#gaad527092d1dc183f06cf67eceeaabf63", null ],
+    [ "as_generic_filter", "group__as__cnn__serial__convolution__filter__internal.html#gad0b3680098aa09492c7e9b8464a034b3", null ],
+    [ "asterics", "group__as__cnn__serial__convolution__filter__internal.html#ga2ff795aec788ea02e760471461dc2c65", null ],
+    [ "bias_value", "group__as__cnn__serial__convolution__filter__internal.html#ga9702803985e3d2c3f3a4a8d8afb620b4", null ],
+    [ "clk", "group__as__cnn__serial__convolution__filter__internal.html#ga4a4609c199d30b3adebbeb3a01276ec5", null ],
+    [ "data_in", "group__as__cnn__serial__convolution__filter__internal.html#ga960385406004efa99530db024d2adc10", null ],
+    [ "data_out", "group__as__cnn__serial__convolution__filter__internal.html#ga05d2a8923584a5b4da01683c29542130", null ],
+    [ "DIN_WIDTH", "group__as__cnn__serial__convolution__filter__internal.html#gac84df96239faa2dcf823571609bb1c5a", null ],
+    [ "DOUT_WIDTH", "group__as__cnn__serial__convolution__filter__internal.html#ga95866e6f486bf56113f767f2e2be37c3", null ],
+    [ "helpers", "group__as__cnn__serial__convolution__filter__internal.html#ga2ecf7c71f2bc85b2c43934cce6f054cd", null ],
+    [ "ieee", "group__as__cnn__serial__convolution__filter__internal.html#ga0a6af6eef40212dbaf130d57ce711256", null ],
+    [ "math_real", "group__as__cnn__serial__convolution__filter__internal.html#gacb415f2e3abd505b8338da5b5bf9e2fb", null ],
+    [ "numeric_std", "group__as__cnn__serial__convolution__filter__internal.html#ga2edc34402b573437d5f25fa90ba4013e", null ],
+    [ "quant_m_zero", "group__as__cnn__serial__convolution__filter__internal.html#gad1e3197b9c8fc34ce5606e7fbd69f01a", null ],
+    [ "quant_n_shift", "group__as__cnn__serial__convolution__filter__internal.html#ga218887f0b1656eea6c8f7912ce06f5d7", null ],
+    [ "QUANT_N_SHIFT_BITWIDTH", "group__as__cnn__serial__convolution__filter__internal.html#gae4afbed3fc6dd43983535449b69a3b08", null ],
+    [ "QUANTIZATION_OFFSET", "group__as__cnn__serial__convolution__filter__internal.html#ga83ce7df3ca1adce6a98e04adec42a743", null ],
+    [ "reset", "group__as__cnn__serial__convolution__filter__internal.html#gaad8dc6359d9e23dabcbf342fadf2fa06", null ],
+    [ "std_logic_1164", "group__as__cnn__serial__convolution__filter__internal.html#gacd03516902501cd1c7296a98e22c6fcb", null ],
+    [ "strobe_in", "group__as__cnn__serial__convolution__filter__internal.html#ga6898409539454864bb9f745e73c76d90", null ]
+];

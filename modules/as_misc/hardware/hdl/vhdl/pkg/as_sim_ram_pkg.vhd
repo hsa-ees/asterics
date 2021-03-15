@@ -29,8 +29,17 @@
 ----------------------------------------------------------------------------------
 --! @file  as_sim_ram_pkg.vhd
 --! @brief Package for providing functions, procedures and constants 
---         for simulating memory.
+--!        for simulating memory.
+--! @addtogroup asterics_helpers
+--! @{
+--! @defgroup as_sim_ram_pkg as_sim_ram_pkg: ASTERICS Helpers for Canny Pipeline
+--! This helper package contains constants, data types and functions used by
+--! the simulated memory reader and writer modules for debugging ASTERICS systems.
+--! @}
 ----------------------------------------------------------------------------------
+
+--! @addtogroup as_sim_ram_pkg
+--! @{
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -85,6 +94,7 @@ package as_sim_ram_pkg is
     
 end package as_sim_ram_pkg;
 
+--! @}
 
 package body as_sim_ram_pkg is
 

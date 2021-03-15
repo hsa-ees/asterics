@@ -52,12 +52,12 @@ int read_byte(int addr) {
 
     temp_file = fopen("temp.file","r");
     if (temp_file == NULL) {
-        perror("Error: Can not find 'temp.file', which should contain a filename");
+        perror("Error in read_byte.c: Can not find 'temp.file', which should contain a filename");
         return 0;
     }
     
     if ( fgets(file_name, FILE_NAME_SIZE-1, temp_file) == NULL ) {
-        perror("Error: 'temp.file' is empty. 'temp.file' should hold the filename to be read\n");
+        perror("Error in read_byte.c: 'temp.file' is empty. 'temp.file' should hold the filename to be read\n");
         return 0;
     }
     fclose(temp_file);
@@ -67,7 +67,7 @@ int read_byte(int addr) {
 
     pFile = fopen(file_name,"rb");
     if (pFile==NULL) {
-        perror("Error: read_byte.c: fopen() failed\n");
+        perror("Error in read_byte.c: fopen() failed\n");
         return 0;
     }
     fseek (pFile, 0L, SEEK_END);

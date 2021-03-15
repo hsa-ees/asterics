@@ -15,7 +15,7 @@ Author:
 <module author>
 
 Description:
-Python module used by as_automatics used to build the generators internal model
+Python module used by Automatics used to build the generators internal model
 of the ASTERICS hardware module <module name here>.
 """
 # --------------------- LICENSE -----------------------------------------------
@@ -37,8 +37,9 @@ of the ASTERICS hardware module <module name here>.
 # --------------------- DOXYGEN -----------------------------------------------
 ##
 # @file as_<module_name>_spec.py
+# @ingroup automatics_usertemp
 # @author <module author>
-# @brief Specifics for <module> used by as_automatics
+# @brief Specifics for <module> used by Automatics
 # -----------------------------------------------------------------------------
 
 from as_automatics_module import AsModule
@@ -76,18 +77,23 @@ from as_automatics_module import AsModule
 
 
 # This is a template for a module specification used by the generator tool
-# tool for ASTERICS: as_automatics
+# tool for ASTERICS: Automatics
 
-# This type of Python script is used by as_automatics to define the internal
+# This type of Python script is used by Automatics to define the internal
 # representation of your hardware module as an AsModule class instance.
 
-# Important: For as_automatics to recognize the script,
+# Important: For Automatics to recognize the script,
 # it has to be placed in the module's folder under
 # "<module repository>/<module folder>/hardware/automatics/<script file>.py"!
 # The file name must be: "as_<module name>_spec.py"!
 
-
+##@ingroup automatics_usertemp
 def get_module_instance(module_dir: str) -> AsModule:
+    """! @brief This function specifies an ASTERICS module.
+    It is called by the module library to define the meta data required by
+    Automatics to automatically analyze the module
+    and further meta data to use it correctly."""
+
     # Instantiate 'module' as a new ASTERICS module
     module = AsModule()
 
@@ -98,14 +104,17 @@ def get_module_instance(module_dir: str) -> AsModule:
     # of this module:
     # module.add_local_interface_template(<InterfaceClass>())
 
-    # Here the toplevel file for the module has to be defined.
-    # Example, for the file:
+    # In this section the toplevel file for the module has to be defined.
+    # For example: The file:
     # "modules/as_memwriter/hardware/hdl/vhdl/writer/as_memwriter.vhd"
-    # The path to spedify is: "hdl/vhdl/writer/as_memwriter.vhd"
+    # The path to specify is: "hardware/hdl/vhdl/writer/as_memwriter.vhd"
+    # Automatics looks relative to the module's directory, in this case:
+    # "modules/as_memwriter"
+    # Alternatively absolute paths can be used.
     toplevel_file = "path/to/toplevel/toplevel_filename.vhd"
 
-    # Here all other required files in the module's folder need to be specified.
-    # The search path starts at the module's folder, as with the toplevel.
+    # Next, all other required files in the module folder need to be specified.
+    # The search path starts at the module's folder, as with the toplevel file.
     module.files = [
         "hardware/hdl/vhdl/common_file.vhd",
         "hardware/hdl/vhdl/library.vhd",
@@ -117,15 +126,13 @@ def get_module_instance(module_dir: str) -> AsModule:
     # If this module uses files from other modules or from a shared module
     # such as the files in the "as_misc" folder (not technically a module),
     # these have to be declared here.
-    # Only the module name has to be listed here
-    # (not the folder name, the module name!).
-    module.dependencies = ["as_memwriter", "as_lib", "helpers"]
+    # Only the module name has to be listed here (not the folder name,
+    # the module name!), as would be used with add_module().
+    module.dependencies = ["as_memreader", "as_lib", "helpers"]
 
-    # as_automatics now automatically parses the toplevel file and discovers
+    # Automatics now automatically parses the toplevel file and discovers
     # ports, generics, existing interfaces and register interfaces
-    module.discover_module(
-        "{mdir}/{toplevel}".format(mdir=module_dir, toplevel=toplevel_file)
-    )
+    module.discover_module(module_dir + "/" + toplevel_file)
 
     # Custom Interfaces:
     # Your module may implement a new interface that the generator could
@@ -154,14 +161,31 @@ def get_module_instance(module_dir: str) -> AsModule:
     # Depending on the condition, which ports are available, Automatics
     # needs to choose which rules to follow.
 
+    # By default all ports are assigned a minimal ruleset:
+    #   # | condition     |   action
+    #   1. "both_present" -> "connect"
+    #   2. "sink_missing" -> "note"
+
     # Valid rule conditions:
     # Conditions for comparing two ports of interfaces:
-    #  - "any_present" (this is always true)
-    #  - "both_present"
-    #  - "sink_missing"
+    #  "source_present":
+    #       This condition is always true
+    #  "sink_missing":
+    #       This condition is only true if no matching port is found
+    #       for the source port
+    #  "both_present":
+    #       This condition is only true if a matching port is found
+    #       for the source port
     # Conditions for ports not part of an interface:
-    #  - "single_port"
-    #  - "external_port"
+    #  "single_port":
+    #       This condition is only true if the source port is
+    #       neither part of an interface nor a signal
+    #  "external_port":
+    #       This condition is only true if the source port is
+    #       to be made external
+    #  "type_signal":
+    #       This condition is only true if the source port is
+    #       a generic or glue signal in a group module
 
     # Valid rule-actions:
     # "connect":
@@ -173,7 +197,7 @@ def get_module_instance(module_dir: str) -> AsModule:
     #     of the ASTERICS IP-Core.
     # "error"
     #     Applicable for any condition.
-    #     Raises an error message and stops as_automatics.
+    #     Raises an error message and stops Automatics.
     # "warning"
     #     Applicable for any condition.
     #     Prints a warning message, continuing the process.
@@ -200,12 +224,11 @@ def get_module_instance(module_dir: str) -> AsModule:
     #     depending on the ports data direction.
     #     This action defines another port the port may be connected to, if its
     #     counterpart is missing.
+    # "fallback_signal(<signal name>)"
+    #     Applicable to "sink_missing", analogous function to "fallback_port",
+    #     instead the signals of the group module are searched for the signal.
     # "none"
     #     The default rule action: Do nothing.
-
-    # By default all ports are assigned a minimal ruleset:
-    #   1. "both_present" -> "connect"
-    #   2. "sink_missing" -> "note"
 
     # Use the following functions to modify the rulesets of ports to fit
     # your needs:

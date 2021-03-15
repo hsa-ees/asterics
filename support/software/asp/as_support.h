@@ -25,10 +25,24 @@
 --  along with this program; if not, see <http://www.gnu.org/licenses/>
 --  or write to the Free Software Foundation, Inc.,
 --  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-----------------------------------------------------------------------------------
---! @file
---! @brief Software support module for ASTERICS systems.
---------------------------------------------------------------------------------*/
+----------------------------------------------------------------------------------*/
+/*------------------------------- DOXYGEN ----------------------------------------*/
+/**
+ * @defgroup asterics_modules ASTERICS Hardware Module Drivers
+ * This group Doxygen module contains all driver files for ASTERICS modules with
+ * software drivers.
+ */
+/** 
+ * @defgroup asterics_support ASTERICS Support Library 
+ * This Doxygen module contains the ASTERICS support library 
+ * for bare-metal operation.
+ */
+/**
+ * @file as_support.h
+ * @brief Software support module for ASTERICS systems.
+ */
+/*--------------------------------------------------------------------------------*/
+
 
 #ifndef _AS_SUPPORT_
 #define _AS_SUPPORT_
@@ -36,7 +50,10 @@
 
 #include "as_config.h"
 
-
+/**
+ * @addtogroup asterics_support
+ * @{
+ */
 
 /* C Libraries */
 #if !AS_OS_LINUX_KERNEL
@@ -55,13 +72,24 @@
 #if AS_OS_LINUX_KERNEL
     #include <linux/types.h>
     #include <linux/slab.h>
-    #include <asm/uaccess.h>
+    #include <linux/uaccess.h>
     #include <linux/fcntl.h>
     #include <linux/ioctl.h>
+    #include <linux/timer.h>
+    #include <linux/delay.h>
+    #include <linux/spinlock_types.h>
 #endif
 
-#if (AS_OS_LINUX_KERNEL || AS_OS_POSIX)
-    #include "as_linux_kernel_if.h"
+#if AS_OS_LINUX_KERNEL
+    typedef resource_size_t as_hardware_address_t;
+    typedef void __iomem* as_kernel_address_t;
+    typedef void* as_virtual_address_t;
+    typedef void const* as_virtual_address_const_t;
+#else
+    typedef size_t as_hardware_address_t;
+    typedef void* as_kernel_address_t;
+    typedef void* as_virtual_address_t;
+    typedef void const* as_virtual_address_const_t;
 #endif
 
 /* Xilinx Libraries */
@@ -169,11 +197,6 @@ static inline int16_t as_net_from_int16 (int16_t x) { return (int16_t) as_swap16
 
 
 /***** Module init/done *****/
-#if AS_OS_POSIX
-    int as_control_fd;
-    int as_iic_fd;
-    int as_regio_fd;
-#endif /* AS_OS_POSIX */
 
 void as_support_init (void);      /* must be called by application on startup */
 void as_support_done (void);      /* must be called by application when shutting down */
@@ -194,40 +217,32 @@ static inline void as_log_printf (const char *format, ...) {}
 
 
 #if AS_WITH_DEBUG
-#define DEBUG(MSG) { as_log_para ("DEBUG", __FILE__, __LINE__); as_log_printf (MSG); }
-#define DEBUGF(FMT) { as_log_para ("DEBUG", __FILE__, __LINE__); as_log_printf FMT; }
+#define AS_DEBUG(...) { as_log_para ("DEBUG", __FILE__, __LINE__); as_log_printf (__VA_ARGS__); }
 #else
-#define DEBUG(MSG) {}
-#define DEBUGF(FMT) {}
+#define AS_DEBUG(...) {}
 #endif /* AS_WITH_DEBUG */
 
-#if AS_OS_LINUX_KERNEL
+#if AS_OS_LINUX_KERNEL && AS_OS_LINUX_VERBOSE
 
-#define INFO(MSG) {}
-#define INFOF(FMT) {}
+#define AS_INFO(...) {printk(KERN_WARNING "asterics info: " __VA_ARGS__);}
 
-#define WARNING(MSG) {}
-#define WARNINGF(FMT) {}
+#define AS_WARNING(...) {printk(KERN_WARNING "asterics warning: " __VA_ARGS__);}
 
-#define ERROR(MSG) {}
-#define ERRORF(FMT) {}
+#define AS_ERROR(...) {printk(KERN_ERR "asterics error: " __VA_ARGS__);}
 
-#define ASSERT(COND) {}
-#define ASSERTM(COND,MSG) {}
+#define AS_ASSERT(COND) {if (! (COND)) printk(KERN_ERR "asterics assert failed at: %s, %d, %s\n", __FILE__, __LINE__, __func__);}
+#define AS_ASSERTM(COND,...) {}
 
 #else
 
-#define INFO(MSG) { as_log_para ("INFO", __FILE__, __LINE__); as_log_printf (MSG); }
-#define INFOF(FMT) { as_log_para ("INFO", __FILE__, __LINE__); as_log_printf FMT; }
+#define AS_INFO(...) { as_log_para ("INFO", __FILE__, __LINE__); as_log_printf (__VA_ARGS__); }
 
-#define WARNING(MSG) { as_log_para ("WARNING", __FILE__, __LINE__); as_log_printf (MSG); }
-#define WARNINGF(FMT) { as_log_para ("WARNING", __FILE__, __LINE__); as_log_printf FMT; }
+#define AS_WARNING(...) { as_log_para ("WARNING", __FILE__, __LINE__); as_log_printf (__VA_ARGS__); }
 
-#define ERROR(MSG) { as_log_para ("ERROR", __FILE__, __LINE__); as_log_printf (MSG); exit (3); }
-#define ERRORF(FMT) { as_log_para ("ERROR", __FILE__, __LINE__); as_log_printf FMT; exit (3); }
+#define AS_ERROR(...) { as_log_para ("ERROR", __FILE__, __LINE__); as_log_printf (__VA_ARGS__); }
 
-#define ASSERT(COND) { if (!(COND)) { as_log_para ("ERROR", __FILE__, __LINE__); as_log_printf ("Assertion failed"); abort (); } }
-#define ASSERTM(COND,MSG) { if (!(COND)) { as_log_para ("ERROR", __FILE__, __LINE__); as_log_printf ("Assertion failed: %s", MSG); abort (); } }
+#define AS_ASSERT(COND) { if (!(COND)) { as_log_para ("ERROR", __FILE__, __LINE__); as_log_printf ("Assertion failed"); } }
+#define AS_ASSERTM(COND,...) { if (!(COND)) { as_log_para ("ERROR", __FILE__, __LINE__); as_log_printf ("Assertion failed: %s", __VA_ARGS__); } }
 
 
 #endif /* !AS_OS_LINUX_KERNEL */
@@ -349,29 +364,6 @@ static inline void as_dcache_flush_range(uint32_t *addr, uint32_t len) { Xil_DCa
 #endif /* AS_OS_NONE */
 
 
-/********* Linux kernel module utility ********/
-
-#if AS_OS_LINUX_KERNEL
-
-void fill_as_regio_params (uint32_t cmd, uint32_t address, uint32_t value, as_ioctl_params_t * structure);
-void as_reg_write (uint32_t *addr, uint32_t val);
-uint32_t as_reg_read (uint32_t *addr);
-
-#endif /* AS_OS_LINUX_KERNEL */
-
-#if AS_OS_POSIX
-
-void fill_as_regio_params (uint32_t cmd, uint32_t address, uint32_t value, as_ioctl_params_t * structure);
-void as_reg_write (uint32_t *addr, uint32_t val);
-uint32_t as_reg_read (uint32_t *addr);
-
-static inline void as_dcache_invalidate_range(uint32_t *addr, uint32_t len) {}
-static inline void as_dcache_flush(void) {}
-static inline void as_dcache_flush_range(uint32_t *addr, uint32_t len) {}
-
-#endif /* AS_OS_POSIX */
-
-
 
 /********* Useful helpers ********/
 
@@ -383,17 +375,21 @@ static inline void as_dcache_flush_range(uint32_t *addr, uint32_t len) {}
  *
  * @return absolute address that can be passed to 'as_reg_read' or 'as_reg_write'.
  */
-static inline uint32_t *as_module_reg (uint32_t *module_addr, int reg_id) { return &module_addr[reg_id]; }
+static inline as_hardware_address_t as_module_reg (as_hardware_address_t module_addr, int reg_id) { return module_addr + reg_id * 4; }
 
 /**
  * Write to register with mask.
+ * 
+ * @param addr Physical memory address
  */
-void as_reg_write_masked (uint32_t *addr, uint32_t mask, uint32_t val);
+void as_reg_write_masked (as_hardware_address_t addr, uint32_t mask, uint32_t val);
 
 /**
  * Read from register with mask.
+ * 
+ * @param addr Physical memory address
  */
-uint32_t as_reg_read_masked (uint32_t *addr, uint32_t mask);
+uint32_t as_reg_read_masked (as_hardware_address_t addr, uint32_t mask);
 
 
 
@@ -502,7 +498,7 @@ static inline void *as_thread_join (struct as_thread_s *thread) { return NULL; }
 /**
  * Create a new mutex object.
  */
-struct as_mutex_s *as_mutex_new ();
+struct as_mutex_s *as_mutex_new (void);
 
 /**
  * Delete a mutex object.
@@ -551,7 +547,7 @@ static inline void as_mutex_unlock (struct as_mutex_s *mutex) {}
 /**
  * Create a new condition variable.
  */
-struct as_cond_s *as_cond_new ();
+struct as_cond_s *as_cond_new (void);
 
 /**
  * Delete a condition variable.
@@ -623,12 +619,22 @@ static inline void as_cond_broadcast (struct as_cond_s *cond) {}
 static inline void* as_malloc(uint32_t size) { return kmalloc(size, GFP_KERNEL); }
 static inline void as_free(const void* objp) { kfree(objp); };
 
+#include "as_support_linux.h"
+
 #else
 
 static inline void* as_malloc(uint32_t size) { return malloc(size); }
 static inline void as_free (void* objp) { free(objp); }
 
+#if AS_OS_POSIX
+#include "as_support_linux.h"
+#endif
+
 #endif /* AS_OS_LINUX_KERNEL */
+
+/**
+ * @} // addtogroup
+ */
 
 #endif /** _AS_SUPPORT_ */
 

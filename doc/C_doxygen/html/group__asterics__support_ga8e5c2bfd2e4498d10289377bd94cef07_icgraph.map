@@ -1,0 +1,52 @@
+<map id="as_reg_read" name="as_reg_read">
+<area shape="rect" id="node1" title=" " alt="" coords="736,1100,837,1127"/>
+<area shape="rect" id="node2" href="$group__as__canny.html#ga5a7a8da32b17cbc118a2fcc020ed7397" title=" " alt="" coords="488,121,688,162"/>
+<area shape="rect" id="node3" href="$group__as__iic__reg__funcs.html#gaca309e97934beed04c02e31ba9cfbd3a" title=" " alt="" coords="505,187,671,213"/>
+<area shape="rect" id="node11" href="$group__as__iic__reg__funcs.html#ga2dad585c29bd8cff3a81e9b34ff83d6c" title=" " alt="" coords="517,275,659,301"/>
+<area shape="rect" id="node12" href="$group__as__iic__reg__funcs.html#ga9e077d3e462ddbce6703f881f2fee772" title=" " alt="" coords="517,325,659,352"/>
+<area shape="rect" id="node13" href="$group__as__iic__reg__funcs.html#gace5813084165559c81fe11db6b628b5e" title=" " alt="" coords="517,376,659,403"/>
+<area shape="rect" id="node15" href="$group__as__iic__reg__funcs.html#ga8e5ac0f5aaa3e8373eeb8553c00c8fd8" title=" " alt="" coords="521,427,655,453"/>
+<area shape="rect" id="node16" href="$group__as__iic__reg__funcs.html#ga8daa8fde0a7776aa2f5b335250b5aa2a" title=" " alt="" coords="507,477,669,504"/>
+<area shape="rect" id="node24" href="$group__as__iic__reg__funcs.html#ga8058473baeded71954aa72ee8df24e9b" title=" " alt="" coords="263,731,406,757"/>
+<area shape="rect" id="node25" href="$group__as__iic__reg__funcs.html#ga9fc4b532c67bb8f2d999583a900d741b" title=" " alt="" coords="519,579,657,605"/>
+<area shape="rect" id="node26" href="$group__as__reader__writer.html#gaaea10b48e35a224a5870cd3322ffbec2" title="Returns the next address on which the hardware will perform a write operation." alt="" coords="509,630,667,671"/>
+<area shape="rect" id="node27" href="$group__asterics__support.html#ga36a2ed59c59831bee59daaae3cb6cb35" title=" " alt="" coords="509,696,667,723"/>
+<area shape="rect" id="node28" href="$group__asterics__support.html#ga0ccb0610d764a95bda989e35fba59490" title=" " alt="" coords="507,747,669,773"/>
+<area shape="rect" id="node29" href="$group__as__stream__adapter.html#ga949f37184fec3d0fed81cbf05daeb3a7" title=" " alt="" coords="501,798,675,839"/>
+<area shape="rect" id="node30" href="$group__as__stream__adapter.html#ga71ce0201761b81a2f572d833189f4507" title=" " alt="" coords="501,863,675,905"/>
+<area shape="rect" id="node31" href="$group__as__stream__adapter.html#ga23bc1355f217edcbd1e48b944c1f481a" title=" " alt="" coords="501,929,675,970"/>
+<area shape="rect" id="node32" href="$group__as__stream__adapter.html#ga046c0c820ff8e65dc3c4bb43ab9e5d0c" title=" " alt="" coords="505,994,671,1035"/>
+<area shape="rect" id="node33" href="$group__as__stream__adapter.html#ga681755aebf19414cd12621272d00abdd" title=" " alt="" coords="505,1059,671,1101"/>
+<area shape="rect" id="node34" href="$group__as__stream__adapter.html#ga5c6c97e9564049dcdb051977b0430cbf" title=" " alt="" coords="492,1125,684,1166"/>
+<area shape="rect" id="node35" href="$group__as__stream__strobe__counter.html#gae9ff16c03d532084146ef8c4dabf44e8" title="Retrieve the current strobe counter value." alt="" coords="491,1190,685,1231"/>
+<area shape="rect" id="node36" href="$group__as__threshold.html#gab57ae4379fa2b76f65c85e29a4235067" title=" " alt="" coords="510,1255,666,1297"/>
+<area shape="rect" id="node37" href="$group__as__threshold.html#ga821aa37f9a20d976605e06cbc17e631f" title=" " alt="" coords="510,1321,666,1362"/>
+<area shape="rect" id="node38" href="$group__as__threshold.html#gac427effb1fd260c777dc5ea58be9e77f" title=" " alt="" coords="510,1386,666,1427"/>
+<area shape="rect" id="node39" href="$group__as__threshold.html#ga9f720ebbf29d212931203c0839371be6" title=" " alt="" coords="511,1452,665,1479"/>
+<area shape="rect" id="node40" href="$group__as__threshold.html#ga4c241f45b820cc45b132f0c4f08e43a0" title=" " alt="" coords="511,1503,665,1529"/>
+<area shape="rect" id="node41" href="$group__as__threshold.html#gae62d1dc97502916e642b1f22d94907a7" title=" " alt="" coords="515,1554,661,1595"/>
+<area shape="rect" id="node42" href="$group__as__threshold.html#gaacde349094d858c0e0cb7de97b7a0b02" title=" " alt="" coords="515,1619,661,1661"/>
+<area shape="rect" id="node43" href="$group__as__threshold.html#gabe357fa631d024a9be6c410c404b51f1" title=" " alt="" coords="515,1685,661,1726"/>
+<area shape="rect" id="node44" href="$group__as__threshold.html#ga6810bb581bbb6a0ac417fdc69b171b2d" title=" " alt="" coords="512,1751,664,1777"/>
+<area shape="rect" id="node45" href="$group__as__threshold.html#gad7125c18114253bc9aabc77c982748f6" title=" " alt="" coords="512,1801,664,1828"/>
+<area shape="rect" id="node46" href="$group__as__window__pipeline__common.html#ga6ac59a1b0cc45527bf2bd88d403d9dc0" title=" " alt="" coords="509,1853,667,1894"/>
+<area shape="rect" id="node47" href="$group__as__window__pipeline__common.html#ga0c96edb41167e2c09e4c76401fa36c4a" title=" " alt="" coords="509,1918,667,1959"/>
+<area shape="rect" id="node48" href="$group__as__reader__writer.html#ga3a166cc3d15dae4f4d7ba9ddc2fd1ca6" title="Returns the number of received units by the reader_writer." alt="" coords="503,1983,673,2025"/>
+<area shape="rect" id="node49" href="$group__as__reader__writer.html#ga1ed314dbb9e93fbcbab70d4db197e3b6" title="Returns the first address after the last successfully written unit." alt="" coords="491,2049,685,2090"/>
+<area shape="rect" id="node50" href="$group__as__window__pipeline__common.html#ga46bf67f4d3583063c1aaf32a0f8470c2" title=" " alt="" coords="493,2115,683,2141"/>
+<area shape="rect" id="node4" href="$group__as__iic__bitchecks.html#ga2ef7a1f9767986f2033697f584cd4feb" title=" " alt="" coords="261,5,408,32"/>
+<area shape="rect" id="node6" href="$as__iic_8c.html#afea64b05722568dd3faeb338cfa059bc" title=" " alt="" coords="259,56,411,83"/>
+<area shape="rect" id="node7" href="$group__as__iic__user.html#ga01d635936dc80ddaa19a8d189603ead3" title=" " alt="" coords="251,107,418,133"/>
+<area shape="rect" id="node8" href="$group__as__iic__bitsetters.html#ga0fa3aeeb6d2854f9b27c344047bd820e" title=" " alt="" coords="257,157,412,184"/>
+<area shape="rect" id="node9" href="$group__as__iic__bitsetters.html#gaa51d06d83796c60001b40bff2dc35b68" title=" " alt="" coords="261,209,409,250"/>
+<area shape="rect" id="node10" href="$group__as__iic__bitsetters.html#ga3e0050e31ef365ba7813edd7fbcfa724" title=" " alt="" coords="243,275,426,301"/>
+<area shape="rect" id="node5" href="$group__as__iic__helpers.html#ga1662a1a0b29536bf7d74ede3f73598be" title=" " alt="" coords="6,325,181,352"/>
+<area shape="rect" id="node14" href="$group__as__iic__helpers.html#gaa8ce9ac10b8c2ca9b614110ca5cbeff5" title=" " alt="" coords="229,376,440,403"/>
+<area shape="rect" id="node17" href="$group__as__iic__bitchecks.html#gaa4e8718c748b5a7e956a38ffd6dbe15d" title=" " alt="" coords="259,427,411,453"/>
+<area shape="rect" id="node19" href="$group__as__iic__bitchecks.html#gacddb2a75c1c325afe2ec4d25a60e27ba" title=" " alt="" coords="273,477,397,504"/>
+<area shape="rect" id="node20" href="$group__as__iic__bitchecks.html#ga031fa9683d4d6a0a68e65917d5a0610a" title=" " alt="" coords="265,528,405,555"/>
+<area shape="rect" id="node21" href="$group__as__iic__user.html#gacdb0c71d0fcfe5e50a7f7316762cd0c0" title=" " alt="" coords="274,579,395,605"/>
+<area shape="rect" id="node22" href="$group__as__iic__bitchecks.html#gad7ffbce42c3f192281052fced93b7ee7" title=" " alt="" coords="271,629,399,656"/>
+<area shape="rect" id="node23" href="$group__as__iic__bitchecks.html#ga4629e4514c3531d0bcd44ae20abc6bad" title=" " alt="" coords="269,680,401,707"/>
+<area shape="rect" id="node18" href="$group__as__iic__helpers.html#ga53e6050a2c66be89ac23084fd9de9c23" title=" " alt="" coords="5,579,181,605"/>
+</map>

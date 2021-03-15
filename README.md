@@ -2,20 +2,23 @@
 
 Image processing on embedded platforms is a challenging task, especially when implementing extensive computer vision applications. Field-programmable gate arrays (FPGAs) offer a suitable technology to accelerate image processing by customized hardware.
 
-*ASTERICS* ("Augsburg Sophisticated Toolbox for Embedded Real-time Image Crunching Systems") is a modular framwork to perform various real-time image processing tasks. It offers modules and interfaces to perform various image processing including support for complex operations such as natural feature detection based on the *SURF* algorithm or variants of the *Generalized Hough Transform*.
+*ASTERICS* ("Augsburg Sophisticated Toolbox for Embedded Real-time Image Crunching Systems") is a modular framework to perform various real-time image processing tasks. It offers modules and interfaces to perform various image processing tasks including support for complex operations such as natural feature detection based on the *SURF* algorithm or variants of the *Generalized Hough Transform*.
+To simplify the process of developing and implementing image processing systems, ASTERICS includes the system generator /Automatics/.
+Automatics enables the generation of ASTERICS hardware descriptions including software drivers or entire IP-Cores from concise Python scripts.
 
-This repository contains the core and free components of the *ASTERICS* framework. A list of publications and further information on the project can be found on the home page of the [Efficient Embedded Systems](http://ees.hs-augsburg.de) group at the University of Applied Sciences Augsburg.
+This repository contains the core and free components of the *ASTERICS* framework. A list of publications and further information on the project can be found on the home page of the [Efficient Embedded Systems](https://ees.hs-augsburg.de) group at the University of Applied Sciences Augsburg.
 
 ---
 
 ## Getting Started
 
-To get a fast introduction on how to use the ASTERICS framework, 
-we advise you to take a look at the [ASTERICS manual](https://raw.githubusercontent.com/hsa-ees/asterics/master/doc/asterics-manual.pdf).
+For a brief introduction on how to use the ASTERICS framework, 
+we advise you to take a look at the [ASTERICS manual](doc/asterics-manual.pdf).
 
 Chapter 2 "Using ASTERICS" gives information on 
- * how to setup ASTERICS (2.1) and
- * how to get startet with the reference demo design (2.2).
+ * how to setup ASTERICS (2.1),
+ * how to get startet with the reference demo design (2.2) and
+ * how to design ASTERICS systems using the system generator tool "Automatics" (2.3).
 
 
 ## Licensing and Additonal Modules
@@ -35,8 +38,8 @@ individually on a per-project basis. These include modules for:
 
 * efficient, on-the-fly point feature extraction (SURF algorithm) [3]
 
-Please contact the Efficient Embedded Systems (EES) group at the University of
-Applied Sciences Augsburg (see the authors section in the ASTERICS manual) for
+Please contact the [Efficient Embedded Systems (EES)](https://ees.hs-augsburg.de)
+group at the University of Applied Sciences Augsburg for
 further information on using these modules and collaborating with the EES group.
 
 ## Acknowledgments

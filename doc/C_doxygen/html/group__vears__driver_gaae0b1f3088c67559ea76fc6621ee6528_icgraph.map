@@ -1,0 +1,4 @@
+<map id="vears_get_resolution" name="vears_get_resolution">
+<area shape="rect" id="node1" title="Get the VEARS modules screen resolution." alt="" coords="140,5,299,32"/>
+<area shape="rect" id="node2" href="$group__vears__driver.html#ga37c9f106f54f6984a44897e5db7674a4" title="Initialize and reset the VEARS module." alt="" coords="5,5,92,32"/>
+</map>

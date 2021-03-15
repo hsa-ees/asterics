@@ -1,0 +1,11 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classas__automatics__interface_1_1_interface.html" title="Class representing an interface comprised of VHDL ports and generics." alt="" coords="5,235,192,276"/>
+<area shape="rect" id="node2" href="$classas__automatics__2d__window__interface_1_1_as_window_interface.html" title="Interface definition for interface &#39;as_window&#39;." alt="" coords="247,5,464,47"/>
+<area shape="rect" id="node3" href="$classas__automatics__register_1_1_slave_register_interface.html" title="Class representing the ASTERICS slave register interface." alt="" coords="248,71,463,112"/>
+<area shape="rect" id="node4" href="$classas__automatics__templates_1_1_as_stream.html" title="Template definition for ASTERICS&#39; &#39;as_stream&#39; interface." alt="" coords="258,136,453,177"/>
+<area shape="rect" id="node5" href="$classas__automatics__templates_1_1_a_x_i_master_memory_internal.html" title="Template definition for the AXI Master Memory interface used in ASTERICS." alt="" coords="258,201,453,243"/>
+<area shape="rect" id="node6" href="$classas__automatics__templates_1_1_a_x_i_slave_interface.html" title="Template definition for the AXI Slave interface used in ASTERICS." alt="" coords="258,267,453,308"/>
+<area shape="rect" id="node7" href="$classas__automatics__templates_1_1_a_x_i_slave_register_interface.html" title="Template definition for the AXI Slave Register interface used in ASTERICS." alt="" coords="258,332,453,373"/>
+<area shape="rect" id="node8" href="$classas__automatics__templates_1_1_camera_input_o_v7670.html" title="Template definition for the Camera interface used by the OmniiVision OV7670 camera sensor." alt="" coords="258,397,453,439"/>
+<area shape="rect" id="node9" href="$classas__automatics__templates_1_1_slave_register_interface_template.html" title="Template definition of the ASTERICS slave register interface." alt="" coords="240,463,471,504"/>
+</map>

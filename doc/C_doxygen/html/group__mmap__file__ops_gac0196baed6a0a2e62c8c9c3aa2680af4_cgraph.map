@@ -1,0 +1,13 @@
+<map id="as_mmap_wait_for_completion" name="as_mmap_wait_for_completion">
+<area shape="rect" id="node1" title=" " alt="" coords="5,101,232,127"/>
+<area shape="rect" id="node2" href="$group__as__buffer.html#ga4be2b60d2ac888f473e52f39c9492368" title=" " alt="" coords="280,101,455,127"/>
+<area shape="rect" id="node3" href="$group__as__reader__writer.html#gaaea10b48e35a224a5870cd3322ffbec2" title="Returns the next address on which the hardware will perform a write operation." alt="" coords="521,5,679,47"/>
+<area shape="rect" id="node7" href="$group__as__reader__writer.html#ga0e0a5b7e0dd6a14cb0f4251d00a783e8" title="Checks if module is busy." alt="" coords="507,71,693,98"/>
+<area shape="rect" id="node9" href="$as__cache_8c.html#ae76087a19400fcaebb8397a8a1ee828b" title="Unmap DMA address at end of transfer." alt="" coords="533,189,667,215"/>
+<area shape="rect" id="node11" href="$group__as__reader__writer.html#ga1ed314dbb9e93fbcbab70d4db197e3b6" title="Returns the first address after the last successfully written unit." alt="" coords="503,123,697,164"/>
+<area shape="rect" id="node4" href="$group__asterics__support.html#gaa7520f5b717e163da743500adb2eb0b9" title=" " alt="" coords="766,79,887,106"/>
+<area shape="rect" id="node5" href="$group__asterics__support.html#ga8e5c2bfd2e4498d10289377bd94cef07" title=" " alt="" coords="956,29,1057,55"/>
+<area shape="rect" id="node6" href="$group__asterics__support.html#ga4c6d688b840a6e2edc9bc0b8ed961677" title=" " alt="" coords="1105,29,1239,55"/>
+<area shape="rect" id="node8" href="$group__asterics__support.html#ga36a2ed59c59831bee59daaae3cb6cb35" title=" " alt="" coords="747,29,906,55"/>
+<area shape="rect" id="node10" href="$group__asterics__support.html#ga85ce164597e47f4aaee22c873e899d4b" title=" " alt="" coords="745,181,908,223"/>
+</map>

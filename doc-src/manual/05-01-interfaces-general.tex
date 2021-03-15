@@ -1,0 +1,488 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% This file is part of the ASTERICS Framework. 
+%%
+%% Copyright (C) Hochschule Augsburg, University of Applied Sciences
+%% Efficient Embedded Systems Group
+%%
+%% Author(s): Gundolf Kiefer <gundolf.kiefer@hs-augsburg.de>
+%%            Philip Manke <philip.manke@hs-augsburg.de>
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\section{General Interfaces} \label{ch:05-01-interfaces-general}
+
+\secauthor{Alexander Zöllner, Gundolf Kiefer}
+
+
+\subsection{Common Control and Status Registers} \label{ch:05-01-interfaces-general-common}
+
+\infobox{Note: The following base registers are currently planned and will be integrated into the Automatics system generator in future version of \asterics.}
+
+\begin{longtable}[ht]{|l|l|l|l|}
+    \hline
+    \multicolumn{1}{|c|}{\textbf{Name}} & \multicolumn{1}{c|}{\textbf{Address Off.}} & \multicolumn{1}{c|}{\textbf{Width}} & \multicolumn{1}{c|}{\textbf{Description}}\\
+    \hline
+    
+    \texttt{asterics\_id} & 0x0 & 32 & \parbox{7cm}{\ \\
+        Indicates whether the processing chain is \asterics-based.\\
+    }\\
+    \hline
+    
+    \texttt{asterics\_version} & 0x4 & 32 & \parbox{7cm}{\ \\
+        Major, minor and revision of the \asterics installation this chain has been built with.\\
+    }\\
+    \hline
+    
+    \texttt{asterics\_driver\_id} & 0x8 & 32 & \parbox{7cm}{\ \\
+        Compatible flavor of the software stack.\\
+    }\\
+    \hline
+    
+    \texttt{asterics\_state/control} & 0xC & 32 & \parbox{7cm}{\ \\
+        Global \asterics-chain instructions and status information.\\
+    }\\
+    \hline
+    
+    \caption{Common control and status registers of an \asterics image processing chain.}
+\end{longtable}
+
+\begin{longtable}[ht]{|l|l|l|l|l|}
+    \hline
+    \multicolumn{1}{|c|}{\textbf{Field Name}} & \multicolumn{1}{c|}{\textbf{Bit Index}} & \multicolumn{1}{c|}{\textbf{Type}} & \multicolumn{1}{c|}{\textbf{Description}}\\
+    \hline
+    \texttt{asterics\_id} & 31:0 & ro & \parbox{5cm}{\ \\
+        The identification field of \asterics (for example: 0x0ee500a5).\\
+    }\\
+    \hline
+    \caption{Bit fields of the \texttt{asterics\_id} register of the \asterics-chain.}
+    \label{table:common-control_asterics_id}
+\end{longtable}
+
+\begin{longtable}[ht]{|l|l|l|l|l|}
+    \hline
+    \multicolumn{1}{|c|}{\textbf{Field Name}} & \multicolumn{1}{c|}{\textbf{Bit Index}} & \multicolumn{1}{c|}{\textbf{Type}} & \multicolumn{1}{c|}{\textbf{Description}}\\
+    \hline
+    
+    \texttt{major} & 31:16 & ro & \parbox{5cm}{\ \\
+        Major number of the \asterics installation.\\
+    }\\
+    \hline
+    
+    \texttt{minor} & 15:8 & ro & \parbox{5cm}{\ \\
+        Minor number of the \asterics installation.\\
+    }\\
+    \hline
+    
+    \texttt{revision} & 7:0 & ro & \parbox{5cm}{\ \\
+        Revision of the \asterics installation.\\
+    }\\
+    \hline
+
+    \caption{Bit fields of the \texttt{asterics\_version} register of the \asterics installation.}
+    \label{table:common-control_asterics_version}
+\end{longtable}
+
+\begin{longtable}[ht]{|l|l|l|l|l|}
+    \hline
+    \multicolumn{1}{|c|}{\textbf{Field Name}} & \multicolumn{1}{c|}{\textbf{Bit Index}} & \multicolumn{1}{c|}{\textbf{Type}} & \multicolumn{1}{c|}{\textbf{Description}}\\
+    \hline
+    
+    \texttt{driver\_id} & 31:0 & ro & \parbox{5cm}{\ \\
+        Identification number of compatible software stack flavor.\\
+        First 8 characters of the SHA1 hash of \texttt{as\_hardware.c}.\\
+    }\\
+    \hline
+    
+    \caption{Bit fields of the combined \texttt{asterics\_driver\_id} register of the \asterics-chain.}
+    \label{table:common-control_asterics_driver_id}
+\end{longtable}
+
+\begin{longtable}[ht]{|l|l|l|l|l|}
+    \hline
+    \multicolumn{1}{|c|}{\textbf{Field Name}} & \multicolumn{1}{c|}{\textbf{Bit Index}} & \multicolumn{1}{c|}{\textbf{Type}} & \multicolumn{1}{c|}{\textbf{Reset Value}} & \multicolumn{1}{c|}{\textbf{Description}}\\
+    \hline
+    
+    \texttt{reset} & 16 & wo & 0x0 & \parbox{5cm}{\ \\
+        Reset the entire \asterics-chain at once.\\
+    }\\
+    \hline
+    
+    \texttt{sync\_error} & 3 & ro & 0x0 & \parbox{5cm}{\ \\
+        Data synchronization error occurred anywhere within the \asterics-chain which led to data loss.\\
+    }\\
+    \hline
+    
+    \texttt{data\_error} & 2 & ro & 0x0 & \parbox{5cm}{\ \\
+        A data error occurred anywhere within the \asterics-chain.\\
+    }\\
+    \hline
+    
+    \texttt{ready} & 0 & ro & n/a & \parbox{5cm}{\ \\
+        \asterics-chain is ready for operation.\\
+    }\\
+    \hline
+    
+    \caption{Bit field overview of the combined \texttt{asterics\_state/control} register of the \asterics-chain.}
+    \label{table:common-control_asterics_state_control}
+\end{longtable}
+
+The \texttt{READY} signal described in Table~\ref{table:common-control_asterics_state_control} is a "AND" combination of the \texttt{READY} signals of all hardware modules.
+Similarly, the \texttt{DATA\_ERROR} and \texttt{SYNC\_ERROR} signal are "OR" combinations of their respective signals of all hardware modules.
+
+Usually, the hardware modules also poses a \texttt{state/control} register with the same bit fields as the \texttt{asterics\_state/control} register.
+
+\subsection{Error Handling}
+
+There are two distinct error types available to \asterics, namely \texttt{SYNC\_ERROR} and \texttt{DATA\_ERROR}, which are handled separately.
+The former is a per-module signal, as described in Table~\ref{05-02-module_signals} of Chapter~\ref{ch:05-02-interfaces-module_signals}, which may be forwarded to the \texttt{asterics\_state/control} register of the \asterics-chain.
+The \texttt{SYNC\_ERROR} cannot be cleared by software directly. Rather, a reset has to be performed on the \asterics-chain (see Chapter~\ref{ch:05-02-interfaces-module_signals-error_handling}).
+ 
+The \texttt{DATA\_ERROR} is part of the \texttt{as\_stream} interface (see Chapter~\ref{ch:05-03-interfaces-as_stream}).
+As opposed to the \texttt{SYNC\_ERROR}, the software is responsible for clearing the \texttt{DATA\_ERROR}, as described in Chapter~\ref{ch:05-03-interfaces-as_stream-error_handling}.
+
+
+\subsection{Module and Chain Reset Behavior}
+
+Under certain circumstances, the need for reseting the \asterics image processing chain may arise, for example for having a defined state of the processing chain before using it for the first time or if an error occurred.
+
+An \asterics-chain can either be reset at once using the \texttt{RESET} signal of the \texttt{asterics\_control} register or per-module.
+The latter requires to perform the reset in the correct order, starting from the data source to sink.
+
+If a module receives a \texttt{RESET} signal, the corresponding \texttt{READY} and \texttt{STROBE} signals have to be unset (0) after the following clock cycle.
+\texttt{READY} and \texttt{STROBE} must not be set (1) as long as \texttt{RESET} is set (1).
+The \texttt{RESET} signal has to persist for at least one clock cycle.
+Once the \texttt{RESET} is unset (0), the module sets its \texttt{READY} signal as soon as data can be accepted or the \texttt{STALL} signal can be set correctly.
+
+The software is expected to read the \texttt{READY} signal of all modules or the one of the \texttt{asterics\_state} register before starting any module.
+
+\subsection{Version Management}
+
+\asterics allows to build a wide variety of image processing chains, each being accompanied with their own \textit{\asterics Support Package}.
+Thus, the \textit{\asterics Support Package} has to match the configuration of the \asterics-chain, which includes address offsets or the type of modules which have been used.
+If the software does not match the hardware, unexpected behavior or the \asterics-chain not working at all is to be expected.
+The most common error is software drivers trying to access the module's corresponding hardware registers at a certain address but inadvertently configure registers of a different type due to mismatch of addresses.
+
+For this reason, the \asterics-chain poses version registers as described in Chapter~\ref{ch:05-01-interfaces-general-common}.
+The software can read these registers to check whether the current version of the software stack is compatible with the \asterics-chain it is trying to operate.
+
+The \textit{\asterics Support Package} also poses a version, which is a SHA1 hash of the source file \texttt{as\_hardware.c}.
+This file describes the configuration of the \asterics-chain, along with pre-synthesis parameters of the used modules.
+
+
+
+\subsection{\textit{i2c} Bus Master for Module Configuration}
+
+\secauthor{Philip Manke}
+
+%[[ TBD (PM): Prinzipielle Einführung, wie Module mit i2c-Slave-Schnittstelle %angebunden werden (Schnittstellen-Sicht); Details im Kapitel "Modules" (s.u.) ]]
+
+
+External modules used with the \asterics framework (particularly cameras) often require to be configured using the \textit{i2c} bus. To provide a universal solution across platforms for this problem, \asterics implements its own \textit{i2c} hardware module.
+
+This section will give a brief overview on what \textit{i2c} is and how to get started using the \texttt{as\_iic} module. 
+
+\subsubsection{What is \textit{i2c}?}
+
+\textit{i2c} is a bus system which allows for multiple devices to be connected using just two signals/wires in total. There are two types of devices which connect to the bus: masters and slaves.
+Only masters are allowed to start a transaction on the bus. Having multiple masters on a single bus is not supported by the \texttt{as\_iic} module, though generally possible.
+
+The two wires of the \textit{i2c} bus carry a clock signal (SCL \^= Serial CLock) and a data signal (SDA \^= Serial DAta).
+
+The \textit{i2c} protocol uses device addresses to talk to the different devices on the bus. This address is 8 bits in length, with the last bit differentiating between read and write transactions.
+
+\subsubsection{How to Configure \texttt{as\_iic} for Operation}
+
+The \texttt{as\_iic} module only requires one function to be run before it is fully operational: \texttt{as\_iic\_init()}.
+This configures the SCL frequency of the \textit{i2c} bus and is effective immediately.
+The supported standard \textit{i2c} bus frequencies are 100 kHz and 400 kHz for \textit{standard mode} and \textit{fast mode i2c} respectively. With the \texttt{as\_iic} module it is possible to configure the frequency freely in a range from 10 kHz to 1 MHz.
+This allows for faster transactions, provided the slave devices support the faster bus frequency. 
+The function \texttt{as\_iic\_reset()} resets the module to the uninitialized state.
+
+\subsubsection{Using \texttt{as\_iic}}
+
+The software driver for \texttt{as\_iic} provides easy-to-use high level functions for executing transactions on the \textit{i2c} bus.
+After connecting the hardware and initializing the \texttt{as\_iic} module correctly, the high level driver functions can be used immediately.
+
+The two most useful functions are:
+
+\begin{itemize}
+    \item \texttt{as\_iic\_read\_reg()}
+    \item \texttt{as\_iic\_write\_reg()}
+\end{itemize}
+
+These two functions will read and write the registers of \textit{i2c} slaves connected to the bus.
+They both need the \textit{i2c} modules' base-address, the \textit{i2c} address of the slave and a pointer to the address of the register to read or write.
+The forth pointer required by the functions points to the byte to send to the \textit{i2c} slave (\texttt{as\_iic\_write\_reg()}) or to the variable to store the content of the \textit{i2c} slave register in (\texttt{as\_iic\_read\_reg()}).
+
+Section \ref{07-05-as-iic-connect-devices} briefly describes how to connect hardware devices to the \textit{i2c} bus. 
+
+Details on the software driver for \texttt{as\_iic} and other modules, can be found in the \asterics Doxygen documentation.
+The implementation of \texttt{as\_iic} is explained in detail in \ref{ch:07-05-modules-i2c}.
+
+It is recommended to check out \ref{07-05-04-as-iic-quirks} before using \texttt{as\_iic}, to avoid common pitfalls.
+
+
+\subsection{Generic Register Interface for \asterics Modules}
+\label{sec:05-01-05-register_interface}
+\secauthor{Philip Manke}
+
+\asterics provides a generic and configurable register interface that all modules can use.
+Configuring it becomes very easy when used in conjunction with Automatics, the \asterics chain generator.
+Table \ref{table:05-01-slave_register_interface_signals} lists the ports comprising the slave register interface from the viewpoint of an ASTERICS module.
+
+\begin{longtable}[ht]{|l|l|l|l|}
+    \hline
+    \multicolumn{1}{|c|}{\textbf{Name}} & \multicolumn{1}{c|}{\textbf{Data Type}} & \multicolumn{1}{c|}{\textbf{Direction}} & \multicolumn{1}{c|}{\textbf{Description}}\\
+    \hline
+    
+    \texttt{slv\_status\_reg} & \texttt{slv\_reg\_data} & out & \parbox{6cm}{\ \\
+        Data transport to software. An array of 32 bit registers.\\
+    }\\
+    \hline
+    
+    \texttt{slv\_ctrl\_reg} & \texttt{slv\_reg\_data} & in & \parbox{6cm}{\ \\
+        Data transport to hardware. An array of 32 bit registers.\\
+    }\\
+    \hline
+    
+    \texttt{slv\_reg\_modify} & \texttt{std\_logic\_vector} & out & \parbox{6cm}{\ \\
+        Data modify enable signals for the status registers. A vector as wide as the number of registers. Every clock cycle that a bit is set to \texttt{'1'} in this vector, the register will update it's value as set from the hardware.\\
+    }\\
+    \hline
+    
+    \texttt{slv\_reg\_config} & \texttt{slv\_reg\_config\_table} & out & \parbox{6cm}{\ \\
+        A port to export the register configuration. An array of two bit \texttt{std\_logic\_vectors}, designating how the registers are configured.\\
+    }\\
+    \hline
+    
+    \caption{Overview of the signals comprising the slave register interface of \asterics modules.}
+    \label{table:05-01-slave_register_interface_signals}
+\end{longtable}
+
+Each module using the interface must implement all four ports.
+The \texttt{helpers} package from the \texttt{asterics} library must also be used in the VHDL file.
+This makes the custom data types used to bundle the register signals available within the module.
+
+Additionally, the module must contain a constant named \texttt{slave\_register\_configuration} towards the top of the architecture defintion:\\
+\texttt{constant slave\_register\_configuration : slv\_reg\_config\_table(0 to <reg\_count>) := (<config>)}
+
+The width of the constant and all ports must manually be set to the number of the desired register count.
+Then the constant can be configured:
+For each register a two bit wide \texttt{std\_logic\_vector} is required, table \ref{table:05-01-slave_register_config_values} lists all possible values.
+
+\begin{longtable}[ht]{|c|c|}
+    \hline
+    \textbf{Value} & \textbf{Description}\\
+    \hline
+    
+    \texttt{AS\_REG\_NONE} or \texttt{"00"} & \parbox{11cm}{\ \\
+        No register generated.\\
+    }\\
+    \hline
+    
+    \texttt{AS\_REG\_STATUS} or \texttt{"01"} & \parbox{11cm}{\ \\
+        Only generate a status register: Data transport only from the hardware module to the software. This saves some hardware resources and increases data security, as the software won't be able to overwrite the register contents.\\
+    }\\
+    \hline
+    
+    \texttt{AS\_REG\_CONTROL} or \texttt{"10"} & \parbox{11cm}{\ \\
+        Only generate a control register: Data transport only from software towards the hardware module. This mainly just saves some hardware resources.\\
+    }\\
+    \hline
+    
+    \texttt{AS\_REG\_BOTH} or \texttt{"11"} & \parbox{11cm}{\ \\
+        Generate a full slave register with data transport enabled in both directions.\\
+    }\\
+    \hline
+    
+    \caption{Possible values in the slave register configuration constant.}
+    \label{table:05-01-slave_register_config_values}
+\end{longtable}
+
+
+\textbf{Example configuration:}\\
+\texttt{constant slave\_register\_configuration : slv\_reg\_config\_table(0 to 3) := ("11", "11", "10", "01");}\\
+For this configuration, all ports also need to have a data width of \texttt{(0 to 3)}. Also note that all register ports and the constant have data widths in an ascending direction (using \texttt{to} instead of \texttt{downto})!
+
+\textbf{Note:} You may use an "others" construct to assign the register configuration (\texttt{:= ("11", (others => "01"))}. This is supported by Automatics for automatic IP-Core generation. \textit{Important:} This causes an error when using the constant definitions \texttt{AS\_REG\_XX} and may thus only be used with string literals (eg. \texttt{"01"})!
+
+\textbf{Note:} If the module only has a single register, the "normal" assignment of the configuration constant using \texttt{:= ("10")} will usually fail. Either use an \texttt{others} construct or a direct assignment using \texttt{:= (0 => "10")} to assign the register configuration. Both ways are supported by Automatics.
+
+\bigskip
+
+\textbf{Using Automatics:}
+
+Automatics can automatically instantiate the required register manager for the register interface.
+This requires the following:
+\begin{itemize}
+\item The ports of the register interface must contain the names as mentioned above. They may have a \textit{common suffix}, which is required if a module contains multiple interfaces. The suffix must be separated by an underscore from the specified signal names and the configuration constant must have the same suffix. Note: The suffix is only required if the module has multiple register interfaces.
+\item The configuration constant must be defined in the architecture definition, before any \texttt{begin} keyword, as Automatics stops parsing the architecture at the first \texttt{begin} keyword.
+\end{itemize} 
+
+\textbf{Manual configuration:}
+
+The register interface ports must be connected to the register manager component \texttt{as\_regmgr}.
+The register manager has an interface consisting of the same ports with identical names as the register interface of the hardware modules:
+\begin{itemize}
+\item \texttt{slv\_status\_reg => slv\_status\_reg}
+\item \texttt{slv\_ctrl\_reg => slv\_ctrl\_reg}
+\item \texttt{slv\_reg\_modify => slv\_reg\_modify}
+\item \texttt{slv\_reg\_config => slv\_reg\_config}
+\end{itemize}
+\bigskip
+
+And an interface roughly matching an AXI interface, ommiting unnecessary signals.
+Table \ref{table:05-01-slave_register_axi_signals} lists these ports.
+\begin{longtable}[ht]{|l|l|l|l|}
+    \hline
+    \multicolumn{1}{|c|}{\textbf{Name}} & \multicolumn{1}{c|}{\textbf{Data Type}} & \multicolumn{1}{c|}{\textbf{Direction}} & \multicolumn{1}{c|}{\textbf{Description}}\\
+    \hline
+    
+    \texttt{sw\_address} & \texttt{std\_logic\_vector} & in & \parbox{6cm}{\ \\
+        The read and write address. \texttt{as\_regmgr} does NOT support simultanious read and write accesses.\\
+    }\\
+    \hline
+    
+    \texttt{sw\_data\_out} & \texttt{std\_logic\_vector} & out & \parbox{6cm}{\ \\
+        Data transport towards software.\\
+    }\\
+    \hline
+    
+    \texttt{sw\_data\_in} & \texttt{std\_logic\_vector} & in & \parbox{6cm}{\ \\
+        Data transport towards hardware modules.\\
+    }\\
+    \hline
+    
+    \texttt{sw\_data\_out\_en} & \texttt{std\_logic} & in & \parbox{6cm}{\ \\
+        Enable signal for read accesses from software.\\
+    }\\
+    \hline
+    
+    \texttt{sw\_data\_in\_en} & \texttt{std\_logic} & in & \parbox{6cm}{\ \\
+        Enable signal for write accesses from software.\\
+    }\\
+    \hline
+    
+    \texttt{sw\_byte\_mask} & \texttt{std\_logic\_vector} & in & \parbox{6cm}{\ \\
+        Byte-wise mask for partial write operations. Fully supported by \texttt{as\_regmgr}.\\
+    }\\
+    \hline
+    
+    \caption{Overview of the signals comprising the ports connected to the AXI Slave manager of the \asterics slave register manager.}
+    \label{table:05-01-slave_register_axi_signals}
+\end{longtable}
+
+
+\textbf{Integration details:}
+
+The software address is only as wide as the addressing of the hardware modules requires.
+Therefore the required bits have to be extracted from the address provided by the AXI Slave manager.
+The address will also have to be multiplexed from the read and write addresses.
+
+The \texttt{sw\_data\_out} signal will also have to be multiplexed towards software (the AXI Slave manager).
+
+Static HDL code has been developed and is used by Automatics to accomplish these tasks, shown in listing \ref{Code:05-01-06-regmgr_static}.
+Note that the constants have to be assigned values chosen for the system that the code is used in.
+
+\begin{lstlisting}[style=hdl, label=Code:05-01-06-regmgr_static, caption=Static code used to manage multiple \texttt{as\_regmgr} modules]
+  -- Register interface constants and signals:
+  -- Register address width in as_regmgr
+  constant c_slave_reg_addr_width : integer := 6;
+  -- Module addressing width: ceil(log2(module count))
+  constant c_module_addr_width: integer := 2;
+  -- Register addressing width: ceil(log2(register count per module))
+  constant c_reg_addr_width : integer := 4;
+  -- Number of as_regmgrs
+  constant c_reg_if_count : integer := 4;
+  -- Which module / as_regmgr is addressed?  
+  signal read_module_addr : integer;
+  -- Current address for as_regmgrs
+  signal sw_address : std_logic_vector
+                        (c_slave_reg_addr_width - 1 downto 0);
+  -- Collect the sw_data_out signals of all as_regmgrs
+  signal mod_read_data_arr : slv_reg_data(0 to c_reg_if_count - 1);
+
+begin
+
+  -- Extract the module address from the AXI read address
+  read_module_addr <= to_integer(unsigned(
+    axi_slv_reg_read_address(c_slave_reg_addr_width + 1 
+                               downto c_reg_addr_width + 2)));
+
+  -- Connect the read data out port
+  --    of the register manager of the addressed module
+  read_data_mux : process(mod_read_data_arr, read_module_addr, reset_n)
+  begin
+      if reset_n = '0' then
+          axi_slv_reg_read_data <= (others => '0');
+      else
+          if read_module_addr < c_reg_if_count 
+                and read_module_addr >= 0 then
+              axi_slv_reg_read_data <= 
+                  mod_read_data_arr(read_module_addr);
+          else
+              axi_slv_reg_read_data <= (others => '0');
+          end if;
+      end if;
+  end process;
+
+  -- Select between read and write address of the AXI interface
+  --   depending on the read/write enable bits
+  -- The register managers can only handle a single
+  --   read/write per clock cycle
+  -- Write requests have priority
+  sw_addr_mux:
+  process(axi_slv_reg_write_address, axi_slv_reg_read_address, 
+            axi_slv_reg_write_enable, axi_slv_reg_read_enable)
+  begin
+    sw_address <= (others => '0');
+    -- Disregarding lowest two bits
+    --   to account for byte addressing on 32 bit registers
+    if axi_slv_reg_write_enable = '1' then
+        sw_address <= axi_slv_reg_write_address
+                        (c_slave_reg_addr_width + 1 downto 2);
+    elsif axi_slv_reg_read_enable = '1' then
+        sw_address <= axi_slv_reg_read_address
+                        (c_slave_reg_addr_width + 1 downto 2);
+    else
+        sw_address <= (others => '0');
+    end if;
+  end process;
+\end{lstlisting}
+
+\bigskip
+
+The register managers have five Generics, configuring data widths and which address they should listen for, listed in table \ref{table:05-01-slave_register_manager_generics}.
+
+\begin{longtable}[ht]{|l|l|l|l|}
+    \hline
+    \multicolumn{1}{|c|}{\textbf{Name}} & \multicolumn{1}{c|}{\textbf{Data Type}} & \multicolumn{1}{c|}{\textbf{Default Value}} & \multicolumn{1}{c|}{\textbf{Description}}\\
+    \hline
+    
+    \texttt{REG\_ADDR\_WIDTH} & \texttt{integer} & 12 & \parbox{6cm}{\ \\
+        The register address width: ceil(log2(number of register managers)) + ceil(log2(number of registers per module)).\\
+    }\\
+    \hline
+    \texttt{REG\_DATA\_WIDTH} & \texttt{integer} & 32 & \parbox{6cm}{\ \\
+        The register data width. Usually 32 bit.\\
+    }\\
+    \hline
+    \texttt{MODULE\_ADDR\_WIDTH} & \texttt{integer} & 6 & \parbox{6cm}{\ \\
+        Number of bits used to address \texttt{as\_regmgr} in this system.\\
+    }\\
+    \hline
+    \texttt{REG\_COUNT} & \texttt{integer} & 32 & \parbox{6cm}{\ \\
+        The number of registers for this \texttt{as\_regmgr}.\\
+    }\\
+    \hline
+    \texttt{MODULE\_BASEADDR} & \texttt{integer} & None & \parbox{6cm}{\ \\
+        The address for this \texttt{as\_regmgr}.\\
+    }\\
+    \hline
+    
+    \caption{Overview of Generics of the \asterics slave register manager.}
+    \label{table:05-01-slave_register_manager_generics}
+\end{longtable}

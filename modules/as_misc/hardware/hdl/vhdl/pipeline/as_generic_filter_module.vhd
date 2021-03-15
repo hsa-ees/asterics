@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------
 --  This file is part of the ASTERICS Framework. 
 --  (C) 2020 Hochschule Augsburg, University of Applied Sciences
---  All rights reserved
 ------------------------------------------------------------------------
 -- Entity:         as_generic_filter
 --
@@ -30,7 +29,15 @@
 ----------------------------------------------------------------------------------
 --! @file  as_generic_filter.vhd
 --! @brief Generic filter module. Arbitrary filter size and weigths
+--! @addtogroup asterics_helpers
+--! @{
+--! @defgroup as_generic_filter as_generic_filter: Convolution Filter
+--! This entity implements a generic convolution filter with arbitrary weights.
+--! @}
 ----------------------------------------------------------------------------------
+
+--! @addtogroup as_generic_filter
+--! @{
 
 
 library IEEE;
@@ -45,6 +52,7 @@ use asterics.as_generic_filter.all;
 entity as_generic_filter_module is
     generic(
         DIN_WIDTH : integer := 8;
+        FILTER_BIT_WIDTH : integer := 8;
         DOUT_WIDTH : integer := 8;
         WINDOW_X : integer := 3;
         WINDOW_Y : integer := 3;
@@ -56,15 +64,15 @@ entity as_generic_filter_module is
         clk : in std_logic;
         reset : in std_logic;
 
-        filter_values : in t_generic_window(0 to WINDOW_Y - 1, 0 to WINDOW_X - 1, DIN_WIDTH downto 0); -- Interpreted as signed factors. Use powers of two for best (fastest) results!
+        filter_values : in t_generic_window(0 to WINDOW_Y - 1, 0 to WINDOW_X - 1, FILTER_BIT_WIDTH - 1 downto 0); -- Interpreted as signed factors. Use powers of two for best (fastest) results!
 
-        strobe : in std_logic;
-        flush_in : in std_logic;
-        flush_done : out std_logic;
-        window   : in  t_generic_window(0 to WINDOW_Y - 1, 0 to WINDOW_X - 1, DIN_WIDTH - 1 downto 0);
-        data_out     : out  std_logic_vector(DOUT_WIDTH - 1 downto 0)
+        strobe   : in std_logic;
+        window   : in t_generic_window(0 to WINDOW_Y - 1, 0 to WINDOW_X - 1, DIN_WIDTH - 1 downto 0);
+        data_out : out std_logic_vector(DOUT_WIDTH - 1 downto 0)
     );
 end entity as_generic_filter_module;
+
+--! @}
 
 architecture RTL of as_generic_filter_module is
 
@@ -77,14 +85,13 @@ architecture RTL of as_generic_filter_module is
     constant c_downscale_bits : integer := c_comp_bits_add + f_relu(DIN_WIDTH - DOUT_WIDTH);
 
     type t_sums is array(natural range<>) of signed(c_comp_data_width downto 0);
-    
-    signal applied_value_lines : t_sums(0 to WINDOW_Y - 1); -- signed values
-    signal flushing, flushed : std_logic;
 
+    signal applied_value_lines : t_sums(0 to WINDOW_Y - 1); -- signed values
+    --signal debug_pix    : t_sums(0 to 8);
+    --signal debug_filter : t_sums(0 to 8);
+    --signal debug_res    : t_sums(0 to 8);
 begin
 
-    flushing <= flush_in and not flushed;
-    flush_done <= flushed;
 
     -- First pipeline stage
     apply_filter_values : process(clk) is
@@ -99,18 +106,22 @@ begin
         if rising_edge(clk) then
             if reset = '1' then
                 applied_value_lines <= (others => (others => '0'));
-                flushed <= '1';
             else
-                if strobe = '1' and not flushing = '1' then
-                    flushed <= '0';
+                if strobe = '1' then
                     for Y in 0 to WINDOW_Y - 1 loop
                         acc := (others => '0');
                         for X in 0 to WINDOW_X - 1 loop
                             -- Extract values
-                            factor := to_integer(signed(f_get_vector_of_generic_window(filter_values, Y, X)));
-                            pixel := unsigned(f_get_vector_of_generic_window(window, Y, X));
+                            factor := to_integer(signed(f_get_vector_of_generic_window(filter_values, X, Y)));
+                            pixel := unsigned(f_get_vector_of_generic_window(window, X, Y));
                             -- Multiply
                             result_int := to_integer(pixel) * factor;
+                            
+                            -- Debug:
+                            --debug_pix(Y * 3 + X) <= to_signed(to_integer(pixel), c_comp_data_width + 1);
+                            --debug_filter(Y * 3 + X) <= to_signed(factor, c_comp_data_width + 1);
+                            --debug_res(Y * 3 + X) <= to_signed(result_int, c_comp_data_width + 1);
+
                             -- Store result
                             line_acc(X) := to_signed(result_int, c_comp_data_width + 1);
                         end loop;
@@ -121,10 +132,6 @@ begin
                         -- Writeback
                         applied_value_lines(Y) <= acc;
                     end loop;
-                end if;
-                if flushing = '1' then
-                    applied_value_lines <= (others => (others => '0'));
-                    flushed <= '1';
                 end if;
             end if;
         end if;
@@ -140,7 +147,7 @@ begin
             if reset = '1' then
                 data_out <= (others => '0');
             else
-                if strobe = '1' or flushing = '1' then
+                if strobe = '1' then
                     acc := (others => '0');
                     -- Sum up intermediate results 
                     for N in applied_value_lines'range(1) loop
@@ -153,9 +160,10 @@ begin
                     end if;
                     -- Downscale and convert to unsigned (if configured)
                     if OUTPUT_SIGNED then
-                        result := std_logic_vector(shift_right(acc, c_downscale_bits));
+                        result := std_logic_vector(shift_right(acc, c_downscale_bits + 1));
                     else
-                        result := std_logic_vector(shift_right(unsigned(acc), c_downscale_bits));
+                        acc(c_comp_data_width) := '0';
+                        result := std_logic_vector(shift_right(acc, c_downscale_bits));
                     end if;
                     -- Output (registered)
                     data_out <= result(data_out'range);

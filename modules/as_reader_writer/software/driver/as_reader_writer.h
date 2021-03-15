@@ -32,9 +32,9 @@
  * @file  as_reader_writer.h
  * @brief Driver (header file) for as_reader_writer module.
  *
- * \addtogroup asterics_mod
+ * @addtogroup asterics_modules
  * @{
- *   \defgroup as_reader_writer Reader/Writer
+ *   @defgroup as_reader_writer as_reader_writer: Main Memory Reader/Writer
  * @}
  *
  * Operation of the 'as_reader_writer' hardware module
@@ -64,95 +64,81 @@
  * current write address.
  */
 
-
 #ifndef AS_READER_WRITER_H
 #define AS_READER_WRITER_H
 
 #include "as_support.h"
 
-
-
 /******************* Default values ************************/
 
-
 /* Set section size to "0" to remind the user to set the correct size */
-#define AS_READER_WRITER_DEFAULT_SECTION_SIZE                   0
+#define AS_READER_WRITER_DEFAULT_SECTION_SIZE 0
 /* (See hardware bus specification for supported maximum) */
-#define AS_READER_WRITER_DEFAULT_MAX_BURST_LENGTH               256
+#define AS_READER_WRITER_DEFAULT_MAX_BURST_LENGTH 256
 /* (i.e. use only one section for a single frame) */
-#define AS_READER_WRITER_DEFAULT_SECTION_COUNT                  1
+#define AS_READER_WRITER_DEFAULT_SECTION_COUNT 1
 /* (No offset needed since only one section is used) */
-#define AS_READER_WRITER_DEFAULT_SECTION_OFFSET                 0
-
-
+#define AS_READER_WRITER_DEFAULT_SECTION_OFFSET 0
 
 /******************* I/O Registers ************************/
 
-
 /* Internal register definitions */
-#define AS_READER_WRITER_STATE_CONTROL_REG_OFFSET               0
-#define AS_READER_WRITER_REG_SECTION_ADDR_OFFSET                1
-#define AS_READER_WRITER_REG_SECTION_OFFSET_OFFSET              2
-#define AS_READER_WRITER_REG_SECTION_SIZE_OFFSET                3
-#define AS_READER_WRITER_REG_SECTION_COUNT_OFFSET               4
-#define AS_READER_WRITER_REG_MAX_BURST_LENGTH_OFFSET            5
-#define AS_READER_WRITER_REG_CUR_HW_ADDR_OFFSET                 6
+#define AS_READER_WRITER_STATE_CONTROL_REG_OFFSET 0
+#define AS_READER_WRITER_REG_SECTION_ADDR_OFFSET 1
+#define AS_READER_WRITER_REG_SECTION_OFFSET_OFFSET 2
+#define AS_READER_WRITER_REG_SECTION_SIZE_OFFSET 3
+#define AS_READER_WRITER_REG_SECTION_COUNT_OFFSET 4
+#define AS_READER_WRITER_REG_MAX_BURST_LENGTH_OFFSET 5
+#define AS_READER_WRITER_REG_CUR_HW_ADDR_OFFSET 6
 /* Memwriter only */
-#define AS_WRITER_REG_LAST_DATA_UNIT_COMPLETE_ADDR_OFFSET       7
-#define AS_WRITER_REG_CURRENT_UNIT_COUNT                        8
-
+#define AS_WRITER_REG_LAST_DATA_UNIT_COMPLETE_ADDR_OFFSET 7
+#define AS_WRITER_REG_CURRENT_UNIT_COUNT 8
 
 /* Status bit offsets */
-#define AS_READER_WRITER_DONE_BIT_OFFSET                        0
-#define AS_READER_WRITER_BUSY_BIT_OFFSET                        1
-#define AS_READER_WRITER_SYNC_ERROR_BIT_OFFSET                  3
-#define AS_READER_WRITER_PENDING_GO_BIT_OFFSET                  5
+#define AS_READER_WRITER_DONE_BIT_OFFSET 0
+#define AS_READER_WRITER_BUSY_BIT_OFFSET 1
+#define AS_READER_WRITER_SYNC_ERROR_BIT_OFFSET 3
+#define AS_READER_WRITER_PENDING_GO_BIT_OFFSET 5
 /* Memwriter only */
-#define AS_WRITER_FLUSHABLE_DATA_BIT_OFFSET                     4
-#define AS_WRITER_SET_ENABLE_BIT_OFFSET                         6
-
+#define AS_WRITER_FLUSHABLE_DATA_BIT_OFFSET 4
+#define AS_WRITER_SET_ENABLE_BIT_OFFSET 6
 
 /* Control bit offsets */
-#define AS_READER_WRITER_RESET_BIT_OFFSET                       16
-#define AS_READER_WRITER_GO_BIT_OFFSET                          17
+#define AS_READER_WRITER_RESET_BIT_OFFSET 16
+#define AS_READER_WRITER_GO_BIT_OFFSET 17
 /* Memwriter only */
-#define AS_WRITER_ENABLE_BIT_OFFSET                             18
-#define AS_WRITER_DISABLE_BIT_OFFSET                            19
-#define AS_WRITER_ENABLE_ON_DATA_UNIT_COMPLETE_BIT_OFFSET       20
-#define AS_WRITER_SINGLE_SHOT_BIT_OFFSET                        21
-#define AS_WRITER_DISABLE_ON_NO_GO_BIT_OFFSET                   22
-#define AS_WRITER_FLUSH_DATA_BIT_OFFSET                         23
-
+#define AS_WRITER_ENABLE_BIT_OFFSET 18
+#define AS_WRITER_DISABLE_BIT_OFFSET 19
+#define AS_WRITER_ENABLE_ON_DATA_UNIT_COMPLETE_BIT_OFFSET 20
+#define AS_WRITER_SINGLE_SHOT_BIT_OFFSET 21
+#define AS_WRITER_DISABLE_ON_NO_GO_BIT_OFFSET 22
+#define AS_WRITER_FLUSH_DATA_BIT_OFFSET 23
 
 /* Status bit masks */
-#define AS_READER_WRITER_DONE_MASK              (1<<AS_READER_WRITER_DONE_BIT_OFFSET)
-#define AS_READER_WRITER_BUSY_MASK              (1<<AS_READER_WRITER_BUSY_BIT_OFFSET)
-#define AS_READER_WRITER_SYNC_ERROR_MASK        (1<<AS_READER_WRITER_SYNC_ERROR_BIT_OFFSET)
-#define AS_READER_WRITER_PENDING_GO_MASK        (1<<AS_READER_WRITER_PENDING_GO_BIT_OFFSET)
+#define AS_READER_WRITER_DONE_MASK (1 << AS_READER_WRITER_DONE_BIT_OFFSET)
+#define AS_READER_WRITER_BUSY_MASK (1 << AS_READER_WRITER_BUSY_BIT_OFFSET)
+#define AS_READER_WRITER_SYNC_ERROR_MASK (1 << AS_READER_WRITER_SYNC_ERROR_BIT_OFFSET)
+#define AS_READER_WRITER_PENDING_GO_MASK (1 << AS_READER_WRITER_PENDING_GO_BIT_OFFSET)
 /* Memwriter only */
-#define AS_WRITER_FLUSHABLE_DATA_MASK           (1<<AS_WRITER_FLUSHABLE_DATA_BIT_OFFSET)
-#define AS_WRITER_SET_ENABLE_MASK               (1<<AS_WRITER_SET_ENABLE_BIT_OFFSET)
-
+#define AS_WRITER_FLUSHABLE_DATA_MASK (1 << AS_WRITER_FLUSHABLE_DATA_BIT_OFFSET)
+#define AS_WRITER_SET_ENABLE_MASK (1 << AS_WRITER_SET_ENABLE_BIT_OFFSET)
 
 /* Control bit masks */
-#define AS_READER_WRITER_RESET_MASK                         (1<<AS_READER_WRITER_RESET_BIT_OFFSET)
-#define AS_READER_WRITER_GO_MASK                            (1<<AS_READER_WRITER_GO_BIT_OFFSET)
+#define AS_READER_WRITER_RESET_MASK (1 << AS_READER_WRITER_RESET_BIT_OFFSET)
+#define AS_READER_WRITER_GO_MASK (1 << AS_READER_WRITER_GO_BIT_OFFSET)
 /* Memwriter only */
-#define AS_WRITER_ENABLE_MASK                               (1<<AS_WRITER_ENABLE_BIT_OFFSET)
-#define AS_WRITER_DISABLE_MASK                              (1<<AS_WRITER_DISABLE_BIT_OFFSET)
-#define AS_WRITER_ENABLE_ON_DATA_UNIT_COMPLETE_MASK         (1<<AS_WRITER_ENABLE_ON_DATA_UNIT_COMPLETE_BIT_OFFSET)
-#define AS_WRITER_SINGLE_SHOT_MASK                          (1<<AS_WRITER_SINGLE_SHOT_BIT_OFFSET)
-#define AS_WRITER_DISABLE_ON_NO_GO_MASK                     (1<<AS_WRITER_DISABLE_ON_NO_GO_BIT_OFFSET)
-#define AS_WRITER_FLUSH_DATA_MASK                           (1<<AS_WRITER_FLUSH_DATA_BIT_OFFSET)
-
+#define AS_WRITER_ENABLE_MASK (1 << AS_WRITER_ENABLE_BIT_OFFSET)
+#define AS_WRITER_DISABLE_MASK (1 << AS_WRITER_DISABLE_BIT_OFFSET)
+#define AS_WRITER_ENABLE_ON_DATA_UNIT_COMPLETE_MASK (1 << AS_WRITER_ENABLE_ON_DATA_UNIT_COMPLETE_BIT_OFFSET)
+#define AS_WRITER_SINGLE_SHOT_MASK (1 << AS_WRITER_SINGLE_SHOT_BIT_OFFSET)
+#define AS_WRITER_DISABLE_ON_NO_GO_MASK (1 << AS_WRITER_DISABLE_ON_NO_GO_BIT_OFFSET)
+#define AS_WRITER_FLUSH_DATA_MASK (1 << AS_WRITER_FLUSH_DATA_BIT_OFFSET)
 
 /** \addtogroup as_reader_writer
  *  @{
  */
 
-
 /******************* Driver functions **********************/
-
 
 /**
  * @brief Contains all necessary variables for
@@ -164,13 +150,12 @@
  * individually.
  */
 typedef struct as_reader_writer_config_s {
-    uint32_t section_size;
-    uint32_t* first_section_addr;
-    uint32_t max_burst_length;
-    uint32_t section_count;
-    uint32_t section_offset;
-}as_reader_writer_config_t;
-
+  uint32_t section_size;
+  as_hardware_address_t first_section_addr;
+  uint32_t max_burst_length;
+  uint32_t section_count;
+  uint32_t section_offset;
+} as_reader_writer_config_t;
 
 /* Configuration functions */
 /**
@@ -191,7 +176,7 @@ typedef struct as_reader_writer_config_s {
  *                              NULL pointer if default values are to
  *                              be set.
  */
-void as_reader_writer_init(uint32_t* base_addr, as_reader_writer_config_t * config);
+void as_reader_writer_init(as_hardware_address_t base_addr, as_reader_writer_config_t *config);
 
 /**
  * @brief Returns the next address on which the hardware will
@@ -203,7 +188,7 @@ void as_reader_writer_init(uint32_t* base_addr, as_reader_writer_config_t * conf
  * @return                      Address on which hardware will perform
  *                              the next read operation
  */
-uint32_t* as_reader_writer_get_cur_hw_addr(uint32_t* base_addr);
+as_hardware_address_t as_reader_writer_get_cur_hw_addr(as_hardware_address_t base_addr);
 
 /**
  * @brief Sets the start address of the first section to the
@@ -214,7 +199,7 @@ uint32_t* as_reader_writer_get_cur_hw_addr(uint32_t* base_addr);
  * @param value                 Specifies the start address of the first
  *                              section
  */
-void as_reader_writer_set_section_addr(uint32_t* base_addr, uint32_t* value);
+void as_reader_writer_set_section_addr(as_hardware_address_t base_addr, as_hardware_address_t value);
 
 /**
  * @brief Sets the offset in bytes between the start addresses of
@@ -228,7 +213,7 @@ void as_reader_writer_set_section_addr(uint32_t* base_addr, uint32_t* value);
  * @param value                 Specifies the offset between two subsequent
  *                              sections in bytes.
  */
-void as_reader_writer_set_section_offset(uint32_t* base_addr, uint32_t value);
+void as_reader_writer_set_section_offset(as_hardware_address_t base_addr, uint32_t value);
 
 /**
  * @brief Sets the size of a single section in bytes.
@@ -239,7 +224,7 @@ void as_reader_writer_set_section_offset(uint32_t* base_addr, uint32_t value);
  *                              section. Only integer multiples of
  *                              BYTES_PER_WORD are valid.
  */
-void as_reader_writer_set_section_size(uint32_t* base_addr, uint32_t value);
+void as_reader_writer_set_section_size(as_hardware_address_t base_addr, uint32_t value);
 
 /**
  * @brief Sets the number of sections.
@@ -249,7 +234,7 @@ void as_reader_writer_set_section_size(uint32_t* base_addr, uint32_t value);
  * @param value                 Specifies the number sections whereas
  *                              only values greater 0 are valid.
  */
-void as_reader_writer_set_section_count(uint32_t* base_addr, uint32_t value);
+void as_reader_writer_set_section_count(as_hardware_address_t base_addr, uint32_t value);
 
 /**
  * @brief Sets the maximum possible burst length to be performed
@@ -268,8 +253,7 @@ void as_reader_writer_set_section_count(uint32_t* base_addr, uint32_t value);
  *                              in between have to be an integer multiple
  *                              of BYTES_PER_WORD.
  */
-void as_reader_writer_set_max_burst_length(uint32_t* base_addr, uint32_t value);
-
+void as_reader_writer_set_max_burst_length(as_hardware_address_t base_addr, uint32_t value);
 
 /* Memwriter only */
 /**
@@ -284,7 +268,7 @@ void as_reader_writer_set_max_burst_length(uint32_t* base_addr, uint32_t value);
  * @return                      First address after last completed section
  *
  */
-uint32_t* as_writer_get_last_data_unit_complete_addr(uint32_t* base_addr);
+as_hardware_address_t as_writer_get_last_data_unit_complete_addr(as_hardware_address_t base_addr);
 
 /**
  * @brief Returns the number of received units by the reader_writer.
@@ -295,9 +279,7 @@ uint32_t* as_writer_get_last_data_unit_complete_addr(uint32_t* base_addr);
  * @return                      Number of received units by the reader_writer
  *
  */
- uint32_t* as_writer_get_cur_unit_count(uint32_t* base_addr);
-
-
+uint32_t as_writer_get_cur_unit_count(as_hardware_address_t base_addr);
 
 /* Status functions */
 /**
@@ -314,7 +296,7 @@ uint32_t* as_writer_get_last_data_unit_complete_addr(uint32_t* base_addr);
  * @return                      Returns 'AS_TRUE' if hardware module is
  *                              ready for operation and 'AS_FALSE' otherwise.
  */
-AS_BOOL as_reader_writer_is_done(uint32_t* base_addr);
+AS_BOOL as_reader_writer_is_done(as_hardware_address_t base_addr);
 
 /**
  * @brief Checks if module is busy.
@@ -330,8 +312,7 @@ AS_BOOL as_reader_writer_is_done(uint32_t* base_addr);
  *                              occupied with operation and 'AS_FALSE'
  *                              otherwise.
  */
-AS_BOOL as_reader_writer_is_busy(uint32_t* base_addr);
-
+AS_BOOL as_reader_writer_is_busy(as_hardware_address_t base_addr);
 
 /**
  * @brief Checks if another operation is queued.
@@ -347,8 +328,7 @@ AS_BOOL as_reader_writer_is_busy(uint32_t* base_addr);
  * @return                      Returns 'AS_TRUE' if the next "go" signal
  *                              has been set already and 'AS_FALSE' otherwise.
  */
-AS_BOOL as_reader_writer_is_pending_go(uint32_t* base_addr);
-
+AS_BOOL as_reader_writer_is_pending_go(as_hardware_address_t base_addr);
 
 /* Memwriter only */
 /**
@@ -364,7 +344,7 @@ AS_BOOL as_reader_writer_is_pending_go(uint32_t* base_addr);
  * @return                      Returns 'AS_TRUE' if an error was detected
  *                              and 'AS_FALSE' otherwise.
  */
-AS_BOOL as_writer_is_sync_error(uint32_t* base_addr);
+AS_BOOL as_writer_is_sync_error(as_hardware_address_t base_addr);
 
 /**
  * @brief Checks if there is buffered data.
@@ -378,7 +358,7 @@ AS_BOOL as_writer_is_sync_error(uint32_t* base_addr);
  * @return                      Returns 'AS_TRUE' if there is flushable
  *                              data and 'AS_FALSE' otherwise.
  */
-AS_BOOL as_writer_is_flushable_data(uint32_t* base_addr);
+AS_BOOL as_writer_is_flushable_data(as_hardware_address_t base_addr);
 
 /**
  * @brief Checks if the module accepts data.
@@ -392,10 +372,7 @@ AS_BOOL as_writer_is_flushable_data(uint32_t* base_addr);
  * @return                      Returns 'AS_TRUE' if the "enable" signal
  *                              is set and 'AS_FALSE' otherwise.
  */
-AS_BOOL as_writer_is_set_enable(uint32_t* base_addr);
-
-
-
+AS_BOOL as_writer_is_set_enable(as_hardware_address_t base_addr);
 
 /* Control functions */
 /**
@@ -407,7 +384,7 @@ AS_BOOL as_writer_is_set_enable(uint32_t* base_addr);
  * @param                       Address of the corresponding hardware
  *                              module (see also as_hardware.h).
  */
-void as_reader_writer_reset(uint32_t* base_addr);
+void as_reader_writer_reset(as_hardware_address_t base_addr);
 
 /**
  * @brief Starts operation of hardware module.
@@ -422,8 +399,7 @@ void as_reader_writer_reset(uint32_t* base_addr);
  * @param                       Address of the corresponding hardware
  *                              module (see also as_hardware.h).
  */
-void as_reader_writer_set_go(uint32_t* base_addr);
-
+void as_reader_writer_set_go(as_hardware_address_t base_addr);
 
 /* Memwriter only */
 /**
@@ -435,7 +411,7 @@ void as_reader_writer_set_go(uint32_t* base_addr);
  * @param                       Address of the corresponding hardware
  *                              module (see also as_hardware.h).
  */
-void as_writer_set_enable(uint32_t* base_addr);
+void as_writer_set_enable(as_hardware_address_t base_addr);
 
 /**
  * @brief Disable module input port.
@@ -446,7 +422,7 @@ void as_writer_set_enable(uint32_t* base_addr);
  * @param                       Address of the corresponding hardware
  *                              module (see also as_hardware.h).
  */
-void as_writer_set_disable(uint32_t* base_addr);
+void as_writer_set_disable(as_hardware_address_t base_addr);
 
 /**
  * @brief Enable module input port on data unit complete.
@@ -460,7 +436,7 @@ void as_writer_set_disable(uint32_t* base_addr);
  * @param                       Address of the corresponding hardware
  *                              module (see also as_hardware.h).
  */
-void as_writer_set_enable_on_data_unit_complete(uint32_t* base_addr);
+void as_writer_set_enable_on_data_unit_complete(as_hardware_address_t base_addr);
 
 /**
  * @brief Transfer single data unit to memory.
@@ -473,7 +449,7 @@ void as_writer_set_enable_on_data_unit_complete(uint32_t* base_addr);
  * @param                       Address of the corresponding hardware
  *                              module (see also as_hardware.h).
  */
-void as_writer_set_single_shot(uint32_t* base_addr);
+void as_writer_set_single_shot(as_hardware_address_t base_addr);
 
 /**
  * @brief Disable module if no operation is queued.
@@ -485,7 +461,7 @@ void as_writer_set_single_shot(uint32_t* base_addr);
  * @param                       Address of the corresponding hardware
  *                              module (see also as_hardware.h).
  */
-void as_writer_set_disable_on_no_go(uint32_t* base_addr);
+void as_writer_set_disable_on_no_go(as_hardware_address_t base_addr);
 
 /**
  * @brief Flush data to memory.
@@ -496,8 +472,7 @@ void as_writer_set_disable_on_no_go(uint32_t* base_addr);
  * @param                       Address of the corresponding hardware
  *                              module (see also as_hardware.h).
  */
-void as_writer_set_flush(uint32_t* base_addr);
-
+void as_writer_set_flush(as_hardware_address_t base_addr);
 
 /** @}*/
 

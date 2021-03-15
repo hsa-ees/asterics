@@ -1,0 +1,544 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% This file is part of the ASTERICS Framework. 
+%%
+%% (C) 2021 Hochschule Augsburg, University of Applied Sciences
+%% Efficient Embedded Systems Group
+%%
+%% Author(s): Gundolf Kiefer      <gundolf.kiefer@hs-augsburg.de>
+%%            Michael Schäferling <michael.schaeferling@hs-augsburg.de>
+%%            Philip Manke        <philip.manke@hs-augsburg.de>
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% TBD(alle) / Anmerkung GK 2018-07-09:
+%
+%   Neue Kommentare stehen jetzt vor allem als Kommentare im TeX-Code,
+%   nicht mehr lesbar im PDF, damit unsere 5.-Semester nicht von den
+%   vielen TBD's irritiert werden.
+%
+%   WICHTIG: Deshalb bitte auch in den .tex-Dateien nach "TBD" und dem
+%     eigenen Kürzel Ausschau halten. Der jeweils Erstgenannte ist
+%     Hauptverantwortlicher.
+%
+%   Namenskürzel:
+%     AZ - Alexander Zöllner
+%     CS - Christian Scheglmann
+%     GK - Gundolf Kiefer
+%     MS - Michael Schäferling
+%     PM - Philip Manke
+%     PZ - Patrick Zacharias
+%	  TT - Thibaut Temkeng
+%
+%   Konvention zur Autoren-Nennung:
+%   
+%   * Bei Kapiteln, die komplett von einer Person geschrieben wurden,
+%     wird der Name unter dem Titel genannt (Muster: Kapitel C-Konventionen
+%     von Michel Zink)
+%
+
+
+% TBD(CS):
+%   Es fehlen noch die Dokumentationen der Module und des Systems aus 
+%   dem FSD-Fahrzeug.
+
+
+
+% TBD (MS/JS/AZ):
+%
+% - Bitte Literaturverzeichnis erstellen mit
+%   - allen relevanten EES-Papers (TBD: ASAP, ARC-paper ?, der Rest sollte vorhanden sein)
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% General Header %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\documentclass[12pt,english]{scrreprt}
+\usepackage[utf8]{inputenc}
+
+\usepackage[a4paper]{geometry}
+\geometry{verbose,tmargin=25mm,bmargin=30mm,lmargin=25mm,rmargin=25mm}
+
+\usepackage[headsepline,footsepline]{scrlayer-scrpage}
+\pagestyle{scrheadings}
+
+\usepackage{longtable}
+
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+\usepackage{array}
+\usepackage{verbatim}
+\usepackage{makeidx}
+\makeindex
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage{babel}
+\usepackage{color}
+\usepackage[table]{xcolor}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{siunitx}
+\usepackage{xspace}
+
+\renewcommand{\lstlistingname}{Listing}
+
+\usepackage[backend=bibtex,style=numeric,natbib=true]{biblatex} % Use the bibtex backend with the authoryear citation style (which resembles APA)
+
+%\addbibresource{example.bib} % The filename of the bibliography
+\addbibresource{bibliography.bib} % The filename of the bibliography
+
+\usepackage[autostyle=true]{csquotes} % Required to generate language-dependent quotes in the bibliography
+
+% Hyphenation corrections
+\hyphenation{ASTERICS}
+
+\makeatletter
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Listing Definitions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\input{00-lst-settings.tex}
+
+%%%%%%%%%%%%%%%%%%% Hyper reference stuff (from LyX) %%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\usepackage{ifpdf} % part of the hyperref bundle
+\ifpdf % if pdflatex is used
+  % set fonts for nicer pdf view
+  \IfFileExists{lmodern.sty}{\usepackage{lmodern}}{}
+  % link all cross references and URLs in pdf output
+  \usepackage[colorlinks=true, bookmarks, bookmarksnumbered,
+  linkcolor=black, citecolor=black, urlcolor=blue, filecolor=blue,
+  pdfpagelayout=OneColumn, pdfnewwindow=true,
+  pdfstartview=XYZ, plainpages=false, pdfpagelabels,
+  pdfauthor={Gundolf Kiefer}, pdftex,
+  pdftitle={ASTERICS},pdfsubject={ASTERICS},
+  pdfkeywords={ASTERICS}]{hyperref} 
+\else % if dvi or ps is produced
+  % link all cross references and URLs in dvi output
+  \usepackage[ps2pdf]{hyperref}
+\fi % end if pdflatex is used
+
+% line break if an URL is too long to fit one line
+\def\UrlBreaks{\do\/\do-}
+
+% the pages of the TOC are numbered roman
+% and a pdf-bookmark for the TOC is added
+\pagenumbering{roman}
+\let\myTOC\tableofcontents
+\renewcommand\tableofcontents{%
+  \pdfbookmark[1]{Contents}{}
+  \myTOC
+  \cleardoublepage
+  \pagenumbering{arabic} }
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Name Commands %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\newcommand{\asterics}{\textit{ASTERICS}\xspace}
+\newcommand{\automatics}{\textit{Automatics}\xspace}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Labels and References %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% Defining an arbitrary index entry ...
+\newcommand{\idx}[1]{#1\index{#1}}
+
+% Labeling and refering to tools
+\newcommand{\labeltool}[1]{\index{#1@\texttt{#1} (tool)} \label{tool:#1}}
+\newcommand{\reftool}[1]{\hyperref[tool:#1]{\texttt{\idx{#1}}}}
+
+% Labeling and refering to modules
+\newcommand{\labelmodule}[1]{\index{#1@\texttt{#1} (module)} \label{module:#1}}
+\newcommand{\refmodule}[1]{\hyperref[module:#1]{\texttt{\idx{#1}}}}
+
+% Labeling and refering to arbitrary locations in text
+\newcommand{\labelarb}[1]{\index{#1@\textit{#1} (arbitrary)} \label{arb:#1}}
+\newcommand{\refarb}[1]{\hyperref[arb:#1]{\textit{\idx{#1}}}}
+
+% Labeling and refering to chapters
+\newcommand{\labelch}[1]{\label{ch:#1}}
+\newcommand{\refch}[1]{Chapter \ref{ch:#1}\xspace}
+
+% Labeling and refering to sections
+\newcommand{\labelsec}[1]{\label{sec:#1}}
+\newcommand{\refsec}[1]{Section \ref{sec:#1}\xspace}
+
+% Labeling and refering to subsections
+\newcommand{\labelssec}[1]{\label{ssec:#1}}
+\newcommand{\refssec}[1]{Section \ref{ssec:#1}\xspace}
+
+% Labeling and refering to figures
+\newcommand{\labelfig}[1]{\label{fig:#1}}
+\newcommand{\reffig}[1]{Figure \ref{fig:#1}\xspace}
+
+% Labeling and refering to tables
+\newcommand{\labeltab}[1]{\label{tab:#1}}
+\newcommand{\reftab}[1]{Table \ref{tab:#1}\xspace}
+
+
+\newcommand{\refdoxypython}{\href{run:./Python_doxygen/html/index.html}{Python Doxygen documentation}}
+\newcommand{\refdoxyc}{\href{run:./C_doxygen/html/index.html}{C Doxygen documentation}}
+\newcommand{\refdoxyvhdl}{\href{run:./VHDL_doxygen/html/index.html}{VHDL Doxygen documentation}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Misc. definitions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\renewcommand{\caplabelfont}{\textbf}
+
+\makeatother
+
+\newcommand{\construction}[1]{\texttt{\textbf{- This #1 is currently under construction -}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Authorship %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% Authorship notice for sections authored by one or few indivudiuals
+\newcommand{\secauthor}[1]{\emph{by #1}\vspace{0.3em}\\}
+
+% Authorship notice for sections originally authored by one or few indivudiuals and modified afterwards by the ASTERICS main authors
+\newcommand{\secorigauthor}[1]{\emph{originally by #1}\\}
+
+
+
+%%%%%%%%%%%%%%%%%%% Headings, footers and formatting %%%%%%%%%%%%%%%%%%%%%%%%%
+
+%TBD (Makefile): Some of the following lines with indentation cause errors on compilation with the Makefile: "missing \begin{document}"
+% Note[GK]: The following command (texmaker default) appears to work:
+%     pdflatex -synctex=1 -interaction=nonstopmode %.tex
+
+
+\setkomafont{pageheadfoot}{\small}
+%\setkomafont{footsepline}{on}
+%\setfootsepline{0,5pt}
+\lofoot*{The \asterics Book, \today}
+\cofoot*{}
+\rofoot*{\thepage}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Info and Warning Boxes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\newcommand{\infobox}[1]{
+\par
+\vspace{0.5em}
+{
+	\begin{minipage}[t]{0.07\textwidth}	
+		\begin{tabular}{l}  
+    		\includegraphics[height=1.8em]{figs/ic_info_inverted.pdf}\\  		
+		\end{tabular}	
+	\end{minipage}
+	\hfill
+	\begin{minipage}[t]{0.92\textwidth}
+		\begin{tabular}{|l|}
+			\hline
+			\parbox{0.92\textwidth}
+			{
+				\vspace{0.8em}
+				#1	
+				\vspace{0.5em}
+			}\\
+			\hline
+		\end{tabular}
+	\end{minipage}
+}
+\vspace{0.5em}
+\par
+}
+
+\newcommand{\warnbox}[1]{
+\par
+\vspace{0.5em}
+{
+	\begin{minipage}[t]{0.07\textwidth}	
+		\begin{tabular}{l}  
+    		\includegraphics[height=1.8em]{figs/ic_warning.pdf}\\  		
+		\end{tabular}	
+	\end{minipage}
+	\hfill
+	\begin{minipage}[t]{0.92\textwidth}
+		\begin{tabular}{|l|}
+			\hline
+			\parbox{0.92\textwidth}
+			{
+				\vspace{0.8em}
+				#1	
+				\vspace{0.5em}
+			}\\
+			\hline			
+		\end{tabular}
+	\end{minipage}
+}
+\vspace{0.5em}
+\par
+}
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Title page %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\pagenumbering{roman}
+
+\sloppy
+
+\begin{titlepage}
+
+\begin{flushright}
+\includegraphics[width=5cm]{figs/hsa_logo}
+\par\end{flushright}
+
+\begin{center}
+\vfill ~ \vfill
+
+\textsf{\textbf{\Huge The \asterics Book}}
+\vspace{1.5em}  \\
+\textsf{\textbf{\Large User and Reference Guide for the\\
+\textit{Augsburg Sophisticated Toolbox\\ for Embedded Realtime Image Crunching Systems\\ \vspace{0.2em} (ASTERICS)}}}
+
+\vfill ~ \vfill
+
+\textsf{\Large{}
+Michael~Schäferling, 
+Philip~Manke, Alexander~Zöllner 
+\ifdefined\astericsinternal
+~
+\fi
+\medskip
+\\and Gundolf~Kiefer
+}
+
+\vfill
+
+\textsf{\Large{}
+    With contributions from:\\ \medskip
+    Julian~Sarcher, Michel~Zink, Thibaut~Temkeng
+    \ifdefined\astericsinternal
+    ,~Christian~Scheglmann
+    \fi
+    and Thomas Izycki
+}
+
+\vfill
+
+\textsf{\Large
+Hochschule Augsburg \textendash{} University of Applied Sciences \\
+Efficient Embedded Systems Group \\
+\medskip ~ \\
+\texttt{http://ees.hs-augsburg.de}
+}
+
+\vfill ~ \vfill
+
+\textsf{
+  \Large{Version 0.0.9} \\ \medskip ~
+  \Large{\today}
+}
+
+\vfill ~ \vfill
+
+
+\framebox{ 
+  \ifdefined\astericsinternal
+    \parbox{15cm}{
+      \center \LARGE \textsf{
+        This document contains confidential information. \\ ~ \\
+        \textbf{For internal use only!} \\ ~
+      }
+    }
+  \else
+    \parbox{3cm}{
+      \includegraphics[width=3cm,keepaspectratio]{figs/cc-by-sa}   %%% eps: inkscape -z -D -T $BASE.svg -E $BASE.eps
+    }
+    ~
+    \parbox{12cm}{\footnotesize This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit \url{http://creativecommons.org/licenses/by-sa/4.0/} or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.}
+  \fi
+}
+
+\end{center}
+
+\end{titlepage}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Document History %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\chapter*{Document History}
+
+\begin{tabular}{|c|c|c|}
+\hline 
+\textbf{Version} & \textbf{Date} & \textbf{Description} \\
+\hline 
+\hline 
+0.0.1 & 2017-08-15 & Set up document format \\
+\hline 
+0.0.2 & 2019-06-19 & New release alongside a new public version of ASTERICS \\
+\hline 
+0.0.3 & 2019-11-07 & Clean up Makefile and fix title page (full version) \\
+\hline 
+0.0.4 & 2020-06-02 & Extend chapter 6.2: Pipeline generator features for Automatics \\
+\hline 
+0.0.5 & 2020-06-30 & Add user guide for Automatics (Section 2.3); Revise chapter 6\\
+\hline 
+0.0.6 & 2020-07-10 & Extend user guide (Section 2.3); Extend reference system chapter\\
+\hline 
+0.0.7 & 2021-01-15 & Add resources preface page; Add CNN information\\
+\hline 
+0.0.8 & 2021-02-03 & Add Appendix A: Contributing; Add guide for adding modules\\
+\hline 
+0.0.9 & 2021-03-09 & Add \asterics GUI chapter \\
+\hline 
+ & & \\
+\hline 
+\end{tabular}
+
+\clearpage
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Resources on ASTERICS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
+
+\chapter*{Getting to Know \asterics: Resources}
+
+The \asterics book is an attempt to collect relevant information in a manual / book form.
+It is meant for people ...
+\begin{itemize}
+\item ... new to \asterics, providing an overview of the framework (chapter \ref{ch:01-overview}).
+\item ... looking to use \asterics, including user guides (chapter \ref{ch:02-using}) and descriptions of demo systems (chapter \ref{ch:09-systems}).
+\item ... who want to contribute to \asterics, including developer guides (chapter \ref{ch:03-developing}) and in-depth reference chapters of all parts of the framework (chapters \ref{ch:04-software}, \ref{ch:05-interfaces}, \ref{ch:06-tools}, \ref{ch:07-modules}, \ref{ch:08-modules-complex} and \ref{ch:09-systems}).
+\end{itemize} 
+
+Besides this document further information on the \asterics framework can be found on the website of the \href{https://ees.hs-augsburg.de/asterics}{EES research group}.
+
+\medskip
+
+For an in-depth documentation of the code of the various parts of the framework, see the Doxygen documentations:
+{
+\begin{itemize}
+\item \asterics hardware modules: \refdoxyvhdl
+\item \asterics support library, Linux driver, hardware module software drivers: \refdoxyc
+\item \asterics system generator \textit{Automatics}: \refdoxypython
+\end{itemize}
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% About the ASTERICS Book %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
+
+\chapter*{About this Document}
+\labelarb{About this Document}
+
+This document is an attempt to collect all relevant information about the \asterics framework - concepts, usage, development and reference guides - handy in one place.
+
+\bigskip
+
+\noindent It is a "living document", which is maintained and developed by the \asterics community in a self-organized way. Its quality relies on the contributions of all those many developers contributing to the framework. 
+The \asterics Book is distributed "as is" without any warranty regarding correctness or completeness of information.
+
+\bigskip
+
+\noindent Everybody using \asterics is welcome to help improving this book. Please send your contributions or suggestions for improvement to:
+
+\bigskip
+
+\begin{tabular}{ll}
+    Michael Schäferling & \texttt{<}michael.schaeferling@hs-augsburg.de\texttt{>}\\
+    Gundolf Kiefer & \texttt{<}gundolf.kiefer@hs-augsburg.de\texttt{>}
+\end{tabular}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Table of contents %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
+
+% Exclude subsubsections from ToC
+\setcounter{tocdepth}{2}
+
+\tableofcontents{}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Main chapters %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\part{User and Developer Guide}
+
+\input{01-overview.tex}
+\input{02-using.tex}
+\input{03-developing.tex}
+
+\part{Reference Guide}
+
+\input{04-software.tex}
+\input{05-interfaces.tex}
+\input{06-tools.tex}
+\input{07-modules.tex}
+\ifdefined\astericsinternal
+\input{07int-modules.tex}
+\fi
+\input{08-complex-modules.tex}
+\ifdefined\astericsinternal
+\input{08int-complex-modules.tex}
+\fi
+\input{09-systems.tex}
+\ifdefined\astericsinternal
+\input{09int-systems.tex}
+\fi
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Appendix %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\clearpage
+
+\appendix
+\chapter*{Appendices}
+\addcontentsline{toc}{chapter}{Appendices}
+\renewcommand{\thesection}{\Alph{section}}
+
+\input{A-appendix-documentation.tex}
+
+
+% TBD(AZ,CS,DM,MS):   [GK 2018-07-09]
+%   Wir sollten noch ein Kapitel "Systems hinzufügen" (s.o.), um auch komplette
+%   Systeme zu beschreiben. Aktuell:
+%   a) Das Demo-System / evtl. separat das EdS-2-System
+%   b) Das System aus dem ASAP-Paper
+%   c) Das System aus dem FSD-Fahrzeug
+%
+%   Nicht-öffentliche Systeme und Module sollten in Unterdateien mit den Namen
+%
+%     07int-mod-<Modulname>.tex     (Module)
+%     08int-sys-<Systemname>.tex    (Systeme)
+
+%   dokumentiert werden. Für freie Systeme und komplexe Module sollte wir die gleiche
+%   Namenskonvention ohne "int" einführen.
+%
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Bibliography %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%\printbibliography[heading=bibintoc]
+
+\end{document}

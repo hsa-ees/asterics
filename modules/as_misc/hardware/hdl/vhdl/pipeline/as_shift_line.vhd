@@ -29,7 +29,15 @@
 ----------------------------------------------------------------------------------
 --! @file  as_shift_line.vhd
 --! @brief Implements a shifting word array
+--! @addtogroup asterics_helpers
+--! @{
+--! @defgroup as_shift_line as_shift_line: Register-based FIFO
+--! Implementation of a FIFO as a shift register.
+--! @}
 ----------------------------------------------------------------------------------
+
+--! @addtogroup as_shift_line
+--! @{
 
 
 library ieee;
@@ -39,8 +47,6 @@ use ieee.numeric_std.all;
 library asterics;
 use asterics.as_generic_filter.all;
 use asterics.helpers.all;
-
---use work.as_generic_filter.all;
 
 
 entity as_shift_line is
@@ -58,9 +64,9 @@ entity as_shift_line is
     );
 end entity;
 
+--! @}
 
 architecture RTL of as_shift_line is
-
 
     signal ff_line : t_generic_line(0 to LINE_WIDTH - 1, DATA_WIDTH - 1 downto 0);
 

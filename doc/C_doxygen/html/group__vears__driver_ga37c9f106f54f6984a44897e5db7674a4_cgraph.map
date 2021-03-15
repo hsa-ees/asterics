@@ -1,0 +1,12 @@
+<map id="vears_init" name="vears_init">
+<area shape="rect" id="node1" title="Initialize and reset the VEARS module." alt="" coords="5,157,92,184"/>
+<area shape="rect" id="node2" href="$ea__init_8c.html#a9bbd3aea6cfae13690dfb8986318add3" title=" " alt="" coords="186,31,253,57"/>
+<area shape="rect" id="node6" href="$vears_8c.html#a47454b99c42ae19fc259d2a488222a4a" title=" " alt="" coords="347,157,519,184"/>
+<area shape="rect" id="node7" href="$group__vears__driver.html#ga2ab7dd02806559caeadbd84b67e5a8fe" title="Enable the VEARS module, if it was previously disabled." alt="" coords="165,132,274,159"/>
+<area shape="rect" id="node8" href="$group__vears__driver.html#gaae0b1f3088c67559ea76fc6621ee6528" title="Get the VEARS modules screen resolution." alt="" coords="140,183,299,209"/>
+<area shape="rect" id="node9" href="$group__vears__driver.html#gae1d4683ae547789a47454da0151c20d1" title="Set the main image data base address." alt="" coords="146,233,293,260"/>
+<area shape="rect" id="node10" href="$group__vears__driver.html#gac0409c782eccd9330ef0d04b2b60abc6" title="Reset the VEARS module." alt="" coords="170,284,269,311"/>
+<area shape="rect" id="node3" href="$ea__set__clipped__area_8c.html#ac3e09747f980f8bea054fc16753fa914" title=" " alt="" coords="355,5,510,32"/>
+<area shape="rect" id="node4" href="$ea__set__color_8c.html#a1fa21c96fad23ab0fe0544c383441edc" title=" " alt="" coords="381,56,485,83"/>
+<area shape="rect" id="node5" href="$group__vears__driver.html#ga131ffd2ca121aea36286568e3c8a57c7" title="Set entry of the overlay color map." alt="" coords="567,56,747,83"/>
+</map>

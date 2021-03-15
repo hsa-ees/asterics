@@ -4,9 +4,9 @@ Author:  Philip Manke
 Modified: 2017-08-30 Philip Manke
 
 Description:    
-This module adds an IIC master to Asterics.
+This module adds an IIC master to ASTERICS.
 
-It is designed to be used to configure cameras to use with the Asterics framework, therefore many of the advanced features are missing from this module, to keep it as small as possible.
+It is designed to be used to configure cameras to use with the ASTERICS framework, therefore many of the advanced features are missing from this module, to keep it as small as possible.
 
 The module is connected through three AXI Slave registers.
 It is capable to recognize clock stretching and can operate 

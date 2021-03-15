@@ -1,0 +1,14 @@
+<map id="as_memio_module_setup" name="as_memio_module_setup">
+<area shape="rect" id="node1" title=" " alt="" coords="5,115,195,141"/>
+<area shape="rect" id="node2" href="$group__as__reader__writer.html#ga89e42a53f0db5cf22c8583c8e0c8a074" title="Resets the hardware module." alt="" coords="243,56,413,83"/>
+<area shape="rect" id="node9" href="$group__as__reader__writer.html#gae1123634d5cf61d70bcfc7a87cda08bf" title="Sets the maximum possible burst length to be performed by the hardware module." alt="" coords="249,107,407,149"/>
+<area shape="rect" id="node10" href="$group__as__reader__writer.html#ga4dd1a170b8e16005c286c0c0e7d8406f" title="Sets the number of sections." alt="" coords="249,173,407,214"/>
+<area shape="rect" id="node11" href="$group__as__reader__writer.html#ga12f11a3d7cff5ea8bdec75dedec35bab" title="Sets the offset in bytes between the start addresses of two subsequent sections." alt="" coords="249,238,407,279"/>
+<area shape="rect" id="node12" href="$group__as__reader__writer.html#ga1ef22dbd33d87de51113837dd9123c6f" title="Enable module input port." alt="" coords="248,5,408,32"/>
+<area shape="rect" id="node3" href="$group__asterics__support.html#gaa7520f5b717e163da743500adb2eb0b9" title=" " alt="" coords="482,133,603,160"/>
+<area shape="rect" id="node4" href="$group__asterics__support.html#ga0ccb0610d764a95bda989e35fba59490" title=" " alt="" coords="461,32,624,59"/>
+<area shape="rect" id="node5" href="$group__asterics__support.html#ga8e5c2bfd2e4498d10289377bd94cef07" title=" " alt="" coords="674,32,775,59"/>
+<area shape="rect" id="node7" href="$group__asterics__support.html#ga6345b997e24a6cd5f9143cef27629d49" title=" " alt="" coords="672,133,777,160"/>
+<area shape="rect" id="node6" href="$group__asterics__support.html#ga4c6d688b840a6e2edc9bc0b8ed961677" title=" " alt="" coords="834,32,967,59"/>
+<area shape="rect" id="node8" href="$group__asterics__support.html#gab651cc2c035ce61b354578434e59f822" title=" " alt="" coords="825,133,976,160"/>
+</map>

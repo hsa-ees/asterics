@@ -9,8 +9,8 @@
 --
 -- Modified:       
 --
--- Description:    Implements a DUAL-BRAM which can perform a read operation before a write 
---                 operation.
+-- Description:    Implements a dual-ported BRAM which performs read operations 
+--                 before write operations.
 ----------------------------------------------------------------------------------
 --  This program is free software; you can redistribute it and/or
 --  modify it under the terms of the GNU Lesser General Public
@@ -28,9 +28,16 @@
 --  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ----------------------------------------------------------------------------------
 --! @file  DUAL_BRAM_READ_FIRST.vhd
---! @brief Implements a DUAL-BRAM which can perform a read operation before a write 
---         operation.
+--! @brief Dual-port BRAM with read-first behaviour.
+--! @addtogroup asterics_helpers
+--! @{
+--! @defgroup DUAL_BRAM_READ_FIRST DUAL_BRAM_READ_FIRST: Read-first Dual-Port BRAM
+--! Implements a dual-ported BRAM which performs read operations before write operations.
+--! @}
 ----------------------------------------------------------------------------------
+
+--! @addtogroup DUAL_BRAM_READ_FIRST
+--! @{
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -39,13 +46,15 @@ use IEEE.NUMERIC_STD.ALL;
 use work.helpers.all;
 
 entity DUAL_BRAM_READ_FIRST is
-    generic ( gen_data_width : integer := 8;   -- width of each ram cell
-            gen_data_depth : integer := 1024; -- number of ram cells
-            gen_ram_style  : string  := "block" -- distributed | block
-           );
-    port (CLK_A         : in std_logic;
-        CLK_B       : in std_logic;
-        EN_A          : in std_logic;
+    generic ( 
+        gen_data_width : integer := 8;   -- width of each ram cell
+        gen_data_depth : integer := 1024; -- number of ram cells
+        gen_ram_style  : string  := "block" -- distributed | block
+    );
+    port (
+        CLK_A     : in std_logic;
+        CLK_B     : in std_logic;
+        EN_A      : in std_logic;
         EN_B      : in std_logic;
         WE_A      : in std_logic;
         WE_B      : in std_logic;
@@ -57,6 +66,8 @@ entity DUAL_BRAM_READ_FIRST is
         DO_B      : out std_logic_vector(gen_data_width-1 downto 0)
        );   
 end DUAL_BRAM_READ_FIRST;
+
+--! @}
 
 architecture RTL of DUAL_BRAM_READ_FIRST is
   
@@ -88,4 +99,3 @@ begin
   end process;
 
 end RTL;
-

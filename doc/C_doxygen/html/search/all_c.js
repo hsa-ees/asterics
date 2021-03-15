@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['object_750',['object',['../unionbuffer__info__t.html#a9d11e1932227d6f5623e1f2aea5bb223',1,'buffer_info_t']]],
+  ['offset_751',['offset',['../structdevice__data__t.html#adc4105db9303ffcacb093b72c8bbe981',1,'device_data_t']]],
+  ['ov5647_5fsensor_5f1280_5f720_5f30_752',['ov5647_sensor_1280_720_30',['../as__picam_8c.html#a280b04d60552a48ac079936da685342d',1,'as_picam.c']]],
+  ['ov5647_5fsensor_5fcommon_5f10bit_753',['ov5647_sensor_common_10bit',['../as__picam_8c.html#af36f2d70bbcc49acbeed5bbfa7a24fef',1,'as_picam.c']]],
+  ['ov7670_5fas_5fiic_754',['OV7670_AS_IIC',['../as__sensor__ov7670_8h.html#adb5f1b1425061dc107a9e38eb2a4aba8a6e2eceb3b09aa831fd2573b7c68b57ea',1,'as_sensor_ov7670.h']]],
+  ['ov7670_5fexposure_755',['ov7670_exposure',['../as__sensor__ov7670_8c.html#a453ea6dffecee690fa43364ad9320ad9',1,'as_sensor_ov7670.c']]],
+  ['ov7670_5fgain_756',['ov7670_gain',['../as__sensor__ov7670_8c.html#a099e144f2c56539cd6ad092187eedb8c',1,'as_sensor_ov7670.c']]],
+  ['ov7670_5fget_5fiic_5fchannel_757',['ov7670_get_iic_channel',['../as__sensor__ov7670_8c.html#a4af880494f665dfc2d878bcd991246d3',1,'as_sensor_ov7670.c']]],
+  ['ov7670_5fiic_5freg_5fget_758',['ov7670_iic_reg_get',['../as__sensor__ov7670_8c.html#acb25afaea3e81940c50e327c45921f08',1,'as_sensor_ov7670.c']]],
+  ['ov7670_5fiic_5freg_5fset_759',['ov7670_iic_reg_set',['../as__sensor__ov7670_8c.html#ad5b49e677d2124f73482764e3270bb42',1,'as_sensor_ov7670.c']]],
+  ['ov7670_5fiic_5fslv_5faddr_760',['OV7670_IIC_SLV_ADDR',['../as__sensor__ov7670_8c.html#a126f45ac1265298032c795eb05f680bb',1,'as_sensor_ov7670.c']]],
+  ['ov7670_5fiic_5ftypes_761',['ov7670_iic_types',['../as__sensor__ov7670_8h.html#adb5f1b1425061dc107a9e38eb2a4aba8',1,'as_sensor_ov7670.h']]],
+  ['ov7670_5finit_5fcontrast_5fcenter_762',['OV7670_INIT_CONTRAST_CENTER',['../as__sensor__ov7670_8c.html#a28f9cf535e555046c5311bd24f7a6c70',1,'as_sensor_ov7670.c']]],
+  ['ov7670_5finit_5fcontrast_5fcontrol_763',['OV7670_INIT_CONTRAST_CONTROL',['../as__sensor__ov7670_8c.html#ae90429ade92e22c89dee1f9ab491af38',1,'as_sensor_ov7670.c']]],
+  ['ov7670_5fsensor_5fcount_764',['ov7670_sensor_count',['../as__sensor__ov7670_8c.html#a730b37a7db8dfd06eeb7e1f149f5710b',1,'as_sensor_ov7670.c']]],
+  ['ov7670_5fsensor_5fheight_765',['OV7670_SENSOR_HEIGHT',['../as__sensor__ov7670_8h.html#a16d4f13381db58e253f425b0f192af55',1,'as_sensor_ov7670.h']]],
+  ['ov7670_5fsensor_5fwidth_766',['OV7670_SENSOR_WIDTH',['../as__sensor__ov7670_8h.html#ad616b73d5cb17caf3c3262114e61ccd3',1,'as_sensor_ov7670.h']]],
+  ['ov7670_5fsensors_767',['ov7670_sensors',['../as__sensor__ov7670_8c.html#aa069a14be372965950a95d82e62e8afd',1,'as_sensor_ov7670.c']]],
+  ['ov7670_5fset_5fregisters_5fvga_5fgray_768',['ov7670_set_registers_vga_gray',['../as__sensor__ov7670_8c.html#a10bc36e3bfa182ae3dde572ff928f64a',1,'as_sensor_ov7670.c']]],
+  ['ov7670_5fxilinx_5fpl_5fiic_769',['OV7670_XILINX_PL_IIC',['../as__sensor__ov7670_8h.html#adb5f1b1425061dc107a9e38eb2a4aba8a2a546ddaa69c351ee7cb92b7498f20db',1,'as_sensor_ov7670.h']]],
+  ['ov7670_5fxilinx_5fps_5fiic_770',['OV7670_XILINX_PS_IIC',['../as__sensor__ov7670_8h.html#adb5f1b1425061dc107a9e38eb2a4aba8ad05867a8c13d54ea9aa7d65ef101feae',1,'as_sensor_ov7670.h']]],
+  ['overlay_5ftable_771',['overlay_table',['../embedded__augmenter__helpers_8c.html#ada0624d1cd7e45b4e92be0b3797abe87',1,'overlay_table():&#160;embedded_augmenter_helpers.c'],['../embedded__augmenter__helpers_8h.html#ada0624d1cd7e45b4e92be0b3797abe87',1,'overlay_table():&#160;embedded_augmenter_helpers.c']]]
+];

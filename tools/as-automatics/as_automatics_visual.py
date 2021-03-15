@@ -36,6 +36,7 @@ Implements various visualization methods for as_automatics.
 # --------------------- DOXYGEN -----------------------------------------------
 ##
 # @file as_automatics_visual.py
+# @ingroup automatics_generate
 # @author Philip Manke
 # @brief Implements various visualization methods for as_automatics.
 # -----------------------------------------------------------------------------
@@ -45,12 +46,12 @@ import copy
 import importlib
 
 from as_automatics_2d_pipeline import As2DWindowPipeline
-from as_automatics_window_module import AsWindowModule, AsWindowInterface
-from as_automatics_2d_infrastructure import AsLayer
 from as_automatics_module import AsModule
 from as_automatics_interface import Interface
 from as_automatics_port import Port
+from as_automatics_signal import GenericSignal
 from as_automatics_proc_chain import AsProcessingChain
+from as_automatics_connection_helper import get_parent_module
 import as_automatics_logging as as_log
 
 LOG = as_log.get_log()
@@ -69,11 +70,16 @@ else:
     )
 
 
+##
+# @addtogroup automatics_generate
+# @{
+
+
 class Graph:
-    """Automatic's own graph class. Keeps track of nodes added to the graph.
+    """! @brief Automatic's own graph class - keeps track of nodes added to the graph.
     Sadly no nice interface for checking for added nodes exists in graphviz
     (not that I'm aware of, anyways).
-    The default behaviour of the graphviz API is to automatically add nodes 
+    The default behaviour of the graphviz API is to automatically add nodes
     that don't exist when adding edges - we don't want this here!"""
 
     def __init__(self, graph):
@@ -111,9 +117,13 @@ def system_graph(
     show_auto_inst: bool,
     show_unconnected: bool,
     show_toplevels: bool,
+    show_line_buffers: bool,
     *,
     return_graph: bool = False
 ):
+    """! @brief Implemenation of the SVG graph drawing function.
+    For more information, check
+    as_automatics_proc_chain::AsProcessingChain::write_system_graph()."""
     # Instanciate graphviz graph
     gv_graph = gv.Digraph(name="AsModule Graph")
     # Small custom management class. Keeps track of added nodes
@@ -128,7 +138,12 @@ def system_graph(
 
     # Gather modules
     all_modules = copy.copy(chain.modules)
-    all_modules.extend(chain.module_groups)
+    all_modules = [
+        mod
+        for mod in all_modules
+        if not isinstance(mod.parent, As2DWindowPipeline)
+    ]
+    all_modules.append(chain.as_main)
     all_modules.append(chain.top)
 
     # Add one node for each module
@@ -140,10 +155,13 @@ def system_graph(
             label = module.name
             # If unconnected ports should be shown:
             if show_unconnected:
-                # Add all unconnected ports to the module node label
-                uncon = module.get_unconnected_ports()
-                uncon = [port.name for port in uncon]
-                label += ":\n" + "\n".join(uncon)
+                # All ports of toplevel are unconnected; don't print
+                if module is not chain.top:
+                    # Add all unconnected ports to the module node label
+                    uncon = module.get_unconnected_ports()
+                    uncon = [port.code_name for port in uncon]
+                    if uncon:
+                        label += "\n\nUnconnected ports:\n" + "\n".join(uncon)
             graph.add_node(module.name, label)
 
     # Interfaces to skip:
@@ -163,9 +181,15 @@ def system_graph(
             # Add a port list to the interface label
             if show_ports:
                 inter_label += ":\n"
-                inter_label += "\n".join([port.name for port in inter.ports])
+                inter_label += "\n".join(
+                    [port.code_name for port in inter.ports]
+                )
             # For interfaces from or to external (on toplevel)
-            if show_toplevels and inter.to_external and (inter.parent is chain.top):
+            if (
+                show_toplevels
+                and inter.to_external
+                and (inter.parent is chain.top)
+            ):
                 if inter.direction == "in":
                     if not ext_in_added:  # Add an external node, if necessary
                         graph.add_node(ext_in_name, ext_in_name, ext_form)
@@ -194,6 +218,12 @@ def system_graph(
                     if p0.outgoing
                     else None
                 )
+                # If target is a mock GlueSignal (no parent)
+                if target is not None:
+                    if target.parent is None:
+                        target = None
+                    if "signal" in target.port_type:
+                        target = None
                 # Count the ports tried
                 count = 1
                 # If no connection exists for this port, try until we get one
@@ -207,11 +237,19 @@ def system_graph(
                         else None
                     )
                     count += 1
-                    # Stop at the last port
+                    # If target is a mock GlueSignal (no parent)
+                    if target is not None:
+                        if target.parent is None:
+                            target = None
+                        if "signal" in target.port_type:
+                            target = None  # Stop at the last port
                     if count == len(inter.ports):
                         break
                     # Skip single port targets
-                    if isinstance(target, Port) and target.port_type == "single":
+                    if (
+                        isinstance(target, Port)
+                        and target.port_type == "single"
+                    ):
                         target = None
                 # Still no connection? Skip this interface
                 if target is None:
@@ -247,6 +285,11 @@ def system_graph(
                     graph.add_edge(head, tail, inter_label)
                 else:
                     graph.add_edge(tail, head, inter_label)
+
+    # Add any 2D Window pipelines to the graph
+    for pipe in chain.pipelines:
+        add_2dpipe_subgraph(pipe, graph, show_line_buffers=show_line_buffers)
+
     if return_graph:
         return graph.graph
     else:
@@ -254,84 +297,98 @@ def system_graph(
         graph.write_svg(out_file)
 
 
-def add_2dpipe_subgraph(pipe: As2DWindowPipeline, graph):
-    tgraph = graph
-    with tgraph.subgraph(name="cluster_pipe2d") as subg:
-        graph = subg
-        graph.attr(
-            style="filled, rounded", fillcolor="lightgrey", label="2D Window Pipeline"
+def add_2dpipe_subgraph(
+    pipe: As2DWindowPipeline,
+    ggraph: Graph,
+    show_line_buffers: bool,
+):
+    def get_target_mods(target, targets=[]) -> list:
+        mods = []
+        targets.append(target)
+        if isinstance(target, GenericSignal):
+            for sig in target.outgoing:
+                if sig in targets:
+                    return []
+                mods.extend(get_target_mods(sig, targets))
+        else:
+            mods.append(get_parent_module(target))
+        return list(set(mods))
+
+    mod_form = {"style": "filled, bold", "color": "blue", "fillcolor": "white"}
+    buf_form = {"shape": "box", "style": "filled", "fillcolor": "white"}
+    with ggraph.graph.subgraph(name="cluster_" + pipe.name) as subg:
+        graph = Graph(subg)
+        graph.graph.attr(
+            style="filled, rounded",
+            fillcolor="lightgrey",
+            label="2D Window Pipeline: {}".format(pipe.name),
         )
+        # Exclude flushing module
+        added_mods = [pipe.pipe_manager]
+        for buff in pipe.buffer_rows:
+            added_mods.append(buff.module)
+            if not show_line_buffers:
+                continue
+            name = buff.name
+            label = "Module '{}'\ndelay: {}\nlength: {}".format(
+                name, buff.input_delay, buff.length
+            )
+
+            graph.add_node(name=name, label=label, form=buf_form)
+
         # Generate nodes
-        for mod in pipe.window_modules:
+        for mod in pipe.modules:
+            if mod in added_mods:
+                continue
             name = mod.name
-            label = "Module '{}'\noffset{}".format(name, mod.offset)
+            label = "Module '{}'\nOutput delay: {}".format(name, mod.delay)
             # Add the module node
-            graph.node(
-                name=name,
-                label=label,
-                style="filled, bold",
-                color="blue",
-                fillcolor="white",
-            )
-
-        for layer in pipe.layers:
-            label = "Layer '{}'\noffset{}".format(layer.name, layer.offset)
-            graph.node(
-                name=layer.name,
-                label=label,
-                shape="box",
-                style="filled",
-                fillcolor="white",
-            )
-
-        def make_window_edge(graph, layer, refs, end: bool = False):
-            out = "Window '{}':\n".format(refs[0].port.name)
-            count = 0
-            leave_count = 1 if end else 2
-            while len(refs) > leave_count:
-                out += str(refs.pop(0).get_ref()) + ", "
-                count += 1
-                if count == 3:
-                    count = 0
-                    out += "\n"
-            crt_ref = refs.pop(0)
-            out += str(crt_ref.get_ref())
-            graph.edge(layer.name, crt_ref.port.parent.parent.name, out)
-
-        def make_edge(graph, layer, refs, tgraph):
-            crt_ref = refs.pop(0)
-            # Add edges to going outside the pipeline to the top graph
-            if isinstance(crt_ref.port.parent.parent, AsWindowModule):
-                graph.edge(
-                    layer.name, crt_ref.port.parent.parent.name, str(crt_ref.get_ref())
-                )
-            else:
-                tgraph.edge(
-                    layer.name, crt_ref.port.parent.parent.name, str(crt_ref.get_ref())
-                )
+            graph.add_node(name=name, label=label, form=mod_form)
 
         # Generate edges
-        for layer in pipe.layers:
-            refs = []
-            to_mod = layer.input.port.parent.parent
-            # Add edges going into the pipeline to the top graph
-            if isinstance(to_mod, AsWindowModule):
-                graph.edge(to_mod.name, layer.name, str(layer.offset.get_ref()))
-            else:
-                tgraph.edge(to_mod.name, layer.name, str(layer.offset.get_ref()))
-            for ref in layer.output_refs:
-                if not refs:
-                    refs.append(ref)
-                else:
-                    refs.append(ref)
-                    if refs[0].port is not ref.port and len(refs) == 2:
-                        make_edge(graph, layer, refs, tgraph)
-                    elif refs[0].port is not ref.port and len(refs) > 2:
-                        make_window_edge(graph, layer, refs)
-            if len(refs) > 1:
-                make_window_edge(graph, layer, refs, end=True)
-            else:
-                make_edge(graph, layer, refs, tgraph)
+        for mod in pipe.modules:
+            source = mod.name
+            for port in mod.get_full_port_list():
+                if port.get_direction_normalized() == "in":
+                    continue
+                for target in port.outgoing:
+                    if target.code_name == "pipeline_stream_in":
+                        continue
+                    target_mods = get_target_mods(target)
+                    for target_mod in target_mods:
+                        if target_mod is pipe:
+                            continue
+                        graph.add_edge(
+                            source,
+                            target_mod.name,
+                            port.code_name + " ->\n" + target.code_name,
+                        )
+    ggraph.nodes.extend(graph.nodes)
+    for in_stream in pipe.input_streams:
+        tail = get_parent_module(in_stream.stream).name
+        if isinstance(in_stream.stream, Interface):
+            label = "{} ->\n{}\n({})".format(
+                in_stream.stream.name,
+                in_stream.target.name,
+                in_stream.stream.type,
+            )
+        else:
+            label = in_stream.stream.code_name
+        for target in in_stream.signal.outgoing:
+            if isinstance(target, GenericSignal):
+                continue
+            head = get_parent_module(target).name
+            ggraph.add_edge(tail, head, label)
+    for out_stream in pipe.output_streams:
+
+        tail = get_parent_module(out_stream.source).name
+        head = out_stream.target_stream.parent.name
+        label = "{} ->\n{}\n({})".format(
+            out_stream.source.name,
+            out_stream.stream.name,
+            out_stream.stream.type,
+        )
+        ggraph.add_edge(tail, head, label)
 
 
 def write_graph_svg(graph, out_file: str):
@@ -339,59 +396,4 @@ def write_graph_svg(graph, out_file: str):
     graph.render(out_file, cleanup=True)
 
 
-def generate_2dpipe_graph(pipe: As2DWindowPipeline, out_file: str):
-
-    graph = gv.Digraph(name="AsModule Graph")
-    # TODO: Add graph node representing "External"
-
-    # Generate nodes
-    for mod in pipe.window_modules:
-        name = mod.name
-        label = "Module '{}'\noffset{}".format(name, mod.offset)
-        # Add the module node
-        graph.node(name=name, label=label)
-
-    for layer in pipe.layers:
-        label = "Layer '{}'\noffset{}".format(layer.name, layer.offset)
-        graph.node(name=layer.name, label=label)
-
-    def make_window_edge(graph, layer, refs, end: bool = False):
-        out = "Window '{}':\n".format(refs[0].port.name)
-        count = 0
-        leave_count = 1 if end else 2
-        while len(refs) > leave_count:
-            out += str(refs.pop(0).get_ref()) + ", "
-            count += 1
-            if count == 3:
-                count = 0
-                out += "\n"
-        crt_ref = refs.pop(0)
-        out += str(crt_ref.get_ref())
-        graph.edge(layer.name, crt_ref.port.parent.parent.name, out)
-
-    def make_edge(graph, layer, refs):
-        crt_ref = refs.pop(0)
-        graph.edge(layer.name, crt_ref.port.parent.parent.name, str(crt_ref.get_ref()))
-
-    # Generate edges
-    for layer in pipe.layers:
-        refs = []
-        graph.edge(
-            layer.input.port.parent.parent.name, layer.name, str(layer.offset.get_ref())
-        )
-        for ref in layer.output_refs:
-            if not refs:
-                refs.append(ref)
-            else:
-                refs.append(ref)
-                if refs[0].port is not ref.port and len(refs) == 2:
-                    make_edge(graph, layer, refs)
-                elif refs[0].port is not ref.port and len(refs) > 2:
-                    make_window_edge(graph, layer, refs)
-        if len(refs) > 1:
-            make_window_edge(graph, layer, refs, end=True)
-        else:
-            make_edge(graph, layer, refs)
-
-    graph.format = "svg"
-    graph.render(out_file, cleanup=True)
+## @}

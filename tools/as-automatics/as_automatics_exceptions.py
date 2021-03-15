@@ -36,6 +36,7 @@ Module containing all error and exception classes used in as_automatics.
 # --------------------- DOXYGEN -----------------------------------------------
 ##
 # @file as_automatics_exceptions.py
+# @ingroup automatics_errors
 # @author Philip Manke
 # @brief Module containing all exception classes used in as_automatics.
 # -----------------------------------------------------------------------------
@@ -45,9 +46,12 @@ import as_automatics_logging as as_log
 LOG = as_log.get_log()
 
 
-# Automatics error manager
+##
+# @addtogroup automatics_errors
+# @{
 
 SEVERITIES = ("Error", "Warning", "Critical")
+SEVERITY_MAP = {2: "Warning", 1: "Error", 0: "Critical"}
 ERROR_TYPES = (
     "General",
     "Object",
@@ -60,7 +64,7 @@ ERROR_TYPES = (
 
 
 class AsErrorManager:
-    """Class to collect, count and categorize all Automatics-specific errors."""
+    """! @brief Class to collect, count and categorize all Automatics-specific errors."""
 
     def __init__(self):
         self.error_count = {}
@@ -68,7 +72,7 @@ class AsErrorManager:
         self.errors = []
 
     def register_error(self, err):
-        """Called when a new error object is generated."""
+        """! @brief Called when a new error object is generated."""
         try:
             self.error_count[err.type] += 1
         except KeyError:
@@ -90,10 +94,34 @@ class AsErrorManager:
             self.error_severities[err.severity] += 1
             self.error_count[err.type] += 1
 
-    def has_errors(self) -> bool:
-        return bool(len(self.errors))
+    def has_errors(self, severity: str = "Error") -> bool:
+        """! @brief Returns whether errors have been encountered.
+        Use 'severity' to exclude errors below the passed severity."""
+        if not self.errors:
+            return False
+        if severity not in SEVERITIES:
+            raise ValueError("Invalid error severity '{}'".format(severity))
+        sev_id = next(
+            (
+                idx
+                for idx in sorted(SEVERITY_MAP.keys())
+                if SEVERITY_MAP[idx] == severity
+            )
+        )
+        for idx in range(sev_id, 0, -1):
+            try:
+                if self.error_severities[SEVERITY_MAP[idx]]:
+                    return True
+            except KeyError:
+                pass
+        return False
 
-    def has_specific_error(self, err_type: str = "", severity: str = ""):
+    def has_specific_error(
+        self, err_type: str = "", severity: str = ""
+    ) -> bool:
+        """! @brief Returns whether specific errors have ocurred.
+        Allows checking whether errors of a specific type and/or severity
+        have occurred."""
         if err_type and severity:
             return bool(
                 [
@@ -105,9 +133,11 @@ class AsErrorManager:
         elif err_type:
             return True if self.get_error_count(err_type) > 0 else False
         elif severity:
-            return True if self.get_error_severity_count(severity) > 0 else False
+            return (
+                True if self.get_error_severity_count(severity) > 0 else False
+            )
         # Else ->
-        return False
+        return bool(len(self.errors))
 
     def get_error_count(self, err_type: str = "") -> int:
         if err_type:
@@ -118,7 +148,8 @@ class AsErrorManager:
                     return 0
                 else:
                     LOG.error(
-                        "Invalid error type querying AsErrorManager! '%s'", err_type
+                        "Invalid error type querying AsErrorManager! '%s'",
+                        err_type,
                     )
                     return -1
         # Else ->
@@ -158,8 +189,9 @@ class AsErrorManager:
 
 
 class AsError(Exception):
-    """Exception class. Base for all Automatics exceptions."""
+    """! @brief Base exception class for all Automatics exceptions."""
 
+    # Error manager is set in 'as_automatics_env.py' during init of Automatics
     err_mgr = None
 
     def __init__(self, err_type: str = "General", severity: str = "Error"):
@@ -170,7 +202,8 @@ class AsError(Exception):
 
 
 class AsTextError(AsError):
-    """Generic Automatics exception class. Base for multiple exceptions.
+    """! @brief Generic Automatics exception class with additional textual info.
+    Base for multiple exceptions.
     Holds an error message, detail string and name of the affected resource."""
 
     def __init__(
@@ -194,7 +227,8 @@ class AsTextError(AsError):
 
 
 class AsObjectError(AsError):
-    """Generic Automatics exception class. Base for multiple exceptions.
+    """! @brief Generic Automatics exception class concerning a specific object.
+    Base for multiple exceptions.
     Holds an error message, detail string and reference to the affected object.
     """
 
@@ -227,7 +261,7 @@ class AsObjectError(AsError):
 
 
 class AsConnectionError(AsObjectError):
-    """Automatics error class: AsConnectionError
+    """! @brief Automatics error class: AsConnectionError
     Signifies a problem/error with a port, interface or module connection.
     'message' contains the error message.
     'detail_string' may contain additional details.
@@ -247,20 +281,26 @@ class AsConnectionError(AsObjectError):
 
 
 class AsAnalysisError(AsTextError):
-    """Automatics error class: AsAnalysisError
+    """! @brief Automatics error class: AsAnalysisError
     Signifies a problem/error while analysing VHDL code.
     'message' and 'detail' contain details about the error.
     'filename' contains the name of the file where the error occurred."""
 
     def __init__(
-        self, filename: str, msg: str = "", detail: str = "", severity: str = "Error"
+        self,
+        filename: str,
+        msg: str = "",
+        detail: str = "",
+        severity: str = "Error",
     ):
-        super().__init__(filename, msg, detail, err_type="Analysis", severity=severity)
+        super().__init__(
+            filename, msg, detail, err_type="Analysis", severity=severity
+        )
         self.base_msg = "Error analysing VHDL file"
 
 
 class AsAssignError(AsObjectError):
-    """Automatics error class: AsAssignError
+    """! @brief Automatics error class: AsAssignError
     Signifies a problem/error while assigning objects to each other, like ports
     to interfaces and interfaces to modules.
     'detail_string' may contain additional details.
@@ -281,35 +321,47 @@ class AsAssignError(AsObjectError):
 
 
 class AsFileError(AsTextError):
-    """Automatics error class: AsFileError
+    """! @brief Automatics error class: AsFileError
     Signifies a problem/error with a file object.
     Usually a problem opening or writing to a file.
     'message' and 'detail' contain information about the error.
     'filename' stores the name of the file that caused the error."""
 
     def __init__(
-        self, filename: str, msg: str = "", detail: str = "", severity: str = "Error"
+        self,
+        filename: str,
+        msg: str = "",
+        detail: str = "",
+        severity: str = "Error",
     ):
-        super().__init__(filename, msg, detail, err_type="IO", severity=severity)
+        super().__init__(
+            filename, msg, detail, err_type="IO", severity=severity
+        )
         self.base_msg = "File error occurred"
 
 
 class AsModuleError(AsTextError):
-    """Automatics error class: AsModuleError
+    """! @brief Automatics error class: AsModuleError
     Signifies a problem/error with an AsModule object.
     Usually a module that couldn't be found in the module library.
     'message' and 'detail' contain details about the error.
     'module_name' stores the name of the module that caused the error."""
 
     def __init__(
-        self, module_name: str, msg: str = "", detail: str = "", severity: str = "Error"
+        self,
+        module_name: str,
+        msg: str = "",
+        detail: str = "",
+        severity: str = "Error",
     ):
-        super().__init__(module_name, msg, detail, err_type="Module", severity=severity)
+        super().__init__(
+            module_name, msg, detail, err_type="Module", severity=severity
+        )
         self.base_msg = "Module error occurred"
 
 
 class AsNameError(AsTextError):
-    """Automatics error class: AsNameError
+    """! @brief Automatics error class: AsNameError
     Signifies a problem/error with a port/module/etc. name from the user script.
     Usually a port or interface that couldn't be found in a module.
     'message' and 'detail' contain details about the error.
@@ -328,7 +380,9 @@ class AsNameError(AsTextError):
             label = "{} in {}".format(affected_name, str(from_object))
         else:
             label = affected_name
-        super().__init__(label, msg, detail, err_type="InvalidName", severity=severity)
+        super().__init__(
+            label, msg, detail, err_type="InvalidName", severity=severity
+        )
 
 
 if AsError.err_mgr is None:
@@ -337,3 +391,6 @@ if AsError.err_mgr is None:
 
 def list_errors():
     AsError.err_mgr.print_errors()
+
+
+## @}

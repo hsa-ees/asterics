@@ -28,7 +28,7 @@ of the ASTERICS hardware module as_threshold.
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>
 # or write to the Free Software Foundation, Inc.,
@@ -47,13 +47,16 @@ from as_automatics_module import AsModule
 def get_module_instance(module_dir: str) -> AsModule:
     module = AsModule()
     toplevel_file = "hardware/hdl/vhdl/as_threshold.vhd"
-    
+
     module.files = []
     module.dependencies = []
+    module.show_in_browser = True
+    module.dev_status = AsModule.DevStatus.STABLE
+    module.module_type = AsModule.ModuleTypes.HARDWARE_SW_CTRL
+    module.module_category = "Image Processing Operations"
 
     # as_automatics now automatically parses the toplevel file and discovers
     # ports, generics, existing interfaces and register interfaces
-    module.discover_module("{mdir}/{toplevel}"
-                           .format(mdir=module_dir, toplevel=toplevel_file))
+    module.discover_module(module_dir + "/" + toplevel_file)
 
     return module

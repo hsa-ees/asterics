@@ -1,0 +1,280 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% This file is part of the ASTERICS Framework. 
+%%
+%% Copyright (C) Hochschule Augsburg, University of Applied Sciences
+%% Efficient Embedded Systems Group
+%%
+%% Author(s): Michael Schaeferling <michael.schaeferling@hs-augsburg.de>
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% The VEARS module %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section{Image Output: The \textit{VEARS} module} 
+\label{ch:07-modules-vears}
+\secauthor{Michael Schaeferling}
+
+\bigskip
+
+This section describes the \texttt{VEARS} module in detail.
+\texttt{VEARS} stands for "Visualization for Embedded Augmented Reality Systems". It is developed to display an image on a monitor and enrich this image by a graphical overlay, e.g. to mark particular image regions or to display other information (like text) on top of the image (without manipulating the original image stored in the main memory).
+Although \texttt{VEARS} is part of the \asterics framework, unlike many other \asterics modules, it is a self-contained IP core. 
+The \texttt{VEARS} module was initially developed as a project work by several students of the University of Applied Sciences, Augsburg. Since then, it is maintained by the EES workgroup. 
+
+
+\subsection{Brief description}
+
+The \texttt{VEARS} module is a stand-alone IP core which can be integrated into a system on chip, also without the need of an \asterics image processing chain. 
+The image and the overlay are stored in the systems main memory where \texttt{VEARS} fetches them via AXI Master Burst accesses. The image to display is to be provided by the user in a specified format, which may be grayscale or color. In grayscale mode, \texttt{VEARS} uses 8 bits per pixel, while in color mode 32 bits per pixel (8 bits for red, green and blue each with 8 bits padding) are used. To simplify overlay manipulation, \texttt{VEARS} provides several functions for this task, e.g. for drawing lines, circles, rectangles, etc. and also to draw text. The overlay is also stored in main memory, using a space and memory bandwitdh saving 2 bit per pixel data format.
+
+
+
+
+\subsection{The Hardware}
+
+
+\subsubsection{Configuration Options}
+
+
+\texttt{VEARS} supports a selection of most common video formats (and may be extended for other desired formats in the future). 
+Video and color mode selection is set at synthesis time via generics as several fixed hardware structures, such as line buffers and clock generators depend on the video format and timing. Also the desired video output method, such as VGA, HDMI or interfacing to external video encoder chips is set at synthesis time. 
+The following parameters are set by generics (which can also be accessed in the Vivado blockdesign GUI), as described in the subsequent paragraphs.
+
+\begin{itemize}
+	\item \textbf{Video Group} and the respective \textbf{Video Mode} (see table \ref{07-vears-video-modes})
+	\item \textbf{Color Mode}
+	\item \textbf{VGA output enable} and \textbf{VGA TFT output enable} along with\textbf{VGA Color width}
+	\item \textbf{HDMI output enable}
+	\item \textbf{Chrontel CH7301 output enable}
+  \item \textbf{AXI Clock Frequency}
+  
+\end{itemize}
+
+
+
+The following \textbf{Video Group} (1=CEA, 2=DMT) and \textbf{Video Mode} combinations are currently supported:
+
+\begin{table}[htb]
+\centering
+\begin{tabular}[t]{|c|c|l|l|}
+  \hline
+  \textbf{Video Group} & \textbf{Video Mode} & Video Format / Timing     & Pixel Frequency \\ \hline
+  1                    &  4                  & 1280x720 @60Hz/45kHz      & 74.250 MHz  \\ \hline
+  1                    &  32                 & 1920x1080 @24Hz/26.8kHz   & 74.250 MHz  \\ \hline
+  1                    &  33                 & 1920x1080 @25Hz/27.9kHz   & 74.250 MHz  \\ \hline
+  1                    &  34                 & 1920x1080 @30Hz/33.5kHz   & 74.250 MHz  \\ \hline
+  \hline
+  2                    &  4                  & 640x480 @60Hz/31.5kHz     & 25.175 MHz  \\ \hline
+  2                    &  8                  & 800x600 @56Hz/35.2kHz     & 36 MHz      \\ \hline
+  2                    &  10                 & 800x600 @72Hz/48.1kHz     & 50 MHz      \\ \hline
+  2                    &  16                 & 1024x768 @60Hz/48.4kHz    & 65 MHz      \\ \hline
+  2                    &  35                 & 1280x1024 @60Hz/64kHz     & 108 MHz     \\ \hline
+\end{tabular}
+\caption{\texttt{VEARS} - Supported Video Modes}
+\label{07-vears-video-modes}
+\end{table}
+
+
+The \textbf{Color Mode} for the image can be '0' (8-bit grayscale) or '1' (24-bit color). In grayscale mode, image pixels are stored as consecutive 8-bit values in memory. In color mode, each pixel occupies 32 bits in memory where 8 bits are used for red, green and blue channels (resulting in 24 bit RGB) and 8 bits are used for padding. Note that color mode does only affect the image and not the overlay (which is a fixed 2 bits per pixel format).
+
+
+The \textbf{VGA, HDMI and CH7301 output enables} should be set accordingly to the desired output methods. 
+\textbf{VGA TFT output enable} is an extension to the VGA output, needed by some digital displays. 
+
+
+\textbf{AXI Clock Frequency} must be set to the actual system bus frequency as it is used to calculate internal parameters for generating the video clock (the systems bus clock is used as a clock source). In Xilinx Vivado block-designs, this value should be updated automatically. 
+
+
+\subsubsection{Interrupts}
+
+\texttt{VEARS} provides interrupt output signals \textit{intr\_frame} and \textit{intr\_line}, e.g. in order to synchronize software. These signals are active high at the beginning of the video sync time (V-Sync for \textit{intr\_frame} and H-Sync for \textit{intr\_line}) for one AXI-slave clock cycle.
+The interrupt signals can be controlled by enable bits of the control register (see Table \ref{07-vears-control-bits}).
+
+
+\subsubsection{Considerations to Memory Bandwidth}
+
+When selecting the required \textbf{Video Group}/\textbf{Video Mode} in combination with the \textbf{Color Mode}, it should be considered that there is enough  memory bandwidth available for image data transfer. \texttt{VEARS} pre-fetches image and overlay data for the next line on-the-fly while outputting the recent line to the monitor. Thus, image and overlay data must be fetched into the internal line-buffer within the recent lines time-to-draw. To meet this requirement, the AXIs clock speed must be set high enough so that the bus is able to transport at least image and overlay data (if \texttt{VEARS} is the only bus master). As a rule of thumb, in color mode one should budget the system bus to be occupied by at least 1.25x the recent video modes pixel frequency. In grayscale mode, only a quarter of this bandwidth is needed as for image data only 8 bits instead of 32 bits (for color) have to be transferred per image pixel. 
+The overlay has very little impact on memory bandwidth usage as it uses a space and bandwidth saving 2 bit per pixel data format, but may also be taken into account for bandwidth considerations.
+
+
+\subsubsection{Pitfall: SoC software re-upload}
+
+The \texttt{VEARS} module continuously fetches data when it is enabled. In Xilinx Zynq environments it was observed that this can cause a problem when the system software is re-uploaded. During various initialization steps which are automatically performed on software upload and start (so called "ps7init") the Zynq-system is getting prepared for operation (several Zynq PS register values for clocking etc. are set), but if \texttt{VEARS} is still running during that time (as it may not be disabled before re-uploading the software), this initialization phase is likely to fail (due to pending bus transactions caused by \texttt{VEARS}). The only recovery option is to power-cycle the system.
+
+Thus, on Zynq-based (and probably other) systems, \texttt{VEARS} must be disabled before re-uploading an running software on the system once it was enabled before!
+
+
+\bigskip
+
+\subsubsection{Register Space}
+
+The \texttt{VEARS} module is configured by 32 bit wide slave registers, connected to the AXI-Slave bus.
+Table \ref{07-vears-registers} gives an overview on the registers.
+
+\begin{longtable}[htb]{|c|c|c|c|}
+\hline 
+\textbf{Register Name} & \textbf{Access} & \textbf{Offset} & \textbf{Description} \\
+\hline
+\endhead
+
+\texttt{Control Register} & W & 0 &
+\parbox{7cm}{ ~ \\ Control register for the hardware: \\ \small
+Various bits are used to control the module.\\
+See table \ref{07-vears-control-bits} for a detailed description.
+\\ ~ } \\
+
+\hline 
+
+\texttt{Status Register} & R & 1 &
+\parbox{7cm}{ ~ \\ Status register for the hardware: \\ \small
+This register delivers various information on the capabilities of the module.\\
+See table \ref{07-vears-status-bits} for a detailed description.
+\\ ~ } \\
+
+\hline 
+
+\texttt{Image Base-Address} & W & 2 &
+\parbox{7cm}{ ~ \\ The image base-address: \\ ~ \\ \small
+used to fetch image data from memory.
+\\ ~ } \\
+
+\hline 
+
+\texttt{Overlay Base-Address} & W & 3 &
+\parbox{7cm}{ ~ \\ The overlay base-address: \\ ~ \\ \small
+used to fetch overlay data from memory.
+\\ ~ } \\
+
+\hline 
+
+\texttt{Overlay Color 1} & W & 4 &
+\parbox{7cm}{ ~ \\ Overlay Color 1: \\ \small
+24 bit RGB palette value of overlay color 1.
+\\ ~ } \\
+
+\hline 
+
+\texttt{Overlay Color 2} & W & 5 &
+\parbox{7cm}{ ~ \\ Overlay Color 2: \\ \small
+24 bit RGB palette value of overlay color 2.
+\\ ~ } \\
+
+\hline 
+
+\texttt{Overlay Color 3} & W & 6 &
+\parbox{7cm}{ ~ \\ Overlay Color 3: \\ \small
+24 bit RGB palette value of overlay color 3.
+\\ ~ } \\
+
+\hline 
+\caption{The registers of \texttt{VEARS}}
+\label{07-vears-registers}
+\end{longtable}
+
+
+
+
+Tables \ref{07-vears-control-bits} and \ref{07-vears-status-bits} explain the purpose of each control and status bit in more detail.
+
+
+\begin{longtable}[htb]{|c|c|c|c|}
+\hline 
+\textbf{Bit Name} & \textbf{Access} & \textbf{Bit} & \textbf{Description} \\
+\hline
+\endhead
+
+\texttt{Reset} & W & 0 &
+\parbox{7cm}{ ~ \\ Reset the VEARS module. \\ ~ \\ \small
+This control bit can be used to reset the \texttt{VEARS} module.
+\\ ~ } \\
+
+\hline 
+
+\texttt{Enable} & W & 1 &
+\parbox{7cm}{ ~ \\ Set the \texttt{VEARS} instance into operation. \\ ~ \\ \small
+This control bit is used to activate the \texttt{VEARS} module. When activated, the \texttt{VEARS} module will grab image data from memory. For this, an appropriate image base address must be supplied (via the according register) before enabling \texttt{VEARS}. Note: the \texttt{VEARS} module will generate video data on the monitor output ports (a vertical bit pattern) even if it's not enabled.
+\\ ~ } \\
+
+\hline 
+
+\texttt{Overlay Enable} & W & 2 &
+\parbox{7cm}{ ~ \\ Enable the overlay. \\ ~ \\ \small
+When the \texttt{VEARS} module is in operational mode (bit "Enable" is set), the overlay can be enabled or disabled with this bit separately. An appropriate overlay base address must be supplied (via the according register) before enabling overlay output.
+\\ ~ } \\
+
+\hline
+
+\texttt{Frame Interrupt Enable} & W & 6 &
+\parbox{7cm}{ ~ \\ Enable frame interrupt. \\ ~ \\ \small
+Each time a new frame starts (at the start of V-Sync) an interrupt signal is generated on the \textit{intr\_frame} output.
+\\ ~ } \\
+
+\hline 
+
+\texttt{Line Interrupt Enable} & W & 7 &
+\parbox{7cm}{ ~ \\ Enable line interrupt. \\ ~ \\ \small
+Each time a new line starts (at the start of H-Sync) an interrupt signal is generated on the \textit{intr\_line} output.
+\\ ~ } \\
+
+\hline
+
+\caption{Bit fields of the control register}
+\label{07-vears-control-bits}
+\end{longtable}
+
+
+
+
+\begin{longtable}[htb]{|c|c|c|c|}
+\hline 
+\textbf{Bit Name} & \textbf{Access} & \textbf{Bit} & \textbf{Description} \\
+\hline
+\endhead
+
+\texttt{Video Group} & R & [7:0] &
+\parbox{7cm}{ ~ \\ Video Group: \\ ~ \\ \small
+These bits give information on the video group supported by this \texttt{VEARS} instance. \textbf{Video Group} and \textbf{Video Mode} can be used to determine the video output format.
+\\ ~ } \\
+
+\hline
+
+\texttt{Video Mode} & R & [15:8] &
+\parbox{7cm}{ ~ \\ Video Mode: \\ ~ \\ \small
+These bits give information on the video mode supported by this \texttt{VEARS} instance. \textbf{Video Group} and \textbf{Video Mode} can be used to determine the video output format.
+\\ ~ } \\
+
+\hline
+
+\texttt{Color Mode} & R & 16 &
+\parbox{7cm}{ ~ \\ Color Mode: \\ ~ \\ \small
+This bit gives information on the color mode supported by this \texttt{VEARS} instance: \\
+'0': grayscale \\
+'1': color
+\\ ~ } \\
+
+\hline
+
+\caption{Bit fields of the status register}
+\label{07-vears-status-bits}
+\end{longtable}
+
+
+
+
+
+
+\subsection{The Software Driver}
+
+The driver functions can be split to two categories: the hardware interfacing functions and functions for overlay manipulation.
+
+Hardware interfacing functions are used to generally control the module, such as to enable or disable the module at all or to set memory adresses for image and overlay data. 
+
+Overlay manipulation functions can be used to erase the whole overlay, to draw lines, circles or rectangles or even to draw text to the overlay. 
+
+For a detailed overview on the software driver functions, see the \asterics Doxygen driver documentation.

@@ -11,7 +11,7 @@
 -- Authors:        Philip Manke
 --
 -- Description:    Simple First In First Out buffer.
---                 Depends on as_misc/.../ram/ram.vhd
+--                 Depends on as_misc/.../ram/DUAL_BRAM_READ_FIRST.vhd
 --
 ----------------------------------------------------------------------------------
 --  This program is free software; you can redistribute it and/or
@@ -31,7 +31,16 @@
 ----------------------------------------------------------------------------------
 --! @file  as_fifo.vhd
 --! @brief Simple First In First Out buffer.
+--! @addtogroup asterics_helpers
+--! @{
+--! @defgroup as_fifo as_fifo: First In First Out Buffer
+--! Simple First In First Out buffer.
+--! Depends on as_misc/.../ram/DUAL_BRAM_READ_FIRST.vhd
+--! @}
 ----------------------------------------------------------------------------------
+
+--! @addtogroup as_fifo
+--! @{
 
 
 library ieee;
@@ -67,44 +76,12 @@ port (
 );
 end as_fifo;
 
+--! @}
 
 architecture RTL of as_fifo is
 
-    --component ram is
-    --generic ( 
-    --      DATA_WIDTH : integer;
-    --      ADDR_WIDTH : integer
-    --     );
-    --port (
-    --      clk       : in  std_logic;
-    --      wr_en     : in  std_logic;
-    --      wr_addr   : in  std_logic_vector(ADDR_WIDTH-1 downto 0);
-    --      rd_addr   : in  std_logic_vector(ADDR_WIDTH-1 downto 0);
-    --      din       : in  std_logic_vector(DATA_WIDTH-1 downto 0);
-    --      dout      : out std_logic_vector(DATA_WIDTH-1 downto 0)
-    --     ); 
-    --end component;
-    --component DUAL_BRAM_READ_FIRST is
-    --    generic ( gen_data_width : integer := 8;   -- width of each ram cell
-    --            gen_data_depth : integer := 1024; -- number of ram cells
-    --            gen_ram_style  : string  := "block" -- distributed | block
-    --           );
-    --    port (CLK_A         : in std_logic;
-    --        CLK_B       : in std_logic;
-    --        EN_A          : in std_logic;
-    --        EN_B      : in std_logic;
-    --        WE_A      : in std_logic;
-    --        WE_B      : in std_logic;
-    --        ADDR_A    : in std_logic_vector(log2_ceil(gen_data_depth)-1 downto 0);
-    --        ADDR_B    : in std_logic_vector(log2_ceil(gen_data_depth)-1 downto 0);
-    --        DI_A      : in std_logic_vector(gen_data_width-1 downto 0);
-    --        DI_B      : in std_logic_vector(gen_data_width-1 downto 0);
-    --        DO_A      : out std_logic_vector(gen_data_width-1 downto 0);
-    --        DO_B      : out std_logic_vector(gen_data_width-1 downto 0)
-    --       );   
-    --end component;
-
     constant c_fifo_addr_width : integer := log2_ceil(FIFO_DEPTH);
+    constant high_addr : unsigned := to_unsigned(FIFO_DEPTH - 1, c_fifo_addr_width);
 
     signal s_full, s_empty : std_logic;
     signal bram_write_en : std_logic;
@@ -116,26 +93,6 @@ architecture RTL of as_fifo is
     -- FIFO is filling / emptying
     signal filling, emptying : std_logic;
 begin
-
-    -- sanity check for generic "FIFO_DEPTH":
-    assert FIFO_DEPTH = 2**log2_ceil(FIFO_DEPTH)
-    report "Generic FIFO_DEPTH must be a 2**n value"
-    severity failure;
-  
-    ---- RAM for storage
-    --FIFO_RAM : ram
-    --generic map(
-    --    DATA_WIDTH => DATA_WIDTH,
-    --    ADDR_WIDTH => c_fifo_addr_width
-    --)
-    --port map(
-    --    clk     => clk,
-    --    wr_en   => bram_write_en,
-    --    wr_addr => std_logic_vector(bram_write_addr),
-    --    rd_addr => std_logic_vector(bram_read_addr),
-    --    din     => data_in,
-    --    dout    => s_data_out
-    --); 
 
     FIFO_RAM : entity DUAL_BRAM_READ_FIRST 
         generic map( gen_data_width => DATA_WIDTH,
@@ -163,20 +120,19 @@ begin
         if rising_edge(clk) then
             -- FIFO starts empty
             if reset = '1' then
-                bram_write_addr <= (others => '0');
+                bram_write_addr <= high_addr;
                 filling <= '0';
             else
                 filling <= '0';
                 -- Advance on valid write
                 if write_en = '1' 
                         and (s_full = '0' or s_int_read_en = '1') then
-                    bram_write_addr <= bram_write_addr + 1;
+                    if bram_write_addr = 0 then
+                        bram_write_addr <= high_addr;
+                    else
+                        bram_write_addr <= bram_write_addr - 1;
+                    end if;
                 end if;
-                --if AUTO_READ_ON_FULL = true and (bram_write_addr + 1 = bram_read_addr or s_full = '1') and write_en = '1' then
-                --    auto_read_en <= '1';
-                --else
-                --    auto_read_en <= '0';
-                --end if;
                 -- Filling if already full or writing while not reading
                 if s_full = '1' or (write_en = '1' 
                                     and s_int_read_en = '0') then
@@ -192,14 +148,18 @@ begin
         if rising_edge(clk) then
             if reset = '1' then
                 -- FIFO starts empty after reset
-                bram_read_addr <= (others => '0');
+                bram_read_addr <= high_addr;
                 emptying <= '1';
                 data_out <= (others => '0');
             else
                 emptying <= '0';
                 -- Advance on valid read
                 if s_int_read_en = '1' and s_empty = '0' then
-                    bram_read_addr <= bram_read_addr + 1;
+                    if bram_read_addr = 0 then
+                        bram_read_addr <= high_addr;
+                    else
+                        bram_read_addr <= bram_read_addr - 1;
+                    end if;
                 end if;
                 -- Emptying if not writing and reading or already empty
                 if s_empty = '1' or (s_int_read_en = '1'
@@ -215,16 +175,19 @@ begin
 
     s_int_read_en <= auto_read_en or read_en;
 
+    -- IF  auto read mode is enabled
+    -- AND next operation is a WRITE
+    -- AND next WRITE address is the next READ address (FIFO is full)
+    -- => Set auto read mode active!
     auto_read_en <= '0' when reset = '1' 
-            else '1' when (AUTO_READ_ON_FULL = true 
-                           and (bram_write_addr + 1 = bram_read_addr)
-                           and write_en = '1')
+            else '1' when ((AUTO_READ_ON_FULL = true) and (write_en = '1')
+                           and ((bram_write_addr - 1 = bram_read_addr)
+                                or ((bram_write_addr = 0) 
+                                    and (bram_read_addr = high_addr))
+                               )
+                          )
             else '0';
 
-    -- Always output data (except on reset high)
-    
-    --data_out <= (others => '0') when reset = '1' or s_int_read_en = '0'
-    --            else s_data_out;
     -- Fast pass for write enable signal
     -- Write unless FIFO buffer is full
     bram_write_en <= '0' when reset = '1'
@@ -242,4 +205,3 @@ begin
     empty <= s_empty;
 
 end RTL;
-

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   id="svg6"
+   version="1.1"
+   viewBox="0 0 48 48"
+   height="48"
+   width="48">
+  <metadata
+     id="metadata12">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs10" />
+  <path
+     style="stroke-width:1.03550506"
+     id="path4-6"
+     d="m 24.017662,3.2992021 c -11.447299,0 -20.7190923,9.2637479 -20.7190923,20.7011139 0,11.437366 9.2717933,20.701114 20.7190923,20.701114 11.447297,0 20.719091,-9.263748 20.719091,-20.701114 0,-11.437366 -9.271794,-20.7011139 -20.719091,-20.7011139 z" />
+  <path
+     id="path2"
+     fill="none"
+     d="M0 0h48v48h-48z" />
+  <path
+     style="fill:#ffffff"
+     id="path4"
+     d="M24 4c-11.05 0-20 8.95-20 20s8.95 20 20 20 20-8.95 20-20-8.95-20-20-20zm2 30h-4v-12h4v12zm0-16h-4v-4h4v4z" />
+</svg>

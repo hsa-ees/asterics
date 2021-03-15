@@ -1,3 +1,5 @@
+#!/bin/bash
+
 ############################################################################
 #
 # This file is part of the ASTERICS Framework.
@@ -27,16 +29,16 @@
 #
 ############################################################################
 
-if [ -z $ASTERICS_HOME ]; then
-    echo "ASTERICS_HOME is not set! Cannot start Automatics!";
+if [ -z $ASTERICS_AUTOMATICS_HOME ]; then
+    echo "ASTERICS_AUTOMATICS_HOME is not set! Cannot start Automatics!";
     echo "Source the settings.sh file in the root directory of the ASTERICS installation!";
     echo "";
     exit 1;
 fi
 
 if [ -z $(which ipython3) ]; then
-    ipython -i $ASTERICS_HOME/tools/as-automatics/as_automatics_env_init.py;
+    ipython -i $ASTERICS_AUTOMATICS_HOME/as_automatics_env_init.py;
 else
-    ipython3 -i $ASTERICS_HOME/tools/as-automatics/as_automatics_env_init.py;
+    ipython3 -i $ASTERICS_AUTOMATICS_HOME/as_automatics_env_init.py;
 fi
 

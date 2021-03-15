@@ -1,0 +1,624 @@
+
+\section{Contributing to the \asterics Book}
+\secauthor{Philip Manke}
+
+This appendix serves as a guide and reference for contributors to the \asterics book.
+
+\subsection{Who can Contribute?}
+
+All members of the Efficient Embedded Systems (EES) research group working on or with the \asterics framework are urged to write a section or chapter on their work, to help provide a complete documentation of the framework.
+
+All other users of \asterics are also welcome to help complete and improve this document and can do so by sending their suggestions or contributions to one of the main maintainers, as indicated in the preface in \refarb{About this Document}.
+
+\subsection{Language and Style}
+
+This document is written in English.
+
+We strive to keep the content neutral and objective.
+Further, we encourage all contributors to base their contributions on scientific publications and professional documentation.
+
+\subsection{\LaTeX{} and Building the \asterics Book}
+
+The \asterics book is written using \LaTeX{} to produce a consistent visual style and reproducible output.
+It allows conditionally including parts of the documentation and allows easily collaborating within the EES group.
+
+
+\subsubsection{Building the \asterics book}
+
+
+To build the \asterics book, a \LaTeX{} installation must be present on your system.
+A Makefile is provided in the directory \texttt{asterics/doc-src/}, capable of producing the PDF output.
+All source files for this document are located in \texttt{asterics/doc-src/manual/}.
+The produced PDF should be placed in the directory \texttt{asterics/doc/}, so all links are correctly resolved.
+\bigskip
+
+\subsubsection{Edititing \LaTeX{}}
+
+
+For editing and writing \LaTeX{}, any text editor can be used.
+We recommend Texmaker\footnote{\url{https://www.xm1math.net/texmaker/}}, as it is rather light-weight, cross-platform, open-source and for its relative simplicity.
+\bigskip
+
+\subsubsection{Using \LaTeX{} packages}
+
+
+\LaTeX{} is a modular typesetting language and supports the use of third-party, often open-source, community developed and maintained packages to extend \LaTeX{} by various features.
+The \asterics book includes a number of packages to support the inclusion of different image formats, code with syntax highlighting, local links, URLs and more.
+We strongly suggest you make use of the existing packages and only explore the use of other, new packages if no alternative exists.
+
+\warnbox{New \LaTeX{} packages \emph{must not be included} in your contribution without having consulted a maintainer of the \asterics book first.}
+
+Conflicts between \LaTeX{} packages are common and may result in your contribution being unusable without rewriting the parts that require a certain package.
+Testing new packages \emph{in the full version of the manual first} is essential.
+
+
+\subsection{Where Should I Add My Contribution?}
+
+This question should generally be discussed with your supervisor or with one of the maintainers (see preface \refarb{About this Document}).
+
+Generally, it can be helpful to out-source your contribution to a separate file following the existing file naming conventions, especially if your contribution is larger.
+The separate file is then included in another file of the document using the \texttt{input} command:
+\begin{lstlisting}[style=LaTeXStyle]
+§\texttt{\textbackslash}{\texttt{input}}§{my-contribution.tex}
+\end{lstlisting}
+
+%input{my-contribution.tex}
+%\end{lstlisting}
+
+
+\subsection{Conventions and Brief Reference Guide}
+
+Within the \asterics book we observe a set of conventions regarding the formatting of text, font styles, listings, tables, references and more.
+This section gives an overview over these and may serve as a reference when contributing to this document.
+It is not exhaustive and only presents a subset of the most commonly used \LaTeX{} commands.
+
+\subsubsection{General Conventions}
+~~
+\textbf{Attribution:}
+\smallskip
+
+Chapters, sections or (sub-)subsections that are entirely or almost entirely written by a single author or very few authors, should be marked as such.
+This document includes two commands to easily add this information:
+\begin{itemize}
+\item For any part authored by one or two (maybe three) authors, use the following below your chapter, section or (sub-)subsection:
+\begin{lstlisting}[style=LaTeXStyle]
+\secauthor{<authorname>[, <second author>]}
+\end{lstlisting}
+If more than two (three) authors have worked on a chapter, section, etc, this should not be used and instead be left unmarked.
+
+\item For any chapter, section, etc, formerly authored by a single author and edited by you substantially, change the above command to:
+\begin{lstlisting}[style=LaTeXStyle]
+\secorigauthor{<authorname>[, <second author>]}
+\end{lstlisting}
+\end{itemize}
+
+\textbf{Referring to \asterics:}
+\smallskip
+
+To reference the \asterics project, a \LaTeX{} command exists that consistently reproduces the style chosen to represent the \asterics framework in this document.
+Any time you refer to the framework by name, the following command must be used:
+
+\begin{lstlisting}[style=LaTeXStyle]
+\asterics
+\end{lstlisting}
+
+\subsubsection{Font Styles}
+
+Within this document the following three font styles are used to accentuate the following:
+\begin{itemize}
+\item \textbf{Bold style font} is used to define names and terms you deem important and/or that are used often within the document / chapter / section.
+\begin{lstlisting}[style=LaTeXStyle]
+\textbf{text you want to print in bold}
+\end{lstlisting}
+
+\item \textit{Italic style font} is used to highlight important text, phrases or words you want the reader to pay special attention to.
+\begin{lstlisting}[style=LaTeXStyle]
+\emph{text you want to print in italic}
+ - or - 
+\textit{text you want to print in italic}
+\end{lstlisting}
+
+\item \texttt{Typewriter style font} is used to highlight directories, file paths, file names and function, parameter, class names or similar things.
+Anything more than singular names, concerning code inclusions in written text, should be done using the \texttt{lstlisting} environment, explained in Section \refarb{Code Listings} of this appendix.
+\begin{lstlisting}[style=LaTeXStyle]
+\texttt{text you want to print in typewriter}
+\end{lstlisting}
+\end{itemize}
+
+\subsubsection{Chapters, Sections and Subsections}
+
+This document is organized using the following levels in descending hierarchy: chapters, sections, subsections and subsubsections.
+If you believe that another level below the subsubsection would be helpful/required, consider restructuring your text.
+Only if this is not possible, use:
+\begin{lstlisting}[style=LaTeXStyle]
+§{\texttt{\textbackslash}}subsubsection*§{Name of the Subsubsection}
+\end{lstlisting}
+This will create a non-numbered heading of the same fontsize and style as a subsubsection.
+
+\warnbox{Starred sections will not appear in the table of context, thus will be harder to find!}
+
+Typically, each chapter and section is labeled, to more easily reference it throughout the document. See Section \refarb{Referencing} for more information.
+
+\subsubsection{Referencing}
+\labelarb{Referencing}
+
+In general, to reference something in \LaTeX{}, a label has to be first set.
+Chapters, (sub-) sections, figures, tables, code listings and more can be labeled and referenced throughout the document.
+References create clickable links that link to the location in the document of the referenced label.
+
+This document includes helpful commands for referencing different targets:
+
+\begin{itemize}
+\item \textbf{Chapters:}
+\begin{lstlisting}[style=LaTeXStyle]
+§{\textbackslash}\texttt{chapter}§{Example Chapter}
+\labelch{<internal label name>}
+% [...]
+Xyz is described in \refch{<internal label name>}.
+% This prints as: "§{\textrm{Xyz is described in Chapter 2.}§"
+\end{lstlisting}
+
+\item \textbf{Sections:}
+\begin{lstlisting}[style=LaTeXStyle]
+§{\textbackslash}\texttt{section}§{Example Section}
+\labelsec{<internal label name>}
+% [...]
+Xyz is described in \refsec{<internal label name>}.
+% This prints as: "§{\textrm{Xyz is described in Section 2.3.}§"
+\end{lstlisting}
+
+\item \textbf{(Sub-)Subsections:}
+\begin{lstlisting}[style=LaTeXStyle]
+§{\textbackslash}\texttt{subsection}§{Example Subsection}
+\labelssec{<internal label name>}
+% [...]
+Xyz is described in \refssec{<internal label name>}.
+% This prints as: "§{\textrm{Xyz is described in Section 2.3.1.}§"
+\end{lstlisting}
+
+\item \textbf{Figures:}
+\begin{lstlisting}[style=LaTeXStyle]
+§{\textbackslash}§begin{figure}
+% [...]
+\labelfig{<internal label name>}
+§{\textbackslash}§end{figure}
+% [...]
+Xyz is shown in \reffig{<internal label name>}.
+% This prints as: "§{\textrm{Xyz is shown in Figure 2.1.}§"
+\end{lstlisting}
+
+\item \textbf{Tables:}
+\begin{lstlisting}[style=LaTeXStyle]
+§{\textbackslash}§begin{table}
+% [...] Table
+\labeltab{<internal label name>}
+§{\textbackslash}§end{table}
+% [...]
+Xyz is provided in \reftab{<internal label name>}.
+% This prints as: "§{\textrm{Xyz is provided in Table 2.1.}§"
+\end{lstlisting}
+
+\item \textbf{Hardware Modules:}
+\begin{lstlisting}[style=LaTeXStyle]
+\labelmodule{<module name>}
+% [...]
+, in this case, consider using \refmodule{<module name>}.
+% This prints as: "§{\textrm{, in this case, consider using }\texttt{<module name>}}§"
+\end{lstlisting}
+
+\item \textbf{Tools:}
+\begin{lstlisting}[style=LaTeXStyle]
+\labeltool{<tool name>}
+% [...]
+The tool \refmodule{<module name>} simplifies this operation.
+% This prints as: "§{\textrm{The tool }\texttt{<tool name>}\textrm{ simplifies this operation.}}§"
+\end{lstlisting}
+
+\item \textbf{Arbitrary Locations by Name:}
+\begin{lstlisting}[style=LaTeXStyle]
+\labelarb{<name>}
+% [...]
+See Section \refarb{<name>} in the preamble.
+% This prints as: "§{\textrm{See Section \texttt{<}\textit{name}\texttt{>} in the preamble.}}§"
+\end{lstlisting}
+
+\end{itemize}
+
+\textbf{Code listings} must be labeled and referenced manually, using the built-in \LaTeX{} label and reference commands:
+\begin{lstlisting}[style=LaTeXStyle]
+§\textbackslash§begin{lstlisting}[style=[...], label=lst:<label name>]
+% [...]
+§\textbackslash§end{lstlisting}
+% [...]
+Listing \ref{lst:<label name>} shows a relevant code example.
+% This prints as: "§{\textrm{Listing 3.1 shows a relevant code example.}}§"
+\end{lstlisting}
+
+To refer to the Doxygen documentations of the different parts of the framework, the following commands are available:
+
+\begin{itemize}
+\item \textbf{Python code:} \lstinline[style=LaTeXStyle]{\refdoxypython}, prints as: \refdoxypython
+
+
+\item \textbf{C code:} \lstinline[style=LaTeXStyle]{\refdoxyc}, prints as: \refdoxyc
+
+\item \textbf{VHDL code:} \lstinline[style=LaTeXStyle]{\refdoxyvhdl}, prints as: \refdoxyvhdl
+
+\end{itemize}
+
+
+\subsubsection{Info and Warning Boxes}
+
+To especially highlight some information, this document includes two types of information "boxes".
+
+\begin{itemize}
+
+\item \textbf{Information Box:}
+\begin{lstlisting}[style=LaTeXStyle]
+\infobox{Hello, I am a friendly looking information box.}
+\end{lstlisting}
+This prints as:
+\infobox{Hello, I am a friendly looking information box.}
+
+\item \textbf{Warning Box:}
+\begin{lstlisting}[style=LaTeXStyle]
+\warnbox{Please pay attention, I am a warning box!}
+\end{lstlisting}
+This prints as:
+\warnbox{Please pay attention, I am a warning box!}
+
+\end{itemize}
+
+\subsubsection{Including Images/Figures}
+
+Images or figures are very helpful to illustrate more complex concepts or to provide examples and overviews of topics.
+We encourage the use of figures, but be aware of the following:
+\begin{itemize}
+\item 
+Make sure that you are legally allowed to use an image when it comes from a third party.
+Check that it can be distributed under the Creative Commons Attribution-ShareAlike 4.0 International License, which this document is published under.
+Be sure you fulfill all obligations of the license that an image is published under, when you include third party content.
+
+Or alternatively, create the image/figure yourself, but be aware that it will be published under the CC-SA 4.0.
+
+\item
+Use high quality images and figures, ideally vector graphics (e.g. SVG) for figures and good quality JPEGs, PNGs or similar for photos.
+Be aware of the file sizes.
+Ideally you should strike a balance between sharp images/figures and acceptable file sizes.
+
+\item
+Vector graphics must be packed into PDF files to be used in this document.
+We suggest you use Inkscape\footnote{\url{https://inkscape.org/}} to easily convert vector graphic files to PDF files.
+\end{itemize}
+
+To include a figure use the following syntax:
+\begin{lstlisting}[style=LaTeXStyle]
+\begin{figure}[htbp]
+§{\texttt{\textbackslash}}§centering  % optional
+\includegraphics[width=0.8\textwidth]{path/to/file.png}
+\caption{Brief description of this figure}
+\label{fig:<labelname>}
+§{\texttt{\textbackslash}}§end{figure}
+\end{lstlisting}
+
+The tag \texttt{[htbp]} in the first line describes roughly, where \LaTeX{} should place the figure and with what priority.
+The letters mean the following: \texttt{h}: here, \texttt{t}: top of a page, \texttt{b}: bottom of a page, \texttt{p}: on its own page.
+You may omit any (or all) and rearrange them to fit your needs.
+
+The \texttt{{\textbackslash}centering} command centers the figure horizontally on the page.
+
+The decimal number within the statement "\texttt{width=0.8{\textbackslash}textwidth}", in this example \texttt{0.8}, defines the percentage ($0.8 = 80\%$) of the page the figure should occupy.
+Only the portion of the page, where text is printed, is considered.
+
+\subsubsection{Lists and Enumerations}
+
+\LaTeX{} supports two types of listings:
+
+\begin{itemize}
+\item \textbf{itemize:} Itemize listings are unnumbered, bullet point lists, like this one. Create them using:
+\begin{lstlisting}[style=LaTeXStyle]
+§\textbackslash§begin{itemize}
+§\textbackslash§item <First point here
+  Still part of the first point.>
+§\textbackslash§item <Second point here>
+§\textbackslash§end{itemize}
+\end{lstlisting}
+
+\item \textbf{enumerate:} Enumerate listings are numbered lists. Create them using:
+\begin{lstlisting}[style=LaTeXStyle]
+§\textbackslash§begin{enumerate}
+§\textbackslash§item <First point here
+  Still part of the first point.>
+§\textbackslash§item <Second point here>
+§\textbackslash§end{enumerate}
+\end{lstlisting}
+
+\end{itemize}
+
+\subsubsection{Tables}
+
+To present data in a table environment, two templates are provided here:
+
+\begin{itemize}
+\item \textbf{Smaller tables:}
+\begin{lstlisting}[style=LaTeXStyle]
+\begin{table}[htbp]
+§{\texttt{\textbackslash}}§centering  % optional
+\begin{tabular}{|l|c|r|}
+  \hline  % Column headers
+  \textbf{Header 1} & \textbf{Header 2} & \textbf{Header 3} \\
+  \hline  % First data row
+  Data 1 & Data 2 & Data 3 \\
+  \hline  % Second data row
+  Data 1 & Data 2 & Data 3 \\
+  \hline
+§{\texttt{\textbackslash}}§end{tabular}
+\caption{<Short description of the table>}
+\labeltab{<label name>}
+§{\texttt{\textbackslash}}§end{table}
+\end{lstlisting}
+This prints as:
+\begin{table}[htbp]
+\centering  % optional
+\begin{tabular}{|l|c|r|}
+  \hline  % Column headers
+  \textbf{Header 1} & \textbf{Header 2} & \textbf{Header 3} \\
+  \hline  % First data row
+  Data 1 & Data 2 & Data 3 \\
+  \hline  % Second data row
+  Data 1 & Data 2 & Data 3 \\
+  \hline
+\end{tabular}
+\caption{Short description of the table}
+\end{table}
+
+To adjust the number of columns and the alignment of text within table cells, adjust the column definition characters within the \texttt{tabular} environment:
+\begin{lstlisting}[style=LaTeXStyle]
+\begin{tabular}{|l|c|r|}
+\end{lstlisting}
+Where \texttt{l} defines a left aligned column, \texttt{c} defines a centered column and \texttt{r} defines a right aligned column.
+
+For especially small tables the \texttt{table} environment can be removed, using only \texttt{tabular}.
+
+\item \textbf{Larger tables with multi-line cells:}
+\begin{lstlisting}[style=LaTeXStyle]
+\begin{longtable}[htbp]{|c|c|c|}
+\hline  % Column headers
+\textbf{Header 1} & \textbf{Header 2} & \textbf{Header 3} \\
+\hline  % First data row
+\endhead  
+\texttt{Data 1} & Data 2 &
+\parbox{11cm}{\ \\ Multi-line description text or other long data, maybe a list?
+Who knows, it's your documentation, not mine. 
+\vspace{0.3em}} \\
+\hline  % Second data row
+\texttt{Data 1} & Data 2 &
+\parbox{11cm}{\ \\ Multi-line description text.
+\vspace{0.3em}} \\
+\hline
+\caption{Brief description of the table}
+\labeltab{<label name>}
+§{\texttt{\textbackslash}}§end{longtable}
+\end{lstlisting}
+This prints as:
+\begin{longtable}[htbp]{|c|c|c|}
+\hline  % Column headers
+\textbf{Header 1} & \textbf{Header 2} & \textbf{Header 3} \\
+\hline  % First data row
+\endhead  
+\texttt{Data 1} & Data 2 &
+\parbox{11cm}{\ \\ Multi-line description text or other long data, maybe a list? Who knows, it's your documentation, not mine.
+\vspace{0.3em}} \\
+\hline  % Second data row
+\texttt{Data 1} & Data 2 &
+\parbox{11cm}{\ \\ Multi-line description text.
+\vspace{0.3em}} \\
+\hline
+\caption{Brief description of the table}
+\labeltab{<label name>}
+\end{longtable}
+
+The width of the multi-line text cells, using the \texttt{parbox} command, can be easily adjusted using the first parameter:
+\begin{lstlisting}[style=LaTeXStyle]
+\parbox{<width>cm}{ Text }
+\end{lstlisting}
+
+\end{itemize}
+
+\subsubsection{Code Listings}
+\labelarb{Code Listings}
+
+Code listings should be placed within the \texttt{lstlisting} environment.
+Use the following syntax:
+\begin{lstlisting}[style=LaTeXStyle]
+§\textbackslash§begin{lstlisting}[style=<listing style>,
+	label=lst:<labelname>, caption=<Brief description of the code>]
+Add your code here
+§\textbackslash§end{lstlisting}
+\end{lstlisting}
+
+The following styles are available within the \asterics book:
+\begin{itemize}
+\setlength{\itemsep}{-0.3em}
+\item \texttt{CStyle} for C code
+\item \texttt{hdl} for VHDL code
+\item \texttt{LaTeXStyle} for \LaTeX{} code
+\item \texttt{AutomaticsPython} for Python code (specifically Automatics Scripts)
+\end{itemize}
+Additional styles should be added to the file \texttt{asterics/doc-src/00-lst-settings.tex}.
+
+For especially short code examples or if you want to use syntax highlighting on single words, like function or class names or keywords, consider using the inline syntax:
+
+\begin{lstlisting}[style=LaTeXStyle]
+§\textbackslash§lstinline[style=<listing style>]{Your code here}
+\end{lstlisting}
+
+Three convenience commands are currently available in this document:
+\begin{itemize}
+\setlength{\itemsep}{-0.2em}
+\item \texttt{{\textbackslash}lstapyinline\{Your code here\}} for Python code
+\item \texttt{{\textbackslash}lsthdlinline\{Your code here\}} for VHDL code
+\item \texttt{{\textbackslash}lstcinline\{Your code here\}} for C code
+\end{itemize}
+
+\subsubsection{URLs and Linking to Files}
+
+\LaTeX{} supports linking to URLs and local files.
+
+\begin{itemize}
+\item \textbf{Third party websites:} When linking to third party websites, we suggest you use a footnote and print the URL in full, so readers can clearly see where the link will take them. Were fitting, URLs may also be placed within the text. Note that text wrapping issues may arise for long URLs.
+\begin{lstlisting}[style=LaTeXStyle]
+We suggest the use of \LaTeX{}§\textbackslash§footnote{§\textbackslash§url{https://www.latex-project.org/}}.
+\end{lstlisting}
+This prints as:\\
+We suggest the use of \LaTeX{}\footnote{\url{https://www.latex-project.org/}}.
+
+\item \textbf{Known, internal websites:} Websites, such as the homepage of the EES-group, may be included as follows:
+\begin{lstlisting}[style=LaTeXStyle]
+For more information, see the \href{https://ees.hs-augsburg.de}{EES Homepage}.
+\end{lstlisting}
+This prints as:\\
+For more information, see the \href{https://ees.hs-augsburg.de}{EES Homepage}.
+
+\item \textbf{Files:} Linking to files should be done using their relative position in the file system - relative to the position of this manual.
+The PDF file \textbf{must} be placed in \texttt{asterics/doc/} for these links to function.
+All file links \textbf{must} use this folder as the root for relative file links.
+\begin{lstlisting}[style=LaTeXStyle]
+The \href{run:./VHDL_doxygen/html/index.html}{Doxygen documentation}
+provides more detail.
+\end{lstlisting}
+This prints as:\\
+The \href{run:./VHDL_doxygen/html/index.html}{Doxygen documentation}
+provides more detail.
+
+\end{itemize}
+
+
+
+\clearpage
+
+\section{Doxygen Cheatsheet}
+\secauthor{Philip Manke}
+
+Besides the documentation written for the \asterics book specifically, the framework is also documented per programming language using the Doxygen tool.
+This section serves as a reference for general and language specific functions and rules for writing code that produces Doxygen documentation of high quality.
+
+Doxygen is a tool to automatically parse source code and generate documentation from the code and comments.
+Doxygen does not parse all comments, only those started using specific characters, dependent on the programming language.
+
+Within Doxygen comments, simple Markdown syntax, such as \texttt{**bold**} and \texttt{//italic//} can be used to format text.
+Using the name of other documented code entities, such as classes and functions, will automatically highlight them and add a link to their documentation.
+
+
+\subsection{Doxygen Comments}
+
+\subsubsection{C Code}
+
+Valid Doxygen comments include:
+
+\begin{lstlisting}[style=CStyle]
+/// Doxygen comment
+
+//! Doxygen comment
+
+/**
+ * Multi-line Doxygen comment
+ */
+\end{lstlisting}
+
+\subsubsection{VHDL Code}
+
+Doxygen comments are started using:
+\begin{lstlisting}[style=hdl]
+--! Doxygen comment
+\end{lstlisting}
+
+\subsubsection{Python Code}
+
+In Python, single and multi-line Doxygen comments are started as follows:
+\begin{lstlisting}[style=AutomaticsPython]
+## Doxygen comment
+#  All comments until an empty line are also Doxygen comments
+
+# Regular comment
+\end{lstlisting}
+
+Furthermore, docstrings can also be parsed by Doxygen:
+\begin{lstlisting}[style=AutomaticsPython]
+def example_function():
+    """I am a regular docstring. I describe "example_function"."""
+
+def doxygen_example_function():
+    """! @brief I am a Doxygen-parsed docstring.
+    The exclamation mark makes Doxygen parse me.
+    I describe "doxygen_example_function"."""
+\end{lstlisting}
+
+\clearpage
+
+\subsection{General Commands and Tags}
+
+Each Doxygen command and tag must be preceded by either a backslash (\texttt{\textbackslash}) or an "at"-character (\texttt{@}) to distinguish it from a regular word.
+
+\begin{itemize}
+\item \texttt{@author}: This tag allows to define an author for a file, class, function, etc.
+\begin{lstlisting}[style=CStyle]
+/// @file filename.c
+/// @author <author name>
+\end{lstlisting}
+
+\item \texttt{@file}: This command allows to add a description to the file.
+\begin{lstlisting}[style=CStyle]
+/// @file filename.h
+/// <description>
+\end{lstlisting}
+
+\item \texttt{@brief}: Define part of a Doxygen comment as a short summary. This is displayed more prominently in the resulting documentation and should always be included.
+\begin{lstlisting}[style=CStyle]
+/// @brief This is a summary for as_iic_init, it ends at the 
+/// first sentence/full stop, right here ->.
+/// <detailed description from here on>
+void example_function(){ // [...] 
+\end{lstlisting}
+
+\item \texttt{@param}: This tag defines the description of a function parameter.
+\begin{lstlisting}[style=CStyle]
+/// @param value1  <Description of the parameter value1>
+/// @param value2  <Description of the parameter value2.
+///                 Can span multiple lines and sentences.>
+void example_function(int value1, int value2){ // [...]
+\end{lstlisting}
+
+\item \texttt{@return}: This tag defines the description of a function's return value.
+\begin{lstlisting}[style=CStyle]
+/// @return  <Description of the return value>
+int example_function(){ // [...]
+\end{lstlisting}
+
+\item \texttt{@defgroup}: Creates a group/module for within the documentation. Allows thematic/functional grouping of code documentation.
+\begin{lstlisting}[style=CStyle]
+/// @defgroup <internal group name> <group display name> 
+/// @brief <Summary of group description>
+/// <Detailed descripton from here on>
+\end{lstlisting}
+
+\item \texttt{@\{} and \texttt{@\}}: These braces can be used in conjunction with some Doxygen commands to define their scope. For example with \texttt{@addtogroup}.
+
+\item \texttt{@addtogroup}: Add a scope to a Doxygen group/module.
+\begin{lstlisting}[style=CStyle]
+/// @addtogroup <internal group name>
+/// @{
+  
+// Things to add to the group
+
+/// @}
+\end{lstlisting}
+
+\item \texttt{@ingroup}: Add a single file, class, function, etc. to a group.
+\begin{lstlisting}[style=CStyle]
+/// @ingroup <internal group name>
+void example_function(){ // [...]
+\end{lstlisting}
+
+\end{itemize}
+

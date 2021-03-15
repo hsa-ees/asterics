@@ -31,11 +31,17 @@
 ----------------------------------------------------------------------------------
 --! @file  as_invert.vhd
 --! @brief Invert an image data stream (function can be en- or disabled).
+--! @addtogroup asterics_modules
+--! @{
+--! @defgroup as_invert as_invert: Invert AsStream Data Value
+--! This module inverts an image data stream.
+--! Functionality can be enabled or disabled (by setting the 
+--! configuration register e.g. using the driver).
+--! @}
 ----------------------------------------------------------------------------------
 
-
---! \addtogroup as_invert
---!  @{
+--! @addtogroup as_invert
+--! @{
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -178,4 +184,3 @@ begin
     stall_out <= stall_in;
 
 end RTL;
-

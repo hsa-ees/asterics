@@ -32,7 +32,12 @@
  * @file  as_gensync.h
  * @brief Driver (header file) for as_gensync module.
  *
- * \defgroup as_gensync Module as_gensync
+ * @addtogroup asterics_modules
+ * @{
+ * \defgroup as_gensync as_gensync: Synchronization Signal Generator
+ * @}
+ * as_gensync generates HSync and VSync synchronization signals 
+ * for the as_stream that runs through the module.
  * 
  */
 

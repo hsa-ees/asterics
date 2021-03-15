@@ -1,0 +1,7 @@
+<map id="as_automatics_exceptions.AsObjectError" name="as_automatics_exceptions.AsObjectError">
+<area shape="rect" id="node1" title="Generic Automatics exception class concerning a specific object." alt="" coords="116,169,315,211"/>
+<area shape="rect" id="node4" href="$classas__automatics__exceptions_1_1_as_assign_error.html" title="Automatics error class: AsAssignError Signifies a problem/error while assigning objects to each other..." alt="" coords="5,259,204,300"/>
+<area shape="rect" id="node5" href="$classas__automatics__exceptions_1_1_as_connection_error.html" title="Automatics error class: AsConnectionError Signifies a problem/error with a port, interface or module ..." alt="" coords="228,259,427,300"/>
+<area shape="rect" id="node2" href="$classas__automatics__exceptions_1_1_as_error.html" title="Base exception class for all Automatics exceptions." alt="" coords="116,80,315,121"/>
+<area shape="rect" id="node3" title=" " alt="" coords="172,5,259,32"/>
+</map>
